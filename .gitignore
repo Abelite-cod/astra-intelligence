@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Next.js
+apps/web/.next
+apps/web/out
+
+# Python
+services/**/__pycache__
+services/**/*.pyc
+services/**/*.pyo
+services/**/.venv
+services/**/venv
+services/**/.env
+*.egg-info
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.staging
+
+# Docker volumes
+postgres_data/
+qdrant_data/
+redis_data/
+
+# Turbo
+.turbo
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel
+coverage/
