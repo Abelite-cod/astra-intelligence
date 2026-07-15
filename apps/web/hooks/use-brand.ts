@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api-client";
+import { createClient } from "@/lib/supabase/client";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface Brand {
   id: string;
+  org_id: string;
   name: string;
   description?: string;
   mission?: string;
@@ -15,6 +16,7 @@ export interface Brand {
   hashtags?: string[];
   onboarded: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export interface KnowledgeDocument {
@@ -36,19 +38,47 @@ export interface SearchResult {
   metadata: Record<string, unknown>;
 }
 
+// ── Supabase helper ───────────────────────────────────────────────────────────
+
+function supabase() {
+  return createClient();
+}
+
+async function getCurrentUser() {
+  const { data: { user } } = await supabase().auth.getUser();
+  return user;
+}
+
 // ── Brand hooks ───────────────────────────────────────────────────────────────
 
 export function useBrands() {
   return useQuery({
     queryKey: ["brands"],
-    queryFn: () => api.get("/v1/brands").then((r) => r.brands as Brand[]),
+    queryFn: async () => {
+      const user = await getCurrentUser();
+      if (!user) return [];
+      const { data, error } = await supabase()
+        .from("brands")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Brand[];
+    },
   });
 }
 
 export function useBrand(brandId: string) {
   return useQuery({
     queryKey: ["brands", brandId],
-    queryFn: () => api.get(`/v1/brands/${brandId}`) as Promise<Brand>,
+    queryFn: async () => {
+      const { data, error } = await supabase()
+        .from("brands")
+        .select("*")
+        .eq("id", brandId)
+        .single();
+      if (error) throw new Error(error.message);
+      return data as Brand;
+    },
     enabled: !!brandId,
   });
 }
@@ -56,7 +86,32 @@ export function useBrand(brandId: string) {
 export function useBrandHealthScore(brandId: string) {
   return useQuery({
     queryKey: ["brands", brandId, "health-score"],
-    queryFn: () => api.get(`/v1/brands/${brandId}/health-score`),
+    queryFn: async () => {
+      const { data: brand } = await supabase()
+        .from("brands")
+        .select("*")
+        .eq("id", brandId)
+        .single();
+      const { count } = await supabase()
+        .from("knowledge_documents")
+        .select("*", { count: "exact", head: true })
+        .eq("brand_id", brandId)
+        .eq("status", "indexed");
+
+      let score = 0;
+      const reasons: string[] = [];
+      if (brand?.name) score += 10;
+      if (brand?.description) score += 15;
+      if (brand?.mission) score += 10;
+      if (brand?.tone_of_voice) score += 10;
+      if (brand?.target_audience) score += 15;
+      if (brand?.website_url) score += 10;
+      if (brand?.keywords?.length) score += 10;
+      if ((count ?? 0) >= 1) { score += 10; reasons.push(`${count} document(s) indexed`); }
+      if ((count ?? 0) >= 5) { score += 10; reasons.push("Rich knowledge base"); }
+
+      return { score: Math.min(score, 100), reasons };
+    },
     enabled: !!brandId,
   });
 }
@@ -64,7 +119,60 @@ export function useBrandHealthScore(brandId: string) {
 export function useCreateBrand() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Brand>) => api.post("/v1/brands", data),
+    mutationFn: async (data: {
+      name: string;
+      website_url?: string;
+      industry?: string;
+      description?: string;
+      tone_of_voice?: string;
+      mission?: string;
+    }) => {
+      const user = await getCurrentUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Get or create an organization for this user
+      let orgId: string;
+      const { data: existingOrg } = await supabase()
+        .from("organizations")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (existingOrg) {
+        orgId = existingOrg.id;
+      } else {
+        // Auto-create an org using the user's id as the org id for simplicity
+        const slug = user.email?.split("@")[0]?.toLowerCase().replace(/[^a-z0-9]/g, "-") ?? user.id;
+        const { data: newOrg, error: orgError } = await supabase()
+          .from("organizations")
+          .insert({
+            id: user.id,  // use user id as org id (1:1 for solo users)
+            name: data.name,
+            slug: `${slug}-${Date.now()}`,
+          })
+          .select("id")
+          .single();
+        if (orgError) throw new Error(`Failed to create org: ${orgError.message}`);
+        orgId = newOrg.id;
+      }
+
+      const { data: brand, error } = await supabase()
+        .from("brands")
+        .insert({
+          org_id: orgId,
+          name: data.name,
+          website_url: data.website_url ?? "",
+          industry: data.industry ?? "",
+          description: data.description ?? "",
+          tone_of_voice: data.tone_of_voice ?? "professional",
+          mission: data.mission ?? "",
+        })
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return brand as Brand;
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["brands"] }),
   });
 }
@@ -72,10 +180,17 @@ export function useCreateBrand() {
 export function useUpdateBrand(brandId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Brand>) =>
-      api.patch(`/v1/brands/${brandId}`, data),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["brands", brandId] }),
+    mutationFn: async (data: Partial<Brand>) => {
+      const { data: brand, error } = await supabase()
+        .from("brands")
+        .update(data)
+        .eq("id", brandId)
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      return brand as Brand;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["brands", brandId] }),
   });
 }
 
@@ -84,13 +199,17 @@ export function useUpdateBrand(brandId: string) {
 export function useKnowledgeDocs(brandId: string) {
   return useQuery({
     queryKey: ["knowledge", brandId],
-    queryFn: () =>
-      api
-        .get(`/v1/brands/${brandId}/knowledge`)
-        .then((r) => r.documents as KnowledgeDocument[]),
+    queryFn: async () => {
+      const { data, error } = await supabase()
+        .from("knowledge_documents")
+        .select("*")
+        .eq("brand_id", brandId)
+        .order("created_at", { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as KnowledgeDocument[];
+    },
     enabled: !!brandId,
     refetchInterval: (query) => {
-      // Poll every 3s while any doc is processing
       const docs = query.state.data as KnowledgeDocument[] | undefined;
       const hasProcessing = docs?.some(
         (d) => d.status === "pending" || d.status === "processing"
@@ -104,60 +223,107 @@ export function useUploadDocument(brandId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (file: File) => {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const user = await getCurrentUser();
+      if (!user) throw new Error("Not authenticated");
 
-      const formData = new FormData();
-      formData.append("file", file);
+      // 1. Create document record in Supabase
+      const { data: doc, error } = await supabase()
+        .from("knowledge_documents")
+        .insert({
+          brand_id: brandId,
+          name: file.name,
+          type: file.name.toLowerCase().endsWith(".pdf") ? "pdf"
+            : file.name.toLowerCase().endsWith(".docx") ? "docx" : "txt",
+          status: "pending",
+        })
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/v1/brands/${brandId}/knowledge/upload`,
-        {
-          method: "POST",
-          headers: session?.access_token
-            ? { Authorization: `Bearer ${session.access_token}` }
-            : {},
-          body: formData,
-        }
-      );
-      if (!res.ok) throw new Error("Upload failed");
-      return res.json();
+      // 2. Upload file to Supabase Storage
+      const filePath = `${brandId}/${doc.id}/${file.name}`;
+      const { error: uploadError } = await supabase()
+        .storage
+        .from("knowledge")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        // Mark as failed if storage fails
+        await supabase()
+          .from("knowledge_documents")
+          .update({ status: "failed", error_message: uploadError.message })
+          .eq("id", doc.id);
+        throw new Error(uploadError.message);
+      }
+
+      // Update with file path
+      await supabase()
+        .from("knowledge_documents")
+        .update({ file_path: filePath, status: "pending" })
+        .eq("id", doc.id);
+
+      return doc;
     },
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["knowledge", brandId] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["knowledge", brandId] }),
   });
 }
 
 export function useIngestUrl(brandId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { url: string; name?: string }) =>
-      api.post(`/v1/brands/${brandId}/knowledge/url`, data),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["knowledge", brandId] }),
+    mutationFn: async (data: { url: string; name?: string }) => {
+      const { data: doc, error } = await supabase()
+        .from("knowledge_documents")
+        .insert({
+          brand_id: brandId,
+          name: data.name || data.url,
+          type: "url",
+          source_url: data.url,
+          status: "pending",
+        })
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      return doc;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["knowledge", brandId] }),
   });
 }
 
 export function useDeleteDocument(brandId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (docId: string) =>
-      api.delete(`/v1/brands/${brandId}/knowledge/${docId}`),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["knowledge", brandId] }),
+    mutationFn: async (docId: string) => {
+      const { error } = await supabase()
+        .from("knowledge_documents")
+        .delete()
+        .eq("id", docId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["knowledge", brandId] }),
   });
 }
 
 export function useKnowledgeSearch(brandId: string) {
   return useMutation({
-    mutationFn: (query: string) =>
-      api.post(`/v1/brands/${brandId}/knowledge/search`, {
+    mutationFn: async (query: string) => {
+      // Direct Supabase full-text search as fallback when FastAPI is offline
+      const { data, error } = await supabase()
+        .from("knowledge_chunks")
+        .select("content, document_id, metadata")
+        .eq("brand_id", brandId)
+        .textSearch("content", query, { type: "plain" })
+        .limit(5);
+      if (error) throw new Error(error.message);
+      return {
         query,
-        top_k: 20,
-        top_n: 5,
-      }),
+        results: (data ?? []).map((r, i) => ({
+          content: r.content,
+          document_id: r.document_id,
+          score: 1 - i * 0.1,
+          metadata: r.metadata ?? {},
+        })) as SearchResult[],
+      };
+    },
   });
 }

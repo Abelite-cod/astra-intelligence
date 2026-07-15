@@ -1,9 +1,8 @@
 -- ============================================================
--- Astra Intelligence — Supabase Migration
--- Run this in your Supabase SQL editor or via supabase db push
+-- Astra Intelligence — Supabase Migration (idempotent)
+-- Safe to run multiple times — uses IF NOT EXISTS throughout
 -- ============================================================
 
--- Enable pgvector for future embedding storage in Postgres
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -11,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- ORGANIZATIONS
 -- ============================================================
 
-CREATE TABLE organizations (
+CREATE TABLE IF NOT EXISTS organizations (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name            TEXT NOT NULL,
   slug            TEXT UNIQUE NOT NULL,
@@ -26,10 +25,10 @@ CREATE TABLE organizations (
 );
 
 -- ============================================================
--- USERS (mirrors Supabase auth.users with extra fields)
+-- USERS
 -- ============================================================
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   org_id          UUID REFERENCES organizations(id) ON DELETE CASCADE,
   email           TEXT NOT NULL,
@@ -44,7 +43,7 @@ CREATE TABLE users (
 -- BRANDS
 -- ============================================================
 
-CREATE TABLE brands (
+CREATE TABLE IF NOT EXISTS brands (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   org_id          UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
   name            TEXT NOT NULL,
@@ -72,7 +71,7 @@ CREATE TABLE brands (
 -- KNOWLEDGE DOCUMENTS
 -- ============================================================
 
-CREATE TABLE knowledge_documents (
+CREATE TABLE IF NOT EXISTS knowledge_documents (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
   name            TEXT NOT NULL,
@@ -93,7 +92,7 @@ CREATE TABLE knowledge_documents (
 -- KNOWLEDGE CHUNKS
 -- ============================================================
 
-CREATE TABLE knowledge_chunks (
+CREATE TABLE IF NOT EXISTS knowledge_chunks (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_id     UUID REFERENCES knowledge_documents(id) ON DELETE CASCADE NOT NULL,
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
@@ -109,7 +108,7 @@ CREATE TABLE knowledge_chunks (
 -- CAMPAIGNS
 -- ============================================================
 
-CREATE TABLE campaigns (
+CREATE TABLE IF NOT EXISTS campaigns (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
   created_by      UUID REFERENCES users(id),
@@ -134,7 +133,7 @@ CREATE TABLE campaigns (
 -- CONTENT
 -- ============================================================
 
-CREATE TABLE content (
+CREATE TABLE IF NOT EXISTS content (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
   campaign_id     UUID REFERENCES campaigns(id) ON DELETE SET NULL,
@@ -163,7 +162,7 @@ CREATE TABLE content (
 -- APPROVALS
 -- ============================================================
 
-CREATE TABLE approvals (
+CREATE TABLE IF NOT EXISTS approvals (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   content_id      UUID REFERENCES content(id) ON DELETE CASCADE NOT NULL,
   reviewer_id     UUID REFERENCES users(id),
@@ -177,7 +176,7 @@ CREATE TABLE approvals (
 -- SOCIAL ACCOUNTS
 -- ============================================================
 
-CREATE TABLE social_accounts (
+CREATE TABLE IF NOT EXISTS social_accounts (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
   platform        TEXT NOT NULL,
@@ -197,7 +196,7 @@ CREATE TABLE social_accounts (
 -- SCHEDULED POSTS
 -- ============================================================
 
-CREATE TABLE scheduled_posts (
+CREATE TABLE IF NOT EXISTS scheduled_posts (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   content_id      UUID REFERENCES content(id) ON DELETE CASCADE NOT NULL,
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
@@ -216,7 +215,7 @@ CREATE TABLE scheduled_posts (
 -- POST ANALYTICS
 -- ============================================================
 
-CREATE TABLE post_analytics (
+CREATE TABLE IF NOT EXISTS post_analytics (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   scheduled_post_id   UUID REFERENCES scheduled_posts(id) ON DELETE CASCADE NOT NULL,
   brand_id            UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
@@ -242,7 +241,7 @@ CREATE TABLE post_analytics (
 -- AGENT RUNS
 -- ============================================================
 
-CREATE TABLE agent_runs (
+CREATE TABLE IF NOT EXISTS agent_runs (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
   campaign_id     UUID REFERENCES campaigns(id),
@@ -265,7 +264,7 @@ CREATE TABLE agent_runs (
 -- TREND REPORTS
 -- ============================================================
 
-CREATE TABLE trend_reports (
+CREATE TABLE IF NOT EXISTS trend_reports (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
   report_date     DATE DEFAULT CURRENT_DATE,
@@ -281,7 +280,7 @@ CREATE TABLE trend_reports (
 -- BRAND MEMORY
 -- ============================================================
 
-CREATE TABLE brand_memory (
+CREATE TABLE IF NOT EXISTS brand_memory (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id        UUID REFERENCES brands(id) ON DELETE CASCADE NOT NULL,
   memory_type     TEXT NOT NULL DEFAULT 'insight',
@@ -296,7 +295,7 @@ CREATE TABLE brand_memory (
 -- HUMAN FEEDBACK
 -- ============================================================
 
-CREATE TABLE human_feedback (
+CREATE TABLE IF NOT EXISTS human_feedback (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   content_id      UUID REFERENCES content(id),
   agent_run_id    UUID REFERENCES agent_runs(id),
@@ -312,7 +311,7 @@ CREATE TABLE human_feedback (
 -- NOTIFICATIONS
 -- ============================================================
 
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   type            TEXT NOT NULL,
@@ -327,7 +326,7 @@ CREATE TABLE notifications (
 -- AUDIT LOGS
 -- ============================================================
 
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   org_id          UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
   user_id         UUID REFERENCES users(id),
@@ -340,24 +339,24 @@ CREATE TABLE audit_logs (
 );
 
 -- ============================================================
--- INDEXES
+-- INDEXES (IF NOT EXISTS)
 -- ============================================================
 
-CREATE INDEX idx_brands_org ON brands(org_id);
-CREATE INDEX idx_knowledge_docs_brand ON knowledge_documents(brand_id, status);
-CREATE INDEX idx_knowledge_chunks_brand ON knowledge_chunks(brand_id);
-CREATE INDEX idx_knowledge_chunks_doc ON knowledge_chunks(document_id);
-CREATE INDEX idx_campaigns_brand ON campaigns(brand_id, status);
-CREATE INDEX idx_content_brand_status ON content(brand_id, status);
-CREATE INDEX idx_content_campaign ON content(campaign_id);
-CREATE INDEX idx_scheduled_posts_time ON scheduled_posts(scheduled_at, status);
-CREATE INDEX idx_scheduled_posts_brand ON scheduled_posts(brand_id);
-CREATE INDEX idx_post_analytics_post ON post_analytics(scheduled_post_id);
-CREATE INDEX idx_agent_runs_brand ON agent_runs(brand_id, started_at DESC);
-CREATE INDEX idx_brand_memory_brand ON brand_memory(brand_id, memory_type);
-CREATE INDEX idx_trend_reports_brand_date ON trend_reports(brand_id, report_date DESC);
-CREATE INDEX idx_notifications_user ON notifications(user_id, read);
-CREATE INDEX idx_audit_logs_org ON audit_logs(org_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_brands_org ON brands(org_id);
+CREATE INDEX IF NOT EXISTS idx_knowledge_docs_brand ON knowledge_documents(brand_id, status);
+CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_brand ON knowledge_chunks(brand_id);
+CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_doc ON knowledge_chunks(document_id);
+CREATE INDEX IF NOT EXISTS idx_campaigns_brand ON campaigns(brand_id, status);
+CREATE INDEX IF NOT EXISTS idx_content_brand_status ON content(brand_id, status);
+CREATE INDEX IF NOT EXISTS idx_content_campaign ON content(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_scheduled_posts_time ON scheduled_posts(scheduled_at, status);
+CREATE INDEX IF NOT EXISTS idx_scheduled_posts_brand ON scheduled_posts(brand_id);
+CREATE INDEX IF NOT EXISTS idx_post_analytics_post ON post_analytics(scheduled_post_id);
+CREATE INDEX IF NOT EXISTS idx_agent_runs_brand ON agent_runs(brand_id, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_brand_memory_brand ON brand_memory(brand_id, memory_type);
+CREATE INDEX IF NOT EXISTS idx_trend_reports_brand_date ON trend_reports(brand_id, report_date DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_org ON audit_logs(org_id, created_at DESC);
 
 -- ============================================================
 -- ROW LEVEL SECURITY
@@ -380,10 +379,6 @@ ALTER TABLE human_feedback ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
--- Users can only see data in their organization
--- (Real RLS policies reference org_id via JWT claim)
--- Apply after you configure Supabase Auth with org_id in JWT
-
 -- ============================================================
 -- FUNCTION: auto-create user record on signup
 -- ============================================================
@@ -397,18 +392,20 @@ BEGIN
     NEW.email,
     NEW.raw_user_meta_data ->> 'full_name',
     NEW.raw_user_meta_data ->> 'avatar_url'
-  );
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger fires on every new signup
+-- Drop and recreate trigger to avoid duplicate
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ============================================================
--- FUNCTION: auto-update updated_at timestamp
+-- FUNCTION: auto-update updated_at
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -419,18 +416,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_organizations_updated_at ON organizations;
 CREATE TRIGGER update_organizations_updated_at
   BEFORE UPDATE ON organizations
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_brands_updated_at ON brands;
 CREATE TRIGGER update_brands_updated_at
   BEFORE UPDATE ON brands
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_content_updated_at ON content;
 CREATE TRIGGER update_content_updated_at
   BEFORE UPDATE ON content
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_campaigns_updated_at ON campaigns;
 CREATE TRIGGER update_campaigns_updated_at
   BEFORE UPDATE ON campaigns
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
