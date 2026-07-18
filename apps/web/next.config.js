@@ -7,10 +7,6 @@ const nextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
   },
-  // Fix TLS negotiation issues on some networks/ISPs
-  env: {
-    NODE_TLS_REJECT_UNAUTHORIZED: "0",
-  },
 };
 
 module.exports = nextConfig;
