@@ -2,7 +2,7 @@
 
 import { useBrand, useBrandHealthScore } from "@/hooks/use-brand";
 import { KnowledgeUploader } from "@/components/brand/knowledge-uploader";
-import { KnowledgeSearch } from "@/components/brand/knowledge-search";
+import { KnowledgeChat } from "@/components/brand/knowledge-chat";
 import { Brain, BarChart2, Globe, Mic2, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +25,7 @@ export default function BrandDetailPage({ params }: BrandPageProps) {
 
   if (!brand) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
-        Brand not found.
-      </div>
+      <div className="p-8 text-center text-muted-foreground">Brand not found.</div>
     );
   }
 
@@ -115,22 +113,22 @@ export default function BrandDetailPage({ params }: BrandPageProps) {
         ))}
       </div>
 
-      {/* Knowledge section */}
+      {/* Knowledge Base */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-1">Knowledge Base</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Everything your AI knows about this brand. Upload documents, PDFs, and websites.
+          Upload documents, PDFs, and websites. Your AI learns from everything you add.
         </p>
         <KnowledgeUploader brandId={brandId} />
       </div>
 
-      {/* Search section */}
+      {/* Chat with documents */}
       <div>
-        <h2 className="text-lg font-semibold text-foreground mb-1">Search Knowledge</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-1">Ask your documents</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Test what your AI knows. Ask anything about this brand.
+          Ask questions about any uploaded document. The AI reads your files and answers from the content.
         </p>
-        <KnowledgeSearch brandId={brandId} />
+        <KnowledgeChat brandId={brandId} />
       </div>
     </div>
   );
