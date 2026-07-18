@@ -1,8 +1,31 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import https from "node:https";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
 const MODEL = process.env.OPENROUTER_MODEL ?? "meta-llama/llama-3.1-8b-instruct:free";
+
+// Custom HTTPS agent to handle TLS negotiation issues with some networks
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+  secureOptions: 0,
+  minVersion: "TLSv1.2",
+});
+
+async function openRouterFetch(body: object) {
+  return fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://astra-intelligence.com",
+      "X-Title": "Astra Intelligence",
+    },
+    body: JSON.stringify(body),
+    // @ts-expect-error Node.js fetch agent
+    agent: httpsAgent,
+  });
+}
 
 export async function POST(request: NextRequest) {
   const supabase = createClient();
@@ -16,7 +39,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "brand_id and brief are required" }, { status: 400 });
   }
 
-  // Load brand context
   const { data: brand } = await supabase
     .from("brands")
     .select("*")
@@ -25,7 +47,6 @@ export async function POST(request: NextRequest) {
 
   if (!brand) return NextResponse.json({ error: "Brand not found" }, { status: 404 });
 
-  // Build brand context string
   const brandContext = [
     brand.name && `Company: ${brand.name}`,
     brand.description && `Description: ${brand.description}`,
@@ -47,8 +68,7 @@ RULES:
 - Always match the brand's tone of voice exactly
 - Never make up statistics or claims not in the brief
 - Always end with a call to action
-- Use the brand's hashtags where appropriate
-- Keep each platform post within its character limit`;
+- Use the brand's hashtags where appropriate`;
 
   const userPrompt = `Create marketing content for the following brief:
 
@@ -56,71 +76,66 @@ RULES:
 
 Generate content for these platforms: ${platforms.join(", ")}
 
-Respond in this exact JSON format:
+Respond in this exact JSON format (no markdown, no backticks, just raw JSON):
 {
   "linkedin": {
     "body": "full post text",
-    "hook": "first sentence/attention grabber",
+    "hook": "first sentence",
     "cta": "call to action",
     "hashtags": ["tag1", "tag2"]
   },
   "twitter": {
-    "body": "tweet text (max 280 chars)",
+    "body": "tweet text under 280 chars",
     "hook": "opening line",
-    "cta": "call to action",
-    "hashtags": ["tag1", "tag2"]
+    "cta": "cta",
+    "hashtags": ["tag1"]
   },
   "instagram": {
     "body": "caption text",
     "hook": "opening hook",
-    "cta": "call to action",
-    "hashtags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
+    "cta": "cta",
+    "hashtags": ["tag1", "tag2", "tag3"]
   }
 }
 
-Only include platforms that were requested. Make each platform version feel native to that platform.`;
+Only include the platforms requested: ${platforms.join(", ")}.`;
 
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://astra-intelligence.com",
-        "X-Title": "Astra Intelligence",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
+    const response = await openRouterFetch({
+      model: MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
     });
 
     if (!response.ok) {
-      const err = await response.json();
-      return NextResponse.json({ error: err.error?.message ?? "AI generation failed" }, { status: 500 });
+      const err = await response.json().catch(() => ({}));
+      return NextResponse.json(
+        { error: (err as { error?: { message?: string } }).error?.message ?? `OpenRouter error: ${response.status}` },
+        { status: 500 }
+      );
     }
 
-    const data = await response.json();
+    const data = await response.json() as {
+      choices?: Array<{ message?: { content?: string } }>;
+      usage?: { total_tokens?: number };
+    };
     const rawContent = data.choices?.[0]?.message?.content ?? "";
 
-    // Parse JSON from response
     let generated: Record<string, { body: string; hook: string; cta: string; hashtags: string[] }>;
     try {
       const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
       generated = JSON.parse(jsonMatch?.[0] ?? "{}");
     } catch {
-      // Fallback: return raw content as linkedin post
       generated = {
         linkedin: { body: rawContent, hook: "", cta: "", hashtags: [] },
       };
     }
 
-    // Save each platform's content to database
+    // Save to database
     const savedContent = [];
     for (const [platform, content] of Object.entries(generated)) {
       const { data: saved } = await supabase
@@ -152,6 +167,7 @@ Only include platforms that were requested. Make each platform version feel nati
       tokens_used: data.usage?.total_tokens ?? 0,
     });
   } catch (error) {
+    console.error("OpenRouter error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Generation failed" },
       { status: 500 }

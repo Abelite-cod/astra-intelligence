@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Sidebar } from "@/components/dashboard/sidebar";
+import dynamic from "next/dynamic";
+
+// Import Sidebar with no SSR to prevent hydration mismatch
+const Sidebar = dynamic(
+  () => import("@/components/dashboard/sidebar").then((m) => ({ default: m.Sidebar })),
+  { ssr: false }
+);
 
 export default async function DashboardLayout({
   children,
@@ -15,7 +21,7 @@ export default async function DashboardLayout({
   if (!user) redirect("/login");
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden" suppressHydrationWarning>
       <Sidebar user={user} />
       <main className="flex-1 overflow-auto">
         {children}
