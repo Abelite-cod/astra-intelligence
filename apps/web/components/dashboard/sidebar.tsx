@@ -14,7 +14,7 @@ import {
   Settings,
   Zap,
   LogOut,
-  ChevronDown,
+  Send,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/brand", icon: Brain, label: "Brand Brain" },
   { href: "/campaigns", icon: Megaphone, label: "Campaigns" },
   { href: "/content", icon: FileText, label: "Content" },
+  { href: "/publish", icon: Send, label: "Publish" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/agents", icon: Bot, label: "AI Agents" },
   { href: "/settings", icon: Settings, label: "Settings" },
