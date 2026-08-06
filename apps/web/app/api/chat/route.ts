@@ -1,61 +1,34 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
-const MODEL = process.env.OPENROUTER_MODEL ?? "meta-llama/llama-3.1-8b-instruct:free";
-const MAX_CONTEXT_CHARS = 12000; // Keep within token limits for free models
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
+const MODEL_NAME = process.env.GOOGLE_AI_MODEL ?? "gemini-1.5-flash";
+const MAX_CONTEXT_CHARS = 12000;
 
-async function extractTextFromPdf(buffer: ArrayBuffer): Promise<string> {
-  // Pure JS PDF text extraction — no native deps needed
-  const bytes = new Uint8Array(buffer);
+function extractTextFromPdfBytes(bytes: Uint8Array): string {
   const text = new TextDecoder("latin1").decode(bytes);
-
-  // Extract text from PDF stream objects
   const chunks: string[] = [];
-  
-  // Method 1: BT/ET text blocks
-  const btPattern = /BT\s*(.*?)\s*ET/gs;
-  let match;
-  while ((match = btPattern.exec(text)) !== null) {
-    const block = match[1];
-    // Extract Tj and TJ operators
-    const tjPattern = /\(([^)]*)\)\s*Tj/g;
-    const TJPattern = /\[([^\]]*)\]\s*TJ/g;
-    let tj;
-    while ((tj = tjPattern.exec(block)) !== null) {
-      chunks.push(tj[1]);
-    }
-    while ((tj = TJPattern.exec(block)) !== null) {
-      // Extract strings from TJ arrays
-      const inner = tj[1].replace(/\(([^)]*)\)/g, (_: string, s: string) => s + " ");
-      chunks.push(inner);
+  const btPattern = /BT\s*([\s\S]*?)\s*ET/g;
+  let m: RegExpExecArray | null;
+  while ((m = btPattern.exec(text)) !== null) {
+    const block = m[1];
+    const tjP = /\(([^)]*)\)\s*Tj/g;
+    const TJP = /\[([^\]]*)\]\s*TJ/g;
+    let t: RegExpExecArray | null;
+    while ((t = tjP.exec(block)) !== null) chunks.push(t[1]);
+    while ((t = TJP.exec(block)) !== null) {
+      chunks.push(t[1].replace(/\(([^)]*)\)/g, (_: string, s: string) => s + " "));
     }
   }
-
-  // Method 2: Direct string extraction as fallback
-  if (chunks.length < 10) {
-    const stringPattern = /\(([^\x00-\x08\x0b\x0e-\x1f]{4,})\)/g;
-    while ((match = stringPattern.exec(text)) !== null) {
-      const str = match[1]
-        .replace(/\\n/g, "\n")
-        .replace(/\\r/g, "")
-        .replace(/\\t/g, " ")
-        .replace(/\\\(/g, "(")
-        .replace(/\\\)/g, ")")
-        .replace(/\\\\/g, "\\");
-      if (str.trim().length > 3) {
-        chunks.push(str);
-      }
+  if (chunks.length < 5) {
+    const sp = /\(([^\x00-\x08\x0b\x0e-\x1f]{4,})\)/g;
+    while ((m = sp.exec(text)) !== null) {
+      const s = m[1].replace(/\\n/g, "\n").replace(/\\r/g, "").replace(/\\t/g, " ");
+      if (s.trim().length > 3) chunks.push(s);
     }
   }
-
-  const extracted = chunks
-    .join(" ")
-    .replace(/\s{3,}/g, " ")
-    .replace(/[^\x20-\x7E\n]/g, "")
-    .trim();
-
-  return extracted || "Could not extract text from this PDF. The file may be scanned or image-based.";
+  return chunks.join(" ").replace(/\s{3,}/g, " ").replace(/[^\x20-\x7E\n]/g, "").trim();
 }
 
 export async function POST(request: NextRequest) {
@@ -70,14 +43,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "brand_id and question are required" }, { status: 400 });
   }
 
-  // Load brand context
   const { data: brand } = await supabase
     .from("brands")
     .select("name, description, tone_of_voice")
     .eq("id", brand_id)
     .single();
 
-  // If specific document requested, load it
   let documentContext = "";
   let documentName = "";
 
@@ -90,98 +61,63 @@ export async function POST(request: NextRequest) {
 
     if (doc) {
       documentName = doc.name;
-
       if (doc.file_path && doc.type !== "url") {
-        // Download from Supabase Storage
-        const { data: fileData, error: downloadError } = await supabase
-          .storage
+        const { data: fileData, error: dlErr } = await supabase.storage
           .from("knowledge")
           .download(doc.file_path);
-
-        if (!downloadError && fileData) {
+        if (!dlErr && fileData) {
           const buffer = await fileData.arrayBuffer();
-
-          if (doc.type === "pdf") {
-            documentContext = await extractTextFromPdf(buffer);
-          } else {
-            documentContext = new TextDecoder().decode(buffer);
-          }
+          documentContext = doc.type === "pdf"
+            ? extractTextFromPdfBytes(new Uint8Array(buffer))
+            : new TextDecoder().decode(buffer);
         }
       }
     }
   } else {
-    // Load all indexed knowledge chunks for this brand
     const { data: chunks } = await supabase
       .from("knowledge_chunks")
       .select("content")
       .eq("brand_id", brand_id)
       .order("chunk_index")
       .limit(30);
-
-    if (chunks && chunks.length > 0) {
+    if (chunks?.length) {
       documentContext = chunks.map((c) => c.content).join("\n\n");
       documentName = "brand knowledge base";
     }
   }
 
-  // Trim context to fit within token limits
   if (documentContext.length > MAX_CONTEXT_CHARS) {
-    documentContext = documentContext.slice(0, MAX_CONTEXT_CHARS) + "\n\n[...content truncated for length...]";
+    documentContext = documentContext.slice(0, MAX_CONTEXT_CHARS) + "\n\n[...truncated...]";
   }
 
   const systemPrompt = `You are an intelligent assistant for ${brand?.name ?? "this brand"}.
-
-${documentContext ? `DOCUMENT CONTEXT (${documentName}):\n---\n${documentContext}\n---\n` : ""}
+${documentContext ? `\nDOCUMENT CONTEXT (${documentName}):\n---\n${documentContext}\n---\n` : ""}
 INSTRUCTIONS:
 - Answer questions based ONLY on the document context provided above
 - If the answer is not in the document, say "I don't see that information in this document"
 - Be concise and precise
-- Quote relevant passages when helpful
-- Format your answers clearly with bullet points or sections when appropriate`;
-
-  // Build conversation history
-  const chatMessages = [
-    { role: "system", content: systemPrompt },
-    ...messages.slice(-6), // Keep last 6 messages for context
-    { role: "user", content: question },
-  ];
+- Quote relevant passages when helpful`;
 
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://astra-intelligence.com",
-        "X-Title": "Astra Intelligence",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: chatMessages,
-        temperature: 0.3, // Lower temp for Q&A accuracy
-        max_tokens: 1500,
-      }),
+    const model = genAI.getGenerativeModel({
+      model: MODEL_NAME,
+      systemInstruction: systemPrompt,
     });
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      return NextResponse.json(
-        { error: (err as { error?: { message?: string } }).error?.message ?? `AI error: ${response.status}` },
-        { status: 500 }
-      );
-    }
+    // Build chat history
+    const history = messages.slice(-6).map((m: { role: string; content: string }) => ({
+      role: m.role === "user" ? "user" : "model",
+      parts: [{ text: m.content }],
+    }));
 
-    const data = await response.json() as {
-      choices?: Array<{ message?: { content?: string } }>;
-      usage?: { total_tokens?: number };
-    };
-    const answer = data.choices?.[0]?.message?.content ?? "No response generated.";
+    const chat = model.startChat({ history });
+    const result = await chat.sendMessage(question);
+    const answer = result.response.text();
 
     return NextResponse.json({
       answer,
       document_name: documentName,
-      model: MODEL,
-      tokens_used: data.usage?.total_tokens ?? 0,
+      model: MODEL_NAME,
       has_context: documentContext.length > 0,
     });
   } catch (error) {
