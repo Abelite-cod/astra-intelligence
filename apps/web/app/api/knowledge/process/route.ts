@@ -38,22 +38,36 @@ function chunkText(text: string): string[] {
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  const { document_id } = await request.json();
+  let body: { document_id?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { document_id } = body;
   if (!document_id) return NextResponse.json({ error: "document_id required" }, { status: 400 });
+
+  console.log(`[process] Starting for document_id: ${document_id}`);
 
   const admin = getAdmin();
 
-  const { data: doc, error: docError } = await admin
+  const { data: rows, error: docError } = await admin
     .from("knowledge_documents")
     .select("*")
     .eq("id", document_id)
-    .single();
+    .limit(1);
+
+  console.log(`[process] Lookup result: rows=${JSON.stringify(rows?.length)}, error=${JSON.stringify(docError)}`);
 
   if (docError) {
-    console.error("[process] Doc lookup error:", docError);
-    return NextResponse.json({ error: docError.message }, { status: 500 });
+    return NextResponse.json({ error: `DB lookup error: ${docError.message}` }, { status: 500 });
   }
-  if (!doc) return NextResponse.json({ error: "Document not found" }, { status: 404 });
+
+  const doc = rows?.[0];
+  if (!doc) {
+    return NextResponse.json({ error: `Document ${document_id} not found in knowledge_documents` }, { status: 404 });
+  }
 
   await admin.from("knowledge_documents").update({ status: "processing" }).eq("id", document_id);
 
