@@ -262,6 +262,13 @@ export function useUploadDocument(brandId: string) {
         .update({ file_path: filePath, status: "pending" })
         .eq("id", doc.id);
 
+      // Trigger Next.js processing route (no Python backend needed)
+      fetch("/api/knowledge/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document_id: doc.id }),
+      }).catch(() => {}); // fire-and-forget — status will update via polling
+
       return doc;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["knowledge", brandId] }),
@@ -284,6 +291,14 @@ export function useIngestUrl(brandId: string) {
         .select()
         .single();
       if (error) throw new Error(error.message);
+
+      // Trigger processing immediately
+      fetch("/api/knowledge/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document_id: doc.id }),
+      }).catch(() => {});
+
       return doc;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["knowledge", brandId] }),
