@@ -1,9 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
-const MODEL = process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash";
+const MODEL = process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash-lite";
+
+function getAdmin() {
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 async function generate(systemPrompt: string, userPrompt: string): Promise<string> {
   const response = await ai.models.generateContent({
@@ -26,7 +34,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "brand_id and brief are required" }, { status: 400 });
   }
 
-  const { data: brand } = await supabase
+  const admin = getAdmin();
+  const { data: brand } = await admin
     .from("brands").select("*").eq("id", brand_id).single();
   if (!brand) return NextResponse.json({ error: "Brand not found" }, { status: 404 });
 
@@ -66,7 +75,7 @@ Only include: ${platforms.join(", ")}.`;
 
     const savedContent = [];
     for (const [platform, content] of Object.entries(generated)) {
-      const { data: saved } = await supabase.from("content").insert({
+      const { data: saved } = await admin.from("content").insert({
         brand_id, platform, type: platform === "twitter" ? "thread" : "post",
         body: content.body, hook: content.hook, cta: content.cta,
         hashtags: content.hashtags, status: "draft",
