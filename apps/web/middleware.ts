@@ -1,16 +1,13 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // If Supabase is not configured, only protect dashboard routes
-  // and let public pages through so the app renders without config
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    // No Supabase config — allow everything except block dashboard with a redirect to login
     const isProtectedRoute =
       pathname.startsWith("/dashboard") ||
       pathname.startsWith("/brand") ||
@@ -18,7 +15,8 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/content") ||
       pathname.startsWith("/analytics") ||
       pathname.startsWith("/settings") ||
-      pathname.startsWith("/agents");
+      pathname.startsWith("/agents") ||
+      pathname.startsWith("/publish");
 
     if (isProtectedRoute) {
       const redirectUrl = request.nextUrl.clone();
@@ -28,7 +26,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Supabase is configured — run full auth middleware
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
@@ -36,7 +33,7 @@ export async function middleware(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: Array<{ name: string; value: string; options?: CookieOptions }>) {
         cookiesToSet.forEach(({ name, value }) =>
           request.cookies.set(name, value)
         );
@@ -59,7 +56,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/content") ||
     pathname.startsWith("/analytics") ||
     pathname.startsWith("/settings") ||
-    pathname.startsWith("/agents");
+    pathname.startsWith("/agents") ||
+    pathname.startsWith("/publish");
 
   if (isProtectedRoute && !user) {
     const redirectUrl = request.nextUrl.clone();

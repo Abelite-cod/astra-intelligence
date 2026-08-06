@@ -9,11 +9,15 @@ export interface Brand {
   name: string;
   description?: string;
   mission?: string;
+  vision?: string;
   tone_of_voice?: string;
   website_url?: string;
   industry?: string;
   keywords?: string[];
   hashtags?: string[];
+  target_audience?: Record<string, unknown>;
+  products?: unknown[];
+  competitors?: unknown[];
   onboarded: boolean;
   created_at: string;
   updated_at: string;
