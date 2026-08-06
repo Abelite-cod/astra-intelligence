@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pdfParse = require("pdf-parse") as (buf: Buffer) => Promise<{ text: string; numpages: number }>;
@@ -39,21 +38,21 @@ function chunkText(text: string): string[] {
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   const { document_id } = await request.json();
   if (!document_id) return NextResponse.json({ error: "document_id required" }, { status: 400 });
 
   const admin = getAdmin();
 
-  const { data: doc } = await admin
+  const { data: doc, error: docError } = await admin
     .from("knowledge_documents")
     .select("*")
     .eq("id", document_id)
     .single();
 
+  if (docError) {
+    console.error("[process] Doc lookup error:", docError);
+    return NextResponse.json({ error: docError.message }, { status: 500 });
+  }
   if (!doc) return NextResponse.json({ error: "Document not found" }, { status: 404 });
 
   await admin.from("knowledge_documents").update({ status: "processing" }).eq("id", document_id);
