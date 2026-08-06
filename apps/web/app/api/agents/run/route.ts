@@ -1,30 +1,30 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
-const MODEL_NAME = process.env.GOOGLE_AI_MODEL ?? "gemini-1.5-flash";
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
+const MODEL = process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash";
 
-async function callAgent(systemPrompt: string, userPrompt: string): Promise<string> {
-  const model = genAI.getGenerativeModel({
-    model: MODEL_NAME,
-    systemInstruction: systemPrompt,
+async function callAgent(systemInstruction: string, prompt: string): Promise<string> {
+  const response = await ai.models.generateContent({
+    model: MODEL,
+    contents: prompt,
+    config: { systemInstruction },
   });
-  const result = await model.generateContent(userPrompt);
-  return result.response.text();
+  return response.text ?? "";
 }
 
 async function researchAgent(brand: Record<string, unknown>, goal: string): Promise<string> {
   return callAgent(
-    "You are a Research Agent. Identify key facts, insights, and audience pain points relevant to a marketing goal.",
-    `Brand: ${brand.name}\nIndustry: ${brand.industry ?? "General"}\nGoal: ${goal}\n\nProvide:\n1. Main audience pain points\n2. 3-5 key messages\n3. Best content angle/hook\n4. Proof points to include`
+    "You are a Research Agent. Identify key facts, insights, and audience pain points for marketing.",
+    `Brand: ${brand.name}\nIndustry: ${brand.industry ?? "General"}\nGoal: ${goal}\n\nProvide:\n1. Main audience pain points\n2. 3-5 key messages\n3. Best angle/hook\n4. Proof points to include`
   );
 }
 
 async function trendAgent(brand: Record<string, unknown>, goal: string): Promise<string> {
   return callAgent(
-    "You are a Trend Intelligence Agent. Identify trending topics, hashtags, and content formats for social media.",
-    `Brand: ${brand.name}\nIndustry: ${brand.industry ?? "General"}\nGoal: ${goal}\n\nProvide:\n1. 3 trending angles for this goal\n2. 5 trending hashtags\n3. Best content format\n4. One viral hook idea`
+    "You are a Trend Intelligence Agent. Identify trending topics, hashtags, and formats.",
+    `Brand: ${brand.name}\nIndustry: ${brand.industry ?? "General"}\nGoal: ${goal}\n\nProvide:\n1. 3 trending angles\n2. 5 trending hashtags\n3. Best content format\n4. One viral hook`
   );
 }
 
@@ -36,7 +36,7 @@ async function writerAgent(
 ): Promise<Record<string, { body: string; hook: string; hashtags: string[] }>> {
   const raw = await callAgent(
     `You are a Senior Marketing Copywriter for ${brand.name}. Tone: ${brand.tone_of_voice ?? "professional"}.`,
-    `RESEARCH:\n${research}\n\nTREND DATA:\n${trends}\n\nGOAL: ${goal}\n\nWrite content for LinkedIn and Twitter. Return ONLY raw JSON:\n{\n  "linkedin": {"body": "...", "hook": "...", "hashtags": ["tag1"]},\n  "twitter": {"body": "tweet under 280 chars", "hook": "...", "hashtags": ["tag1"]}\n}`
+    `RESEARCH:\n${research}\n\nTREND DATA:\n${trends}\n\nGOAL: ${goal}\n\nReturn ONLY raw JSON:\n{"linkedin":{"body":"...","hook":"...","hashtags":["tag1"]},"twitter":{"body":"under 280 chars","hook":"...","hashtags":["tag1"]}}`
   );
   try {
     const match = raw.match(/\{[\s\S]*\}/);
@@ -51,8 +51,8 @@ async function reviewerAgent(
   content: Record<string, { body: string; hook: string; hashtags: string[] }>
 ): Promise<{ scores: Record<string, number>; feedback: string; improved: typeof content }> {
   const raw = await callAgent(
-    `You are a Content Quality Reviewer for ${brand.name}. Tone: ${brand.tone_of_voice ?? "professional"}.`,
-    `Review and improve this content:\n${JSON.stringify(content, null, 2)}\n\nReturn ONLY raw JSON:\n{"scores":{"brand_voice":8,"engagement":7,"clarity":9,"cta_strength":7},"feedback":"2 sentence summary","improved":{"linkedin":{"body":"...","hook":"...","hashtags":[]},"twitter":{"body":"...","hook":"...","hashtags":[]}}}`
+    `You are a Content Quality Reviewer for ${brand.name}.`,
+    `Review and improve:\n${JSON.stringify(content, null, 2)}\n\nReturn ONLY raw JSON:\n{"scores":{"brand_voice":8,"engagement":7,"clarity":9,"cta_strength":7},"feedback":"2 sentence summary","improved":{"linkedin":{"body":"...","hook":"...","hashtags":[]},"twitter":{"body":"...","hook":"...","hashtags":[]}}}`
   );
   try {
     const match = raw.match(/\{[\s\S]*\}/);
@@ -105,27 +105,26 @@ export async function POST(request: NextRequest) {
 
     const t3 = Date.now();
     const writerOutput = await writerAgent(brand, goal, researchOutput, trendOutput);
-    trace.push({ agent: "Writer Agent", status: "success", output: `Generated ${Object.keys(writerOutput).length} platform versions`, duration_ms: Date.now() - t3 });
+    trace.push({ agent: "Writer Agent", status: "success", output: `Generated ${Object.keys(writerOutput).length} versions`, duration_ms: Date.now() - t3 });
 
     const t4 = Date.now();
     let reviewOutput: { scores: Record<string, number>; feedback: string; improved: typeof writerOutput };
     try {
       reviewOutput = await reviewerAgent(brand, writerOutput);
-      trace.push({ agent: "Reviewer Agent", status: "success", output: `Avg score: ${(Object.values(reviewOutput.scores).reduce((a, b) => a + b, 0) / 4).toFixed(1)}/10`, duration_ms: Date.now() - t4 });
+      trace.push({ agent: "Reviewer Agent", status: "success", output: `Avg: ${(Object.values(reviewOutput.scores).reduce((a, b) => a + b, 0) / 4).toFixed(1)}/10`, duration_ms: Date.now() - t4 });
     } catch (e) {
       trace.push({ agent: "Reviewer Agent", status: "failed", error: String(e), duration_ms: Date.now() - t4 });
       reviewOutput = { scores: { brand_voice: 7, engagement: 7, clarity: 7, cta_strength: 7 }, feedback: "Approved.", improved: writerOutput };
     }
 
-    const finalContent = reviewOutput.improved;
     const savedContent = [];
-    for (const [platform, content] of Object.entries(finalContent)) {
+    for (const [platform, content] of Object.entries(reviewOutput.improved)) {
       const { data: saved } = await supabase.from("content").insert({
         brand_id, campaign_id: campaign_id ?? null, platform,
         type: platform === "twitter" ? "thread" : "post",
         body: content.body, hook: content.hook, hashtags: content.hashtags,
         status: "draft",
-        ai_metadata: { model: MODEL_NAME, goal, workflow: "multi_agent", agent_run_id: runId },
+        ai_metadata: { model: MODEL, goal, workflow: "multi_agent", agent_run_id: runId },
         quality_scores: reviewOutput.scores,
       }).select().single();
       if (saved) savedContent.push(saved);
@@ -133,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     if (runId) {
       await supabase.from("agent_runs").update({
-        status: "completed", output: { content: finalContent, review: reviewOutput },
+        status: "completed", output: { content: reviewOutput.improved, review: reviewOutput },
         agent_trace: trace, completed_at: new Date().toISOString(), duration_ms: Date.now() - startTime,
       }).eq("id", runId);
     }
@@ -141,14 +140,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       run_id: runId, status: "completed", agents_trace: trace,
       research: researchOutput, trends: trendOutput,
-      content: finalContent, review: reviewOutput,
+      content: reviewOutput.improved, review: reviewOutput,
       saved_content: savedContent, duration_ms: Date.now() - startTime,
     });
   } catch (error) {
     if (runId) {
       await supabase.from("agent_runs").update({
-        status: "failed", error_message: String(error),
-        agent_trace: trace, completed_at: new Date().toISOString(),
+        status: "failed", error_message: String(error), agent_trace: trace, completed_at: new Date().toISOString(),
       }).eq("id", runId);
     }
     return NextResponse.json({ error: String(error), trace }, { status: 500 });
