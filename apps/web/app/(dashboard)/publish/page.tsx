@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useBrands } from "@/hooks/use-brand";
 import {
@@ -38,7 +38,7 @@ const PLATFORM_CONFIG = {
   },
 };
 
-export default function PublishPage() {
+function PublishPageInner() {
   const searchParams = useSearchParams();
   const { data: brands = [] } = useBrands();
   const [selectedBrandId, setSelectedBrandId] = useState("");
@@ -349,5 +349,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000`}</code>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PublishPage() {
+  return (
+    <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-6 h-6 border-2 border-astra-500 border-t-transparent rounded-full" /></div>}>
+      <PublishPageInner />
+    </Suspense>
   );
 }
