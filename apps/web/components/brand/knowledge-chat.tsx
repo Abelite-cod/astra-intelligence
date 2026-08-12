@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, Send, Loader2, Bot, User, FileText, BookOpen } from "lucide-react";
+import { MessageCircle, Send, Loader2, Bot, User, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useKnowledgeDocs } from "@/hooks/use-brand";
 
@@ -12,6 +12,35 @@ interface Message {
 
 interface KnowledgeChatProps {
   brandId: string;
+}
+
+// Strip common markdown symbols and clean up text for conversational display
+function cleanResponse(text: string): string {
+  return text
+    .replace(/#{1,6}\s/g, "")           // Remove # headings
+    .replace(/\*\*([^*]+)\*\*/g, "$1")  // **bold** → plain
+    .replace(/\*([^*]+)\*/g, "$1")       // *italic* → plain
+    .replace(/`([^`]+)`/g, "$1")         // `code` → plain
+    .replace(/^[\s-*•>]+/gm, "")         // Remove bullet/blockquote prefixes per line
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // [text](url) → text
+    .replace(/\n{3,}/g, "\n\n")          // Collapse excess blank lines
+    .trim();
+}
+
+// Render text with paragraph breaks — no markdown
+function ResponseText({ text }: { text: string }) {
+  const clean = cleanResponse(text);
+  const paragraphs = clean.split(/\n\n+/).filter(Boolean);
+
+  return (
+    <div className="space-y-2">
+      {paragraphs.map((para, i) => (
+        <p key={i} className="leading-relaxed">
+          {para.replace(/\n/g, " ")}
+        </p>
+      ))}
+    </div>
+  );
 }
 
 export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
@@ -60,7 +89,7 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
 
       if (!res.ok) {
         setError(data.error ?? "Failed to get answer");
-        setMessages((prev) => prev.slice(0, -1)); // Remove user message on error
+        setMessages((prev) => prev.slice(0, -1));
         return;
       }
 
@@ -68,7 +97,7 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
         ...prev,
         { role: "assistant", content: data.answer },
       ]);
-    } catch (err) {
+    } catch {
       setError("Network error — make sure the server is running with start.bat");
       setMessages((prev) => prev.slice(0, -1));
     } finally {
@@ -77,18 +106,20 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
   }
 
   const SUGGESTIONS = [
-    "What are the main topics covered in this document?",
-    "Summarize the key points",
+    "What is this document about?",
+    "Summarise the key points",
     "What problems does this address?",
-    "What are the main conclusions or recommendations?",
+    "Who is the target audience?",
   ];
 
   return (
-    <div className="border border-border rounded-xl overflow-hidden bg-card">
+    <div className="border border-border rounded-2xl overflow-hidden bg-card shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="w-4 h-4 text-astra-500" />
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-background">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-astra-500/10 flex items-center justify-center">
+            <MessageCircle className="w-3.5 h-3.5 text-astra-500" />
+          </div>
           <span className="font-semibold text-sm text-foreground">Chat with your knowledge</span>
         </div>
 
@@ -96,36 +127,38 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
         <select
           value={selectedDocId}
           onChange={(e) => setSelectedDocId(e.target.value)}
-          className="text-xs border border-input bg-background rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-ring"
+          className="text-xs border border-input bg-background rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring text-muted-foreground"
         >
           <option value="all">All documents</option>
           {indexedDocs.map((doc) => (
             <option key={doc.id} value={doc.id}>
-              {doc.name.length > 30 ? doc.name.slice(0, 30) + "…" : doc.name}
+              {doc.name.length > 32 ? doc.name.slice(0, 32) + "…" : doc.name}
             </option>
           ))}
         </select>
       </div>
 
       {/* Messages */}
-      <div className="h-80 overflow-y-auto p-4 space-y-4">
+      <div className="h-96 overflow-y-auto p-5 space-y-5">
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-center">
-            <div className="w-12 h-12 rounded-full bg-astra-500/10 flex items-center justify-center mb-3">
+          <div className="h-full flex flex-col items-center justify-center text-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-astra-500/10 flex items-center justify-center">
               <BookOpen className="w-6 h-6 text-astra-500" />
             </div>
-            <p className="text-sm font-medium text-foreground mb-1">
-              Ask anything about your documents
-            </p>
-            {indexedDocs.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                Upload documents in the Knowledge Base section above first.
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Ask anything about your documents
               </p>
-            ) : (
-              <p className="text-xs text-muted-foreground mb-4">
-                {indexedDocs.length} document{indexedDocs.length !== 1 ? "s" : ""} available
-              </p>
-            )}
+              {indexedDocs.length === 0 ? (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload and index a document above first.
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {indexedDocs.length} document{indexedDocs.length !== 1 ? "s" : ""} ready
+                </p>
+              )}
+            </div>
             {indexedDocs.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-center">
                 {SUGGESTIONS.map((s) => (
@@ -166,13 +199,17 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
             </div>
             <div
               className={cn(
-                "max-w-[80%] rounded-xl px-3.5 py-2.5 text-sm",
+                "max-w-[80%] rounded-2xl px-4 py-3 text-sm",
                 msg.role === "user"
                   ? "bg-astra-500 text-white rounded-tr-none"
                   : "bg-muted text-foreground rounded-tl-none"
               )}
             >
-              <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+              {msg.role === "assistant" ? (
+                <ResponseText text={msg.content} />
+              ) : (
+                <p className="leading-relaxed">{msg.content}</p>
+              )}
             </div>
           </div>
         ))}
@@ -182,14 +219,15 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
             <div className="w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center shrink-0">
               <Bot className="w-3.5 h-3.5 text-muted-foreground" />
             </div>
-            <div className="bg-muted rounded-xl rounded-tl-none px-3.5 py-3">
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            <div className="bg-muted rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Thinking…</span>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="text-xs text-red-500 bg-red-500/10 px-3 py-2 rounded-lg">
+          <div className="text-xs text-red-500 bg-red-500/10 px-4 py-2.5 rounded-xl">
             {error}
           </div>
         )}
@@ -198,7 +236,7 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-border p-3">
+      <div className="border-t border-border p-4 bg-background">
         <form onSubmit={handleSend} className="flex gap-2">
           <input
             value={input}
@@ -206,15 +244,15 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
             placeholder={
               indexedDocs.length === 0
                 ? "Upload documents first…"
-                : "Ask a question about your documents…"
+                : "Ask anything about your documents…"
             }
             disabled={loading || indexedDocs.length === 0}
-            className="flex-1 px-3.5 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-input bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={loading || !input.trim() || indexedDocs.length === 0}
-            className="w-9 h-9 flex items-center justify-center rounded-lg bg-astra-500 hover:bg-astra-600 text-white transition disabled:opacity-50 shrink-0"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-astra-500 hover:bg-astra-600 text-white transition disabled:opacity-50 shrink-0"
           >
             <Send className="w-4 h-4" />
           </button>

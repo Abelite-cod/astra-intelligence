@@ -80,19 +80,20 @@ export async function POST(request: NextRequest) {
   console.log(`[chat] Context length: ${documentContext.length} chars, has_context: ${documentContext.length > 0}`);
 
   const systemInstruction = documentContext
-    ? `You are an intelligent assistant for ${brand?.name ?? "this company"}.
+    ? `You are a knowledgeable assistant for ${brand?.name ?? "this company"}.
 
 DOCUMENT CONTENT (${documentName}):
 ---
 ${documentContext}
 ---
 
-IMPORTANT RULES:
-- Answer questions based on the document content above
-- Quote specific parts of the document when relevant
-- If something is clearly NOT in the document, say "That information is not in this document"
-- Be helpful and concise`
-    : `You are an intelligent assistant for ${brand?.name ?? "this company"}. No documents have been indexed yet. Ask the user to upload documents.`;
+RESPONSE RULES:
+- Answer in plain conversational prose — no markdown, no asterisks, no hashtags, no bullet symbols, no headers
+- Write like a knowledgeable person speaking naturally
+- When quoting the document, use quotation marks and integrate it smoothly into your sentence
+- If something is clearly not in the document, say so naturally: "I don't have that information in this document."
+- Be concise, warm, and direct`
+    : `You are a knowledgeable assistant for ${brand?.name ?? "this company"}. No documents have been indexed yet. Ask the user to upload a document first. Respond in plain prose, no markdown.`;
 
   // Build conversation history
   const history = messages.slice(-6).map((m: { role: string; content: string }) => ({
