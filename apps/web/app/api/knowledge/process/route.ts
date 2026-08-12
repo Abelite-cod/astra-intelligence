@@ -13,20 +13,19 @@ function getAdmin() {
 async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string; numPages: number }> {
   console.log("📄 Starting PDF parse...");
 
-  // Use legacy build — works in Node.js without canvas
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js") as {
+  // pdfjs-dist v6 uses .mjs — must use dynamic import
+  const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs") as {
     getDocument: (src: { data: Uint8Array }) => { promise: Promise<{
       numPages: number;
       getPage: (n: number) => Promise<{
-        getTextContent: () => Promise<{ items: Array<{ str: string }> }>;
+        getTextContent: () => Promise<{ items: Array<{ str?: string }> }>;
       }>;
     }> };
-    GlobalWorkerOptions: { workerSrc: string | boolean };
+    GlobalWorkerOptions: { workerSrc: string };
   };
 
-  // Disable web worker — not needed in Node.js
-  pdfjsLib.GlobalWorkerOptions.workerSrc = false as unknown as string;
+  // Disable web worker — not needed in Node.js server route
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "" ;
 
   const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   const loadingTask = pdfjsLib.getDocument({ data: uint8Array });

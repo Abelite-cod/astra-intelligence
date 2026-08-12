@@ -7,8 +7,10 @@ const nextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
   },
-  // Prevent webpack from bundling these — use native Node.js require()
-  serverExternalPackages: ["pdfjs-dist", "pdf-parse"],
+  // Next.js 14 syntax for excluding packages from server bundle
+  experimental: {
+    serverComponentsExternalPackages: ["pdfjs-dist", "pdf-parse"],
+  },
 };
 
 module.exports = nextConfig;
