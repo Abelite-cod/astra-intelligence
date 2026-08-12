@@ -24,8 +24,13 @@ async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string; numPages:
     GlobalWorkerOptions: { workerSrc: string };
   };
 
-  // Disable web worker — not needed in Node.js server route
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "" ;
+  // Point to the actual worker file — required by pdfjs-dist v6
+  const { resolve } = await import("path");
+  const workerPath = resolve(
+    process.cwd(),
+    "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"
+  );
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `file://${workerPath}`;
 
   const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
