@@ -11,5 +11,8 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
+  // Use NEXT_PUBLIC_APP_URL as the base to avoid Railway's internal localhost:8080
+  // being exposed via requestUrl.origin (proxy strips the real host)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? requestUrl.origin;
+  return NextResponse.redirect(`${appUrl}${next}`);
 }
