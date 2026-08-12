@@ -14,31 +14,41 @@ interface KnowledgeChatProps {
   brandId: string;
 }
 
-// Strip common markdown symbols and clean up text for conversational display
+// Strip markdown symbols and normalize whitespace
 function cleanResponse(text: string): string {
   return text
-    .replace(/#{1,6}\s/g, "")           // Remove # headings
-    .replace(/\*\*([^*]+)\*\*/g, "$1")  // **bold** → plain
-    .replace(/\*([^*]+)\*/g, "$1")       // *italic* → plain
-    .replace(/`([^`]+)`/g, "$1")         // `code` → plain
-    .replace(/^[\s-*•>]+/gm, "")         // Remove bullet/blockquote prefixes per line
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // [text](url) → text
-    .replace(/\n{3,}/g, "\n\n")          // Collapse excess blank lines
+    .replace(/#{1,6}\s+/g, "")                    // # headings → plain
+    .replace(/\*\*([^*]+)\*\*/g, "$1")             // **bold** → plain
+    .replace(/\*([^*\n]+)\*/g, "$1")               // *italic* → plain
+    .replace(/`([^`]+)`/g, "$1")                   // `code` → plain
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")       // [link](url) → text
+    .replace(/^[\s]*[-*•>]\s+/gm, "")              // Remove bullet/list prefixes per line
+    .replace(/\n{3,}/g, "\n\n")                    // Max 2 consecutive newlines
     .trim();
 }
 
-// Render text with paragraph breaks — no markdown
+// Render each non-empty line as its own paragraph — preserves list structure
 function ResponseText({ text }: { text: string }) {
   const clean = cleanResponse(text);
-  const paragraphs = clean.split(/\n\n+/).filter(Boolean);
+  // Split on double newlines first, then single newlines within each block
+  const blocks = clean.split(/\n\n+/).filter((b) => b.trim());
 
   return (
-    <div className="space-y-2">
-      {paragraphs.map((para, i) => (
-        <p key={i} className="leading-relaxed">
-          {para.replace(/\n/g, " ")}
-        </p>
-      ))}
+    <div className="space-y-2.5">
+      {blocks.map((block, i) => {
+        const lines = block.split(/\n/).map((l) => l.trim()).filter(Boolean);
+        if (lines.length === 1) {
+          return <p key={i} className="leading-relaxed">{lines[0]}</p>;
+        }
+        // Multiple lines in one block — render as separate small paragraphs
+        return (
+          <div key={i} className="space-y-1.5">
+            {lines.map((line, j) => (
+              <p key={j} className="leading-relaxed">{line}</p>
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
