@@ -112,12 +112,17 @@ function LoginForm() {
         </button>
       </form>
 
-      <p className="text-center text-white/50 text-sm mt-6">
-        No account?{" "}
-        <Link href="/register" className="text-astra-400 hover:text-astra-300 font-medium">
-          Create one free
+      <div className="flex items-center justify-between mt-6">
+        <Link href="/forgot-password" className="text-white/40 hover:text-white/70 text-xs transition">
+          Forgot password?
         </Link>
-      </p>
+        <p className="text-white/50 text-sm">
+          No account?{" "}
+          <Link href="/register" className="text-astra-400 hover:text-astra-300 font-medium">
+            Create one free
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
