@@ -139,24 +139,59 @@ export async function POST(request: NextRequest) {
       throw new Error("Could not extract meaningful text from this document");
     }
 
-    // ── Stage 5: Chunking (coming next) ───────────────────────────────────
-    // For now: return success with the extracted text to confirm parsing works
-    console.log(`[process] ✅ Text extraction complete. Ready for chunking.`);
+    // ── Stage 5: Chunk the text ───────────────────────────────────────────
+    console.log(`[process] ✅ Text extraction complete. Chunking...`);
+    const MAX_CHUNK = 1500;
+    const OVERLAP = 150;
+    const chunks: string[] = [];
+    const cleanText = rawText.trim();
+    let start = 0;
+    while (start < cleanText.length) {
+      const end = Math.min(start + MAX_CHUNK, cleanText.length);
+      let chunkEnd = end;
+      if (end < cleanText.length) {
+        for (const bp of ["\n\n", ". ", ".\n", "! ", "? "]) {
+          const idx = cleanText.lastIndexOf(bp, end);
+          if (idx > start + MAX_CHUNK / 2) { chunkEnd = idx + bp.length; break; }
+        }
+      }
+      const chunk = cleanText.slice(start, chunkEnd).trim();
+      if (chunk.length > 30) chunks.push(chunk);
+      start = Math.max(start + 1, chunkEnd - OVERLAP);
+    }
+    console.log(`[process] Created ${chunks.length} chunks`);
 
-    // Temporary: update status to show we got this far
+    // ── Stage 6: Persist chunks ───────────────────────────────────────────
+    await admin.from("knowledge_chunks").delete().eq("document_id", document_id);
+
+    const chunkRows = chunks.map((content, i) => ({
+      document_id,
+      brand_id: doc.brand_id,
+      content,
+      chunk_index: i,
+      token_count: Math.ceil(content.length / 4),
+      metadata: { source: doc.name, type: doc.type, num_pages: numPages },
+    }));
+
+    const { error: insertErr } = await admin.from("knowledge_chunks").insert(chunkRows);
+    if (insertErr) throw new Error(`Chunk insert failed: ${insertErr.message}`);
+
+    const totalTokens = chunkRows.reduce((s, c) => s + c.token_count, 0);
     await admin.from("knowledge_documents").update({
       status: "indexed",
-      chunk_count: Math.ceil(rawText.length / 1500),
-      token_count: Math.ceil(rawText.length / 4),
+      chunk_count: chunks.length,
+      token_count: totalTokens,
     }).eq("id", document_id);
+
+    console.log(`[process] ✅ Done — ${chunks.length} chunks persisted`);
 
     return NextResponse.json({
       success: true,
       document_id,
       num_pages: numPages,
       text_length: rawText.length,
+      chunks_created: chunks.length,
       preview: rawText.slice(0, 300),
-      status: "text_extracted_chunking_pending",
     });
 
   } catch (error) {
