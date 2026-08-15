@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
-import { GoogleGenAI, PersonGeneration } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
+
+// ── Why we use Gemini, not Imagen ─────────────────────────────────────────────
+// imagen-3.0-generate-001 is a Vertex AI model and is NOT available via
+// Google AI Studio keys (AQ. prefix). It requires Google Cloud credentials.
+// The correct image generation model for Google AI Studio keys is
+// gemini-2.0-flash-exp with responseModalities: ["IMAGE"].
+// ─────────────────────────────────────────────────────────────────────────────
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
+
+// Use a model known to support image generation on AI Studio free tier
+const IMAGE_MODEL = "gemini-2.0-flash-exp";
 
 function getAdmin() {
   return createAdminClient(
@@ -12,12 +22,6 @@ function getAdmin() {
   );
 }
 
-// ── POST /api/content/[id]/media/generate ────────────────────────────────────
-// Generates an image using Google Imagen 3 and stores it in Supabase Storage.
-// Reference image (image-to-image): only supported with Imagen 3 billed tier.
-// The free tier (imagen-3.0-generate-001) is TEXT → IMAGE only.
-// If a reference_media_id is provided but the model doesn't support it,
-// we log the limitation and generate from text only rather than failing.
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -39,38 +43,46 @@ export async function POST(
 
   if (!content) return NextResponse.json({ error: "Content not found" }, { status: 404 });
 
-  // Build the generation prompt
   const brand = content.brands as { name?: string; tone_of_voice?: string; industry?: string } | null;
   const builtPrompt = userPrompt ?? buildPrompt(content, brand);
 
-  // Reference image note
-  let referenceNote = "";
+  let referenceNote: string | undefined;
   if (reference_media_id) {
-    referenceNote = "NOTE: Image-to-image reference is not supported on the current free tier of Google Imagen. Generating from text only.";
-    console.log(`[media/generate] ${referenceNote}`);
+    referenceNote = "Image-to-image reference requires a billed Google AI plan. Generating from text only.";
   }
 
   try {
-    // Use Imagen 3 via Google AI SDK
-    const response = await ai.models.generateImages({
-      model: "imagen-3.0-generate-001",
-      prompt: builtPrompt,
+    // Generate image using Gemini with IMAGE modality
+    // This works with Google AI Studio keys (AQ. prefix)
+    const response = await ai.models.generateContent({
+      model: IMAGE_MODEL,
+      contents: [{ role: "user", parts: [{ text: builtPrompt }] }],
       config: {
-        numberOfImages: 1,
-        aspectRatio: content.platform === "twitter" ? "1:1" : "4:5",
-        personGeneration: PersonGeneration.DONT_ALLOW,
+        responseModalities: ["IMAGE", "TEXT"],
       },
     });
 
-    const imageData = response.generatedImages?.[0]?.image?.imageBytes;
-    if (!imageData) {
-      return NextResponse.json({ error: "No image returned from AI" }, { status: 500 });
+    // Extract the image part from the response
+    const parts = response.candidates?.[0]?.content?.parts ?? [];
+    const imagePart = parts.find(
+      (p) => p.inlineData?.mimeType?.startsWith("image/")
+    );
+
+    if (!imagePart?.inlineData?.data) {
+      // If no image was returned, the model may not support images in this region/version
+      const textPart = parts.find((p) => p.text);
+      const reason = textPart?.text ?? "No image was returned by the AI.";
+      return NextResponse.json(
+        { error: `Image generation unavailable: ${reason.slice(0, 200)}` },
+        { status: 503 }
+      );
     }
 
-    // Decode base64 bytes
-    const imageBytes = Buffer.from(imageData, "base64");
+    const mimeType = imagePart.inlineData.mimeType;
+    const ext = mimeType === "image/png" ? "png" : mimeType === "image/gif" ? "gif" : "jpg";
+    const imageBytes = Buffer.from(imagePart.inlineData.data, "base64");
 
-    // Upload to Supabase Storage
+    // Get next sort_order
     const sortResult = await admin
       .from("content_media")
       .select("sort_order")
@@ -79,20 +91,24 @@ export async function POST(
       .limit(1);
     const nextOrder = (sortResult.data?.[0]?.sort_order ?? -1) + 1;
 
-    const storagePath = `${content.brand_id}/${params.id}/generated-${crypto.randomUUID()}.png`;
+    // Upload to Supabase Storage (content-media bucket)
+    const storagePath = `${content.brand_id}/${params.id}/generated-${crypto.randomUUID()}.${ext}`;
     const { error: uploadError } = await admin.storage
       .from("content-media")
-      .upload(storagePath, imageBytes, { contentType: "image/png", upsert: false });
+      .upload(storagePath, imageBytes, { contentType: mimeType, upsert: false });
 
     if (uploadError) {
-      return NextResponse.json({ error: `Storage upload failed: ${uploadError.message}` }, { status: 500 });
+      return NextResponse.json(
+        { error: `Storage upload failed: ${uploadError.message}` },
+        { status: 500 }
+      );
     }
 
     const { data: { publicUrl } } = admin.storage
       .from("content-media")
       .getPublicUrl(storagePath);
 
-    // Insert content_media row
+    // Insert content_media row (does NOT overwrite previous generations)
     const { data: media, error: dbError } = await admin
       .from("content_media")
       .insert({
@@ -110,33 +126,34 @@ export async function POST(
 
     if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 });
 
-    return NextResponse.json({
-      media,
-      reference_note: referenceNote || undefined,
-    });
+    return NextResponse.json({ media, reference_note: referenceNote });
+
   } catch (error) {
     console.error("[media/generate] Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Image generation failed" },
-      { status: 500 }
-    );
+    // Return clean error message — never expose raw API error to browser
+    const msg = error instanceof Error ? error.message : String(error);
+    const clean = msg.includes("not found") || msg.includes("404")
+      ? "Image generation model unavailable. Try again or contact support."
+      : msg.includes("quota") || msg.includes("429")
+      ? "Image generation quota exceeded. Try again in a minute."
+      : "Image generation failed. Try again shortly.";
+    return NextResponse.json({ error: clean }, { status: 500 });
   }
 }
-
-// ── Prompt builder ────────────────────────────────────────────────────────────
 
 function buildPrompt(
   content: { body?: string; hook?: string; platform?: string },
   brand: { name?: string; tone_of_voice?: string; industry?: string } | null
 ): string {
-  const parts = [
+  return [
     `Create a professional marketing image for ${brand?.name ?? "a brand"}.`,
     brand?.industry && `Industry: ${brand.industry}.`,
-    content.hook && `Post message: "${content.hook}"`,
-    content.platform && `Platform: ${content.platform}.`,
-    "Style: clean, modern, professional, high quality, no text overlays.",
-    "Aspect ratio appropriate for social media.",
-  ].filter(Boolean);
-
-  return parts.join(" ");
+    content.hook && `Post theme: "${content.hook}"`,
+    content.platform === "linkedin"
+      ? "Style: corporate, clean, professional, suitable for LinkedIn."
+      : content.platform === "instagram"
+      ? "Style: vibrant, visual, lifestyle, suitable for Instagram."
+      : "Style: clear, modern, suitable for social media.",
+    "No text overlays. High quality.",
+  ].filter(Boolean).join(" ");
 }
