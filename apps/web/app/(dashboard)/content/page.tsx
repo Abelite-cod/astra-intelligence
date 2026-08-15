@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useBrands } from "@/hooks/use-brand";
-import { useGenerateContent, useContentList, useApproveContent, useRejectContent, useDeleteContent, type GeneratedContent } from "@/hooks/use-content";
+import { useGenerateContent, useContentList, useApproveContent, useRejectContent, useDeleteContent, useUpdateContent, type GeneratedContent } from "@/hooks/use-content";
 import { PlatformPreview } from "@/components/content/platform-preview";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Loader2, CheckCircle2, XCircle, Trash2,
-  Linkedin, Twitter, Instagram, FileText, ChevronDown
+  Linkedin, Twitter, Instagram, FileText, ChevronDown, Pencil, Save, X as XIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatRelativeTime } from "@/lib/utils";
@@ -42,6 +42,35 @@ export default function ContentPage() {
   const approveMutation = useApproveContent(activeBrandId);
   const rejectMutation = useRejectContent(activeBrandId);
   const deleteMutation = useDeleteContent(activeBrandId);
+  const updateMutation = useUpdateContent(activeBrandId);
+
+  // Inline editing state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState<string>("");
+
+  function startEdit(id: string, body: string) {
+    setEditingId(id);
+    setEditBody(body);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditBody("");
+  }
+
+  function saveEdit(id: string) {
+    toast.promise(
+      updateMutation.mutateAsync({ id, body: editBody }).then(() => {
+        setEditingId(null);
+        setEditBody("");
+      }),
+      {
+        loading: "Saving…",
+        success: "Content updated",
+        error: "Failed to save",
+      }
+    );
+  }
 
   function togglePlatform(id: string) {
     setSelectedPlatforms((prev) =>
@@ -275,9 +304,46 @@ export default function ContentPage() {
                 </span>
               </div>
 
-              <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-4">
-                {item.body}
-              </p>
+              {editingId === item.id ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editBody}
+                    onChange={(e) => setEditBody(e.target.value)}
+                    rows={5}
+                    className="w-full px-3 py-2.5 rounded-lg border border-astra-500 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                    autoFocus
+                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => saveEdit(item.id)}
+                      disabled={updateMutation.isPending}
+                      className="flex items-center gap-1.5 text-xs font-medium bg-astra-500 hover:bg-astra-600 text-white px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                    >
+                      {updateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                      Save
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg border border-border transition"
+                    >
+                      <XIcon className="w-3 h-3" /> Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative group">
+                  <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-4 pr-8">
+                    {item.body}
+                  </p>
+                  <button
+                    onClick={() => startEdit(item.id, item.body)}
+                    className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition p-1 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground"
+                    title="Edit"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
 
               {item.hashtags && item.hashtags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
