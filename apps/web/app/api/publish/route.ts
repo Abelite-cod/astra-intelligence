@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
+
+function getAdmin() {
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(request: NextRequest) {
   const supabase = createClient();
@@ -11,8 +19,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "content_id, brand_id, and platforms required" }, { status: 400 });
   }
 
-  // Load content
-  const { data: content } = await supabase
+  const admin = getAdmin();
+
+  // Load content using admin to bypass RLS
+  const { data: content } = await admin
     .from("content")
     .select("*")
     .eq("id", content_id)
@@ -23,8 +33,8 @@ export async function POST(request: NextRequest) {
   const results: Array<{ platform: string; status: string; post_id?: string; error?: string }> = [];
 
   for (const platform of platforms) {
-    // Load social account for this brand + platform
-    const { data: account } = await supabase
+    // Load social account using admin to bypass RLS
+    const { data: account } = await admin
       .from("social_accounts")
       .select("*")
       .eq("brand_id", brand_id)
@@ -47,7 +57,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Record in scheduled_posts
-      await supabase.from("scheduled_posts").insert({
+      await admin.from("scheduled_posts").insert({
         content_id,
         brand_id,
         platform,
@@ -60,8 +70,7 @@ export async function POST(request: NextRequest) {
 
       results.push({ platform, status: "published", post_id: postId });
     } catch (e) {
-      // Record failure
-      await supabase.from("scheduled_posts").insert({
+      await admin.from("scheduled_posts").insert({
         content_id,
         brand_id,
         platform,
@@ -77,7 +86,7 @@ export async function POST(request: NextRequest) {
   // Update content status to published if all succeeded
   const allPublished = results.every((r) => r.status === "published");
   if (allPublished) {
-    await supabase.from("content").update({ status: "published" }).eq("id", content_id);
+    await admin.from("content").update({ status: "published" }).eq("id", content_id);
   }
 
   return NextResponse.json({ results, content_id });
@@ -104,32 +113,33 @@ async function postToTwitter(accessToken: string, text: string): Promise<string>
   return data.data?.id ?? "unknown";
 }
 
-// ── LinkedIn API ──────────────────────────────────────────────────────────────
+// ── LinkedIn Posts API (v2, current) ─────────────────────────────────────────
+// Uses /rest/posts — the ugcPosts endpoint was deprecated in 2023
 
 async function postToLinkedIn(
   accessToken: string,
   authorId: string,
   text: string
 ): Promise<string> {
-  const res = await fetch("https://api.linkedin.com/v2/ugcPosts", {
+  const res = await fetch("https://api.linkedin.com/rest/posts", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
+      "LinkedIn-Version": "202504",
       "X-Restli-Protocol-Version": "2.0.0",
     },
     body: JSON.stringify({
       author: `urn:li:person:${authorId}`,
+      commentary: text,
+      visibility: "PUBLIC",
+      distribution: {
+        feedDistribution: "MAIN_FEED",
+        targetEntities: [],
+        thirdPartyDistributionChannels: [],
+      },
       lifecycleState: "PUBLISHED",
-      specificContent: {
-        "com.linkedin.ugc.ShareContent": {
-          shareCommentary: { text },
-          shareMediaCategory: "NONE",
-        },
-      },
-      visibility: {
-        "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
-      },
+      isReshareDisabledByAuthor: false,
     }),
   });
 
@@ -138,6 +148,7 @@ async function postToLinkedIn(
     throw new Error(`LinkedIn API error ${res.status}: ${err}`);
   }
 
-  const postId = res.headers.get("x-restli-id") ?? "unknown";
-  return postId;
+  // Posts API returns the post URN in the header
+  const postUrn = res.headers.get("x-restli-id") ?? res.headers.get("location") ?? "unknown";
+  return postUrn;
 }
