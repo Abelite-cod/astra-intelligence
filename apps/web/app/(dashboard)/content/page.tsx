@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useBrands } from "@/hooks/use-brand";
 import { useGenerateContent, useContentList, useApproveContent, useRejectContent, useDeleteContent, useUpdateContent, type GeneratedContent } from "@/hooks/use-content";
 import { PlatformPreview } from "@/components/content/platform-preview";
+import { MediaPanel } from "@/components/content/media-panel";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Loader2, CheckCircle2, XCircle, Trash2,
-  Linkedin, Twitter, Instagram, FileText, ChevronDown, Pencil, Save, X as XIcon
+  Linkedin, Twitter, Instagram, FileText, ChevronDown, Pencil, Save, X as XIcon, ImageIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatRelativeTime } from "@/lib/utils";
@@ -352,6 +353,16 @@ export default function ContentPage() {
                   ))}
                 </div>
               )}
+
+              {/* ── Media section ─────────────────────────────────── */}
+              <div className="pt-1">
+                <MediaPanel
+                  contentId={item.id}
+                  contentBody={item.body}
+                  contentHook={item.hook}
+                  platform={item.platform}
+                />
+              </div>
 
               {item.status === "draft" && (
                 <div className="flex items-center gap-2 pt-1">
