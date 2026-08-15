@@ -191,16 +191,11 @@ function PublishPageInner() {
             );
           })}
 
-          {/* Setup instructions */}
-          {accounts.length === 0 && (
+          {/* Setup hint — only shown on local dev when app URL is localhost */}
+          {accounts.length === 0 && typeof window !== "undefined" && window.location.hostname === "localhost" && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800">
-              <p className="font-semibold mb-1">Setup required</p>
-              <p>To connect social accounts, add your OAuth app credentials to .env.local:</p>
-              <code className="block mt-2 font-mono bg-amber-100 rounded p-2 text-amber-900 whitespace-pre">{`TWITTER_CLIENT_ID=...
-TWITTER_CLIENT_SECRET=...
-LINKEDIN_CLIENT_ID=...
-LINKEDIN_CLIENT_SECRET=...
-NEXT_PUBLIC_APP_URL=http://localhost:3000`}</code>
+              <p className="font-semibold mb-1">Local dev setup</p>
+              <p>Add OAuth credentials to <code className="bg-amber-100 px-1 rounded">.env.local</code> then restart the server.</p>
             </div>
           )}
         </div>
