@@ -12,8 +12,9 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
 
-// Use a model known to support image generation on AI Studio free tier
-const IMAGE_MODEL = "gemini-2.0-flash-exp";
+// gemini-2.0-flash-image was confirmed in the user's available model list.
+// The SDK requires responseModalities to include both "TEXT" and "IMAGE".
+const IMAGE_MODEL = "gemini-2.0-flash-image";
 
 function getAdmin() {
   return createAdminClient(
@@ -53,12 +54,14 @@ export async function POST(
 
   try {
     // Generate image using Gemini with IMAGE modality
-    // This works with Google AI Studio keys (AQ. prefix)
+    // gemini-2.0-flash-preview-image-generation supports responseModalities:["IMAGE"]
+    // on Google AI Studio keys (no Vertex AI / billing required)
     const response = await ai.models.generateContent({
       model: IMAGE_MODEL,
       contents: [{ role: "user", parts: [{ text: builtPrompt }] }],
       config: {
-        responseModalities: ["IMAGE", "TEXT"],
+        // Must include TEXT alongside IMAGE — required by Gemini SDK
+        responseModalities: ["TEXT", "IMAGE"],
       },
     });
 
