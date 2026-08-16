@@ -79,6 +79,26 @@ export default function ContentPage() {
     );
   }
 
+  function safeErrorMessage(e: unknown): string {
+    const raw = e instanceof Error ? e.message : String(e);
+    // Guard against raw JSON leaking through (e.g. {"error":{"code":503,...}})
+    if (raw.trim().startsWith("{") || raw.trim().startsWith("[")) {
+      try {
+        const parsed = JSON.parse(raw);
+        const msg =
+          parsed?.error?.message ??
+          parsed?.error ??
+          parsed?.message ??
+          null;
+        if (typeof msg === "string") return msg;
+      } catch {
+        // fall through
+      }
+      return "Content generation failed. Please try again.";
+    }
+    return raw || "Content generation failed. Please try again.";
+  }
+
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
     if (!brief.trim() || !activeBrandId) return;
@@ -91,7 +111,7 @@ export default function ContentPage() {
       {
         loading: "Generating on-brand content…",
         success: (res) => `Generated ${Object.keys(res.generated).length} platform versions`,
-        error: (e) => e.message,
+        error: (e) => safeErrorMessage(e),
       }
     );
   }

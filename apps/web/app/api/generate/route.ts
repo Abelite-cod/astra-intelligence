@@ -13,13 +13,65 @@ function getAdmin() {
   );
 }
 
+function isRetryable(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const msg = error.message;
+  return (
+    msg.includes("503") ||
+    msg.includes("UNAVAILABLE") ||
+    msg.includes("429") ||
+    msg.includes("RESOURCE_EXHAUSTED") ||
+    msg.includes("overloaded")
+  );
+}
+
+function friendlyError(error: unknown): string {
+  if (error instanceof Error) {
+    const msg = error.message;
+    if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("overloaded")) {
+      return "AI is experiencing high demand right now. Please try again in a moment.";
+    }
+    if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED")) {
+      return "Rate limit reached. Please wait a few seconds and try again.";
+    }
+    if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("403")) {
+      return "AI service configuration error. Please contact support.";
+    }
+  }
+  return "Content generation failed. Please try again.";
+}
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function generate(systemPrompt: string, userPrompt: string): Promise<string> {
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: userPrompt,
-    config: { systemInstruction: systemPrompt },
-  });
-  return response.text ?? "";
+  const MAX_RETRIES = 3;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: userPrompt,
+        config: { systemInstruction: systemPrompt },
+      });
+      return response.text ?? "";
+    } catch (err) {
+      lastError = err;
+      if (isRetryable(err) && attempt < MAX_RETRIES - 1) {
+        // Exponential backoff: 1s → 2s before retry
+        const delay = Math.pow(2, attempt) * 1000;
+        console.warn(`[generate] attempt ${attempt + 1} failed (retryable), retrying in ${delay}ms…`);
+        await sleep(delay);
+        continue;
+      }
+      // Non-retryable or final attempt — break immediately
+      break;
+    }
+  }
+
+  throw lastError;
 }
 
 export async function POST(request: NextRequest) {
@@ -85,7 +137,16 @@ Only include: ${platforms.join(", ")}.`;
     }
     return NextResponse.json({ generated, saved_content: savedContent, model: MODEL });
   } catch (error) {
-    console.error("Gemini error:", error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Generation failed" }, { status: 500 });
+    console.error("[generate] Gemini error:", error);
+    const isOverload =
+      (error instanceof Error &&
+        (error.message.includes("503") ||
+          error.message.includes("UNAVAILABLE") ||
+          error.message.includes("429") ||
+          error.message.includes("RESOURCE_EXHAUSTED")));
+    return NextResponse.json(
+      { error: friendlyError(error) },
+      { status: isOverload ? 503 : 500 }
+    );
   }
 }
