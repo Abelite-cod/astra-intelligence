@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
-import { GoogleGenAI } from "@google/genai";
 
-// ── Why we use Gemini, not Imagen ─────────────────────────────────────────────
-// imagen-3.0-generate-001 is a Vertex AI model and is NOT available via
-// Google AI Studio keys (AQ. prefix). It requires Google Cloud credentials.
-// The correct image generation model for Google AI Studio keys is
-// gemini-2.0-flash-exp with responseModalities: ["IMAGE"].
+// ── Image generation via Pollinations.ai ──────────────────────────────────────
+// Free, no API key required, works on any server including Railway production.
+// Google AI Studio (AQ. keys) does NOT support responseModalities:["IMAGE"] on
+// free tier — that requires Google Cloud Vertex AI credentials.
+// Pollinations.ai generates real AI images from text prompts with no auth.
 // ─────────────────────────────────────────────────────────────────────────────
-
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
-
-// gemini-2.0-flash-image was confirmed in the user's available model list.
-// The SDK requires responseModalities to include both "TEXT" and "IMAGE".
-const IMAGE_MODEL = "gemini-2.0-flash-image";
 
 function getAdmin() {
   return createAdminClient(
@@ -49,41 +42,34 @@ export async function POST(
 
   let referenceNote: string | undefined;
   if (reference_media_id) {
-    referenceNote = "Image-to-image reference requires a billed Google AI plan. Generating from text only.";
+    referenceNote = "Image-to-image reference requires a paid image generation plan. Generating from text only.";
   }
 
   try {
-    // Generate image using Gemini with IMAGE modality
-    // gemini-2.0-flash-preview-image-generation supports responseModalities:["IMAGE"]
-    // on Google AI Studio keys (no Vertex AI / billing required)
-    const response = await ai.models.generateContent({
-      model: IMAGE_MODEL,
-      contents: [{ role: "user", parts: [{ text: builtPrompt }] }],
-      config: {
-        // Must include TEXT alongside IMAGE — required by Gemini SDK
-        responseModalities: ["TEXT", "IMAGE"],
-      },
+    // Pollinations.ai: free image generation, no API key required
+    // Encodes prompt into a URL and fetches the generated image bytes
+    const encodedPrompt = encodeURIComponent(builtPrompt);
+    const aspectRatio = content.platform === "twitter" ? "1024x1024" : "1024x1280";
+    const [width, height] = aspectRatio.split("x");
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&enhance=true&model=flux`;
+
+    const imgRes = await fetch(pollinationsUrl, {
+      headers: { "User-Agent": "AstraIntelligence/1.0" },
+      signal: AbortSignal.timeout(60000), // 60 second timeout
     });
 
-    // Extract the image part from the response
-    const parts = response.candidates?.[0]?.content?.parts ?? [];
-    const imagePart = parts.find(
-      (p) => p.inlineData?.mimeType?.startsWith("image/")
-    );
-
-    if (!imagePart?.inlineData?.data) {
-      // If no image was returned, the model may not support images in this region/version
-      const textPart = parts.find((p) => p.text);
-      const reason = textPart?.text ?? "No image was returned by the AI.";
-      return NextResponse.json(
-        { error: `Image generation unavailable: ${reason.slice(0, 200)}` },
-        { status: 503 }
-      );
+    if (!imgRes.ok) {
+      throw new Error(`Image generation service returned ${imgRes.status}`);
     }
 
-    const mimeType = imagePart.inlineData.mimeType;
-    const ext = mimeType === "image/png" ? "png" : mimeType === "image/gif" ? "gif" : "jpg";
-    const imageBytes = Buffer.from(imagePart.inlineData.data, "base64");
+    const contentType = imgRes.headers.get("content-type") ?? "image/jpeg";
+    const imageBytes = Buffer.from(await imgRes.arrayBuffer());
+
+    if (imageBytes.length < 1000) {
+      throw new Error("Generated image too small — service may be temporarily unavailable");
+    }
+
+    const ext = contentType.includes("png") ? "png" : contentType.includes("gif") ? "gif" : "jpg";
 
     // Get next sort_order
     const sortResult = await admin
@@ -94,11 +80,11 @@ export async function POST(
       .limit(1);
     const nextOrder = (sortResult.data?.[0]?.sort_order ?? -1) + 1;
 
-    // Upload to Supabase Storage (content-media bucket)
+    // Upload to Supabase Storage
     const storagePath = `${content.brand_id}/${params.id}/generated-${crypto.randomUUID()}.${ext}`;
     const { error: uploadError } = await admin.storage
       .from("content-media")
-      .upload(storagePath, imageBytes, { contentType: mimeType, upsert: false });
+      .upload(storagePath, imageBytes, { contentType, upsert: false });
 
     if (uploadError) {
       return NextResponse.json(
@@ -111,7 +97,7 @@ export async function POST(
       .from("content-media")
       .getPublicUrl(storagePath);
 
-    // Insert content_media row (does NOT overwrite previous generations)
+    // Insert content_media row — each generate creates a NEW row, never overwrites
     const { data: media, error: dbError } = await admin
       .from("content_media")
       .insert({
@@ -133,12 +119,11 @@ export async function POST(
 
   } catch (error) {
     console.error("[media/generate] Error:", error);
-    // Return clean error message — never expose raw API error to browser
     const msg = error instanceof Error ? error.message : String(error);
-    const clean = msg.includes("not found") || msg.includes("404")
-      ? "Image generation model unavailable. Try again or contact support."
-      : msg.includes("quota") || msg.includes("429")
-      ? "Image generation quota exceeded. Try again in a minute."
+    const clean = msg.includes("abort") || msg.includes("timeout")
+      ? "Image generation timed out. Try again."
+      : msg.includes("503") || msg.includes("unavailable")
+      ? "Image generation service temporarily unavailable. Try again in a moment."
       : "Image generation failed. Try again shortly.";
     return NextResponse.json({ error: clean }, { status: 500 });
   }
@@ -149,14 +134,14 @@ function buildPrompt(
   brand: { name?: string; tone_of_voice?: string; industry?: string } | null
 ): string {
   return [
-    `Create a professional marketing image for ${brand?.name ?? "a brand"}.`,
+    `Professional marketing image for ${brand?.name ?? "a brand"}.`,
     brand?.industry && `Industry: ${brand.industry}.`,
-    content.hook && `Post theme: "${content.hook}"`,
+    content.hook && `Theme: ${content.hook.slice(0, 100)}`,
     content.platform === "linkedin"
-      ? "Style: corporate, clean, professional, suitable for LinkedIn."
+      ? "Corporate, clean, professional style. LinkedIn format."
       : content.platform === "instagram"
-      ? "Style: vibrant, visual, lifestyle, suitable for Instagram."
-      : "Style: clear, modern, suitable for social media.",
-    "No text overlays. High quality.",
+      ? "Vibrant, lifestyle, visually compelling. Instagram format."
+      : "Clean, modern, social media optimized.",
+    "No text. No words. High quality. Photorealistic or illustrated.",
   ].filter(Boolean).join(" ");
 }
