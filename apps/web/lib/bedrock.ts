@@ -9,11 +9,12 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 
+// eu-north-1 (Stockholm) uses direct model IDs — no "eu." cross-region prefix.
+// Cross-region inference profiles (eu.*) only work from eu-west-1/eu-central-1/eu-west-3.
 const REGION = process.env.AWS_REGION ?? "eu-north-1";
 
-// Try EU cross-region inference prefix first; override with BEDROCK_MODEL env var
 export const BEDROCK_MODEL =
-  process.env.BEDROCK_MODEL ?? "eu.anthropic.claude-3-5-haiku-20241022-v1:0";
+  process.env.BEDROCK_MODEL ?? "anthropic.claude-3-haiku-20240307-v1:0";
 
 function isRetryable(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
