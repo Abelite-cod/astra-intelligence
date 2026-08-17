@@ -3,18 +3,47 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 
-// Claude 3.5 Sonnet on Bedrock — high quality, generous throughput
-// Override via BEDROCK_MODEL env var if needed
-export const BEDROCK_MODEL =
-  process.env.BEDROCK_MODEL ?? "anthropic.claude-3-5-sonnet-20241022-v2:0";
+// ── Authentication ─────────────────────────────────────────────────────────────
+// Supports both:
+//   1. Bedrock long-term API key  →  set AWS_BEARER_TOKEN_BEDROCK
+//   2. IAM credentials           →  set AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY
+//
+// The Bedrock API key (bearer token) is the recommended approach for the
+// Amazon Bedrock console-generated "long-term API key".
+// ─────────────────────────────────────────────────────────────────────────────
 
-const client = new BedrockRuntimeClient({
-  region: process.env.AWS_REGION ?? "us-east-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+const REGION = process.env.AWS_REGION ?? "eu-north-1"; // Europe (Stockholm)
+
+// Claude model IDs:
+// - EU cross-region inference prefix:  eu.anthropic.claude-3-5-sonnet-20241022-v2:0
+// - US cross-region inference prefix:  us.anthropic.claude-3-5-sonnet-20241022-v2:0
+// - Direct (us-east-1 only):           anthropic.claude-3-5-sonnet-20241022-v2:0
+// For Stockholm (eu-north-1) you must use the EU cross-region profile.
+export const BEDROCK_MODEL =
+  process.env.BEDROCK_MODEL ?? "eu.anthropic.claude-3-5-sonnet-20241022-v2:0";
+
+function buildClient(): BedrockRuntimeClient {
+  const bearerToken = process.env.AWS_BEARER_TOKEN_BEDROCK;
+
+  if (bearerToken) {
+    // Bedrock long-term API key — bearer token auth
+    return new BedrockRuntimeClient({
+      region: REGION,
+      token: { token: bearerToken },
+    });
+  }
+
+  // Fallback: IAM credentials
+  return new BedrockRuntimeClient({
+    region: REGION,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+  });
+}
+
+const client = buildClient();
 
 function isRetryable(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
@@ -40,12 +69,16 @@ export function friendlyBedrockError(error: unknown): string {
     if (
       msg.includes("AccessDeniedException") ||
       msg.includes("credentials") ||
-      msg.includes("UnrecognizedClientException")
+      msg.includes("UnrecognizedClientException") ||
+      msg.includes("InvalidSignatureException")
     ) {
-      return "AI service configuration error. Please contact support.";
+      return "AI service authentication error. Please check your API key in settings.";
     }
     if (msg.includes("ValidationException")) {
       return "Invalid request to AI service. Please try again.";
+    }
+    if (msg.includes("ModelNotReadyException") || msg.includes("model access")) {
+      return "Claude model not enabled. Please request Bedrock model access in the AWS console.";
     }
   }
   return "AI generation failed. Please try again.";
