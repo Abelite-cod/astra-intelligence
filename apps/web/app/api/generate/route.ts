@@ -73,14 +73,17 @@ Only include: ${platforms.join(", ")}.`;
     }
     return NextResponse.json({ generated, saved_content: savedContent, model: BEDROCK_MODEL });
   } catch (error) {
-    console.error("[generate] Bedrock error:", error);
+    const rawMsg = error instanceof Error ? error.message : String(error);
+    console.error("[generate] Bedrock error:", rawMsg);
+    // In debug mode expose raw error so we can diagnose; otherwise show friendly message
+    const debugMode = process.env.AI_DEBUG === "true";
     const isOverload =
       error instanceof Error &&
-      (error.message.includes("ThrottlingException") ||
-        error.message.includes("503") ||
-        error.message.includes("ServiceUnavailable"));
+      (rawMsg.includes("ThrottlingException") ||
+        rawMsg.includes("503") ||
+        rawMsg.includes("ServiceUnavailable"));
     return NextResponse.json(
-      { error: friendlyBedrockError(error) },
+      { error: debugMode ? rawMsg : friendlyBedrockError(error) },
       { status: isOverload ? 503 : 500 }
     );
   }
