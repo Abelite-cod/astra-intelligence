@@ -11,10 +11,10 @@ import {
 
 const REGION = process.env.AWS_REGION ?? "eu-north-1";
 
-// For eu-north-1 the Converse API requires a cross-region inference profile.
-// The EU profile for Claude Sonnet 4 auto-routes across eu-north-1/eu-west-1/eu-central-1.
+// Model ID confirmed from AWS Bedrock console → Model catalog → Claude Sonnet 4.6
+// Inference type: Cross-region (Bedrock handles routing automatically via Converse API)
 export const BEDROCK_MODEL =
-  process.env.BEDROCK_MODEL ?? "eu.anthropic.claude-sonnet-4-6-20250514-v1:0";
+  process.env.BEDROCK_MODEL ?? "anthropic.claude-sonnet-4-6";
 
 function isRetryable(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
