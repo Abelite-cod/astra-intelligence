@@ -11,10 +11,10 @@ import {
 
 const REGION = process.env.AWS_REGION ?? "eu-north-1";
 
-// Model ID confirmed from AWS Bedrock console → Model catalog → Claude Sonnet 4.6
-// Inference type: Cross-region (Bedrock handles routing automatically via Converse API)
+// EU cross-region inference profile — required for all current Anthropic Claude models.
+// Bedrock requires the "eu." prefix for the /converse endpoint in EU regions.
 export const BEDROCK_MODEL =
-  process.env.BEDROCK_MODEL ?? "anthropic.claude-sonnet-4-6";
+  process.env.BEDROCK_MODEL ?? "eu.anthropic.claude-sonnet-4-6";
 
 function isRetryable(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
