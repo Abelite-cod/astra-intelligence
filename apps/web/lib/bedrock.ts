@@ -9,12 +9,12 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 
-// eu-north-1 (Stockholm) — confirmed working model from Roo Code settings.
 const REGION = process.env.AWS_REGION ?? "eu-north-1";
 
-// anthropic.claude-sonnet-4-6 confirmed available in eu-north-1 via Bedrock API key.
+// For eu-north-1 the Converse API requires a cross-region inference profile.
+// The EU profile for Claude Sonnet 4 auto-routes across eu-north-1/eu-west-1/eu-central-1.
 export const BEDROCK_MODEL =
-  process.env.BEDROCK_MODEL ?? "anthropic.claude-sonnet-4-6";
+  process.env.BEDROCK_MODEL ?? "eu.anthropic.claude-sonnet-4-6-20250514-v1:0";
 
 function isRetryable(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
@@ -62,13 +62,23 @@ async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// ── Bearer token path (Bedrock long-term API key) ─────────────────────────────
-async function invokeWithBearerToken(
+// ── Converse API helper (works with both bearer token and IAM) ────────────────
+// The Converse API is the recommended endpoint for all Claude models on Bedrock.
+// It supports both direct model IDs and cross-region inference profiles.
+async function converseWithBearerToken(
   bearerToken: string,
   modelId: string,
-  payload: object
+  systemPrompt: string,
+  userPrompt: string,
+  maxTokens: number
 ): Promise<string> {
-  const endpoint = `https://bedrock-runtime.${REGION}.amazonaws.com/model/${encodeURIComponent(modelId)}/invoke`;
+  const endpoint = `https://bedrock-runtime.${REGION}.amazonaws.com/model/${encodeURIComponent(modelId)}/converse`;
+
+  const conversePayload = {
+    messages: [{ role: "user", content: [{ text: userPrompt }] }],
+    system: [{ text: systemPrompt }],
+    inferenceConfig: { maxTokens },
+  };
 
   const res = await fetch(endpoint, {
     method: "POST",
@@ -77,7 +87,7 @@ async function invokeWithBearerToken(
       Accept: "application/json",
       Authorization: `Bearer ${bearerToken}`,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(conversePayload),
   });
 
   if (!res.ok) {
@@ -86,10 +96,12 @@ async function invokeWithBearerToken(
   }
 
   const body = await res.json();
-  return body?.content?.[0]?.text ?? "";
+  return body?.output?.message?.content?.[0]?.text ?? "";
 }
 
-// ── IAM credentials path (fallback) ──────────────────────────────────────────
+// ── IAM credentials path (fallback via AWS SDK ConverseCommand) ───────────────
+import { ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
+
 let _sdkClient: BedrockRuntimeClient | null = null;
 function getSdkClient(): BedrockRuntimeClient {
   if (!_sdkClient) {
@@ -104,16 +116,15 @@ function getSdkClient(): BedrockRuntimeClient {
   return _sdkClient;
 }
 
-async function invokeWithIAM(modelId: string, payload: object): Promise<string> {
-  const command = new InvokeModelCommand({
+async function converseWithIAM(modelId: string, systemPrompt: string, userPrompt: string, maxTokens: number): Promise<string> {
+  const command = new ConverseCommand({
     modelId,
-    contentType: "application/json",
-    accept: "application/json",
-    body: JSON.stringify(payload),
+    messages: [{ role: "user", content: [{ text: userPrompt }] }],
+    system: [{ text: systemPrompt }],
+    inferenceConfig: { maxTokens },
   });
   const response = await getSdkClient().send(command);
-  const body = JSON.parse(new TextDecoder().decode(response.body));
-  return body?.content?.[0]?.text ?? "";
+  return response?.output?.message?.content?.[0]?.text ?? "";
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -130,20 +141,13 @@ export async function claudeGenerate(
   const MAX_RETRIES = 3;
   let lastError: unknown;
 
-  const payload = {
-    anthropic_version: "bedrock-2023-05-31",
-    max_tokens: maxTokens,
-    system: systemPrompt,
-    messages: [{ role: "user", content: userPrompt }],
-  };
-
   const bearerToken = process.env.AWS_BEARER_TOKEN_BEDROCK;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       const text = bearerToken
-        ? await invokeWithBearerToken(bearerToken, BEDROCK_MODEL, payload)
-        : await invokeWithIAM(BEDROCK_MODEL, payload);
+        ? await converseWithBearerToken(bearerToken, BEDROCK_MODEL, systemPrompt, userPrompt, maxTokens)
+        : await converseWithIAM(BEDROCK_MODEL, systemPrompt, userPrompt, maxTokens);
       return text;
     } catch (err) {
       lastError = err;
