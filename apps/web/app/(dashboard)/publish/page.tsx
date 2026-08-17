@@ -12,13 +12,14 @@ import {
   useCancelScheduled,
 } from "@/hooks/use-publishing";
 import { useContentList, useUpdateContent, type ContentItem } from "@/hooks/use-content";
+import { useContentMedia } from "@/hooks/use-content-media";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
 import {
   Twitter, Linkedin, Send, CheckCircle2, XCircle,
   Loader2, Link2, Unlink, ChevronDown, Clock, ExternalLink,
   Zap, Calendar, X, Trash2, Eye, Pencil, Save, ChevronLeft,
-  ChevronRight, Hash, Instagram
+  ChevronRight, Hash, ImageIcon
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -85,9 +86,12 @@ function ContentPreviewModal({
   platformConfig: typeof PLATFORM_CONFIG[keyof typeof PLATFORM_CONFIG] | undefined;
 }) {
   const updateMutation = useUpdateContent(item.brand_id);
+  const { data: mediaList = [] } = useContentMedia(item.id);
+  const selectedMedia = mediaList.filter((m) => m.selected);
   const [editing, setEditing] = useState(false);
   const [editBody, setEditBody] = useState(item.body ?? "");
   const [saved, setSaved] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const Icon = platformConfig?.icon ?? Zap;
   const charLimit = item.platform === "twitter" ? 280 : item.platform === "linkedin" ? 3000 : 2200;
 
@@ -152,6 +156,45 @@ function ContentPreviewModal({
               </span>
             </div>
 
+            {/* Media images */}
+            {selectedMedia.length > 0 && (
+              <div className={cn(
+                "rounded-xl overflow-hidden",
+                selectedMedia.length === 1 ? "" : "grid grid-cols-2 gap-1"
+              )}>
+                {selectedMedia.slice(0, 4).map((media, i) => (
+                  <div
+                    key={media.id}
+                    className="relative cursor-pointer group"
+                    onClick={() => setLightboxUrl(media.public_url)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={media.public_url}
+                      alt={media.alt_text ?? "Post image"}
+                      className={cn(
+                        "w-full object-cover rounded-lg transition group-hover:brightness-90",
+                        selectedMedia.length === 1 ? "max-h-72" : "h-32"
+                      )}
+                    />
+                    {selectedMedia.length > 4 && i === 3 && (
+                      <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                        +{selectedMedia.length - 4}
+                      </div>
+                    )}
+                    <div className="absolute top-1.5 left-1.5">
+                      <span className={cn(
+                        "text-[10px] font-bold px-1.5 py-0.5 rounded-full",
+                        media.type === "generated" ? "bg-astra-500 text-white" : "bg-black/60 text-white"
+                      )}>
+                        {media.type === "generated" ? "AI" : "↑"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Content */}
             {editing ? (
               <div className="space-y-3">
@@ -202,6 +245,14 @@ function ContentPreviewModal({
               </div>
             )}
 
+            {/* Media count hint if none selected */}
+            {selectedMedia.length === 0 && mediaList.length > 0 && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+                <ImageIcon className="w-3.5 h-3.5" />
+                {mediaList.length} image{mediaList.length !== 1 ? "s" : ""} available — none selected for publishing
+              </div>
+            )}
+
             {/* Engagement mock */}
             <div className="flex items-center gap-5 pt-2 border-t border-border/60 text-xs text-muted-foreground">
               <span>👍 Like</span>
@@ -211,6 +262,28 @@ function ContentPreviewModal({
             </div>
           </div>
         </div>
+
+        {/* Lightbox */}
+        {lightboxUrl && (
+          <div
+            className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setLightboxUrl(null)}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={lightboxUrl}
+              alt="Preview"
+              className="max-w-full max-h-full rounded-xl object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setLightboxUrl(null)}
+              className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 rounded-full p-2 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
 
         {/* CTA footer */}
         <div className="px-6 pb-6 flex flex-col gap-3">
