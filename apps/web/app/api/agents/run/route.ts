@@ -3,15 +3,62 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
-const MODEL = process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash";
+// Prefer the dedicated agents model env var; fall back to gemini-2.0-flash-lite (generous free quota)
+const MODEL = process.env.AGENTS_AI_MODEL ?? process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash-lite";
+
+function isRetryable(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const msg = error.message;
+  return (
+    msg.includes("503") || msg.includes("UNAVAILABLE") ||
+    msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") ||
+    msg.includes("overloaded")
+  );
+}
+
+function friendlyAgentError(error: unknown): string {
+  if (error instanceof Error) {
+    const msg = error.message;
+    if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("overloaded")) {
+      return "AI is experiencing high demand. Please try again in a moment.";
+    }
+    if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED")) {
+      return "AI rate limit reached. Please wait a few seconds and try again.";
+    }
+    if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("403")) {
+      return "AI service configuration error. Please contact support.";
+    }
+  }
+  return "Agent pipeline failed. Please try again.";
+}
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function callAgent(systemInstruction: string, prompt: string): Promise<string> {
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: prompt,
-    config: { systemInstruction },
-  });
-  return response.text ?? "";
+  const MAX_RETRIES = 3;
+  let lastError: unknown;
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+        config: { systemInstruction },
+      });
+      return response.text ?? "";
+    } catch (err) {
+      lastError = err;
+      if (isRetryable(err) && attempt < MAX_RETRIES - 1) {
+        const delay = Math.pow(2, attempt) * 1000;
+        console.warn(`[agents] attempt ${attempt + 1} failed (retryable), retrying in ${delay}ms…`);
+        await sleep(delay);
+        continue;
+      }
+      break;
+    }
+  }
+  throw lastError;
 }
 
 async function researchAgent(brand: Record<string, unknown>, goal: string): Promise<string> {
@@ -144,11 +191,19 @@ export async function POST(request: NextRequest) {
       saved_content: savedContent, duration_ms: Date.now() - startTime,
     });
   } catch (error) {
+    console.error("[agents/run] pipeline error:", error);
     if (runId) {
       await supabase.from("agent_runs").update({
         status: "failed", error_message: String(error), agent_trace: trace, completed_at: new Date().toISOString(),
       }).eq("id", runId);
     }
-    return NextResponse.json({ error: String(error), trace }, { status: 500 });
+    const isOverload =
+      error instanceof Error &&
+      (error.message.includes("503") || error.message.includes("UNAVAILABLE") ||
+       error.message.includes("429") || error.message.includes("RESOURCE_EXHAUSTED"));
+    return NextResponse.json(
+      { error: friendlyAgentError(error), trace },
+      { status: isOverload ? 503 : 500 }
+    );
   }
 }

@@ -71,7 +71,17 @@ export default function AgentsPage() {
         error: (e) => {
           clearInterval(stepInterval);
           setActiveAgentStep(-1);
-          return e.message;
+          const raw = e instanceof Error ? e.message : String(e);
+          // Guard against raw JSON leaking through
+          if (raw.trim().startsWith("{") || raw.trim().startsWith("[")) {
+            try {
+              const parsed = JSON.parse(raw);
+              const msg = parsed?.error?.message ?? parsed?.error ?? parsed?.message ?? null;
+              if (typeof msg === "string") return msg;
+            } catch { /* fall through */ }
+            return "Agent pipeline failed. Please try again.";
+          }
+          return raw || "Agent pipeline failed. Please try again.";
         },
       }
     );
