@@ -298,7 +298,7 @@ export default function AnalyticsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-foreground line-clamp-2 leading-snug">
-                          {c.title || c.body.slice(0, 80)}
+                          {c.title || (c.body ?? "").slice(0, 80)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5 capitalize">{c.platform}</p>
                       </div>
