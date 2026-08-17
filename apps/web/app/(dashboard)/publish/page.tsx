@@ -8,6 +8,8 @@ import {
   useDisconnectAccount,
   usePublishContent,
   useScheduledPosts,
+  useScheduleContent,
+  useCancelScheduled,
 } from "@/hooks/use-publishing";
 import { useContentList } from "@/hooks/use-content";
 import { cn } from "@/lib/utils";
@@ -15,7 +17,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import {
   Twitter, Linkedin, Send, CheckCircle2, XCircle,
   Loader2, Link2, Unlink, ChevronDown, Clock, ExternalLink,
-  Zap
+  Zap, Calendar, X, Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,6 +40,26 @@ const PLATFORM_CONFIG = {
   },
 };
 
+// Returns a datetime-local input min value (now + 5 min)
+function getMinDateTime() {
+  const d = new Date(Date.now() + 5 * 60 * 1000);
+  return d.toISOString().slice(0, 16);
+}
+
+// Returns a default datetime (tomorrow same time)
+function getDefaultDateTime() {
+  const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  return d.toISOString().slice(0, 16);
+}
+
+function formatScheduledAt(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleString("en-GB", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
 function PublishPageInner() {
   const searchParams = useSearchParams();
   const { data: brands = [] } = useBrands();
@@ -50,13 +72,22 @@ function PublishPageInner() {
   const { data: scheduledPosts = [] } = useScheduledPosts(activeBrandId);
   const disconnectMutation = useDisconnectAccount(activeBrandId);
   const publishMutation = usePublishContent(activeBrandId);
+  const scheduleMutation = useScheduleContent(activeBrandId);
+  const cancelMutation = useCancelScheduled(activeBrandId);
+
+  // Schedule picker state: { contentId, platform, scheduledAt }
+  const [schedulePicker, setSchedulePicker] = useState<{
+    contentId: string;
+    platform: string;
+    scheduledAt: string;
+  } | null>(null);
 
   // Only show approved content that hasn't been published yet
-  const approvedContent = contentList.filter(
-    (c) => c.status === "approved"
-  );
+  const approvedContent = contentList.filter((c) => c.status === "approved");
 
-  const connectedPlatforms = accounts.map((a) => a.platform);
+  // Split scheduled posts into upcoming and history
+  const upcomingPosts = scheduledPosts.filter((p) => p.status === "scheduled");
+  const historyPosts = scheduledPosts.filter((p) => p.status !== "scheduled");
 
   function getAccount(platform: string) {
     return accounts.find((a) => a.platform === platform);
@@ -70,9 +101,25 @@ function PublishPageInner() {
         success: (res) => {
           const result = res.results[0];
           return result.status === "published"
-            ? `Published to ${platform}! Post ID: ${result.post_id}`
+            ? `Published to ${platform}!`
             : `Failed: ${result.error}`;
         },
+        error: (e) => e.message,
+      }
+    );
+  }
+
+  async function handleSchedule() {
+    if (!schedulePicker) return;
+    toast.promise(
+      scheduleMutation.mutateAsync({
+        contentId: schedulePicker.contentId,
+        platform: schedulePicker.platform,
+        scheduledAt: new Date(schedulePicker.scheduledAt).toISOString(),
+      }).then(() => setSchedulePicker(null)),
+      {
+        loading: "Scheduling post…",
+        success: `Scheduled for ${formatScheduledAt(schedulePicker.scheduledAt)}`,
         error: (e) => e.message,
       }
     );
@@ -88,7 +135,7 @@ function PublishPageInner() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Publish</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Connect your social accounts and publish approved content with one click.
+            Publish now or schedule posts for a specific date and time.
           </p>
         </div>
         {brands.length > 1 && (
@@ -118,6 +165,77 @@ function PublishPageInner() {
         <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 mb-6 text-red-600 text-sm">
           <XCircle className="w-4 h-4 shrink-0" />
           <span>Connection failed: {error.replace(/_/g, " ")}</span>
+        </div>
+      )}
+
+      {/* Schedule picker modal */}
+      {schedulePicker && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-astra-500" />
+                <h3 className="font-semibold text-foreground">Schedule post</h3>
+              </div>
+              <button
+                onClick={() => setSchedulePicker(null)}
+                className="text-muted-foreground hover:text-foreground transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Platform
+                </label>
+                <p className="text-sm font-medium text-foreground capitalize">
+                  {schedulePicker.platform === "twitter" ? "Twitter / X" : "LinkedIn"}
+                </p>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Publish date & time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={schedulePicker.scheduledAt}
+                  min={getMinDateTime()}
+                  onChange={(e) =>
+                    setSchedulePicker((prev) =>
+                      prev ? { ...prev, scheduledAt: e.target.value } : prev
+                    )
+                  }
+                  className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Times are in your local timezone
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={handleSchedule}
+                  disabled={scheduleMutation.isPending || !schedulePicker.scheduledAt}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-astra-500 hover:bg-astra-600 text-white text-sm font-medium transition disabled:opacity-50"
+                >
+                  {scheduleMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Calendar className="w-4 h-4" />
+                  )}
+                  Schedule
+                </button>
+                <button
+                  onClick={() => setSchedulePicker(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -191,11 +309,41 @@ function PublishPageInner() {
             );
           })}
 
-          {/* Setup hint — only shown on local dev when app URL is localhost */}
-          {accounts.length === 0 && typeof window !== "undefined" && window.location.hostname === "localhost" && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800">
-              <p className="font-semibold mb-1">Local dev setup</p>
-              <p>Add OAuth credentials to <code className="bg-amber-100 px-1 rounded">.env.local</code> then restart the server.</p>
+          {/* Upcoming scheduled */}
+          {upcomingPosts.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-astra-500" />
+                Scheduled ({upcomingPosts.length})
+              </h2>
+              <div className="space-y-2">
+                {upcomingPosts.map((post) => {
+                  const platformCfg = PLATFORM_CONFIG[post.platform as keyof typeof PLATFORM_CONFIG];
+                  const Icon = platformCfg?.icon ?? Zap;
+                  return (
+                    <div key={post.id} className="flex items-start gap-2 p-3 rounded-lg border border-astra-500/20 bg-astra-500/5 text-sm">
+                      <Icon className={cn("w-4 h-4 mt-0.5 shrink-0", platformCfg?.color ?? "text-muted-foreground")} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground capitalize">{post.platform}</p>
+                        <p className="text-xs text-muted-foreground">{formatScheduledAt(post.scheduled_at)}</p>
+                      </div>
+                      <button
+                        onClick={() =>
+                          toast.promise(cancelMutation.mutateAsync(post.id), {
+                            loading: "Cancelling…",
+                            success: "Scheduled post cancelled",
+                            error: "Failed to cancel",
+                          })
+                        }
+                        className="text-muted-foreground hover:text-destructive transition"
+                        title="Cancel"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -251,27 +399,39 @@ function PublishPageInner() {
 
                       <div className="flex items-center gap-2 pt-2 border-t border-border">
                         {isConnected ? (
-                          <button
-                            onClick={() => handlePublish(item.id, item.platform)}
-                            disabled={publishMutation.isPending}
-                            className={cn(
-                              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition",
-                              "disabled:opacity-50 disabled:cursor-not-allowed",
-                              item.platform === "twitter"
-                                ? "bg-[#1DA1F2] hover:bg-[#1a91da]"
-                                : "bg-[#0077B5] hover:bg-[#006699]"
-                            )}
-                            style={{
-                              background: item.platform === "twitter" ? "#1DA1F2" : "#0077B5"
-                            }}
-                          >
-                            {publishMutation.isPending ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <Send className="w-3.5 h-3.5" />
-                            )}
-                            Publish now
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handlePublish(item.id, item.platform)}
+                              disabled={publishMutation.isPending}
+                              className={cn(
+                                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white transition",
+                                "disabled:opacity-50 disabled:cursor-not-allowed",
+                                item.platform === "twitter"
+                                  ? "bg-[#1DA1F2] hover:bg-[#1a91da]"
+                                  : "bg-[#0077B5] hover:bg-[#006699]"
+                              )}
+                            >
+                              {publishMutation.isPending ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Send className="w-3.5 h-3.5" />
+                              )}
+                              Publish now
+                            </button>
+                            <button
+                              onClick={() =>
+                                setSchedulePicker({
+                                  contentId: item.id,
+                                  platform: item.platform,
+                                  scheduledAt: getDefaultDateTime(),
+                                })
+                              }
+                              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-border bg-background hover:border-astra-500/50 hover:text-astra-600 transition text-muted-foreground"
+                            >
+                              <Calendar className="w-3.5 h-3.5" />
+                              Schedule
+                            </button>
+                          </>
                         ) : (
                           <a
                             href={activeBrandId ? platformConfig?.connectHref(activeBrandId) ?? "#" : "#"}
@@ -292,14 +452,14 @@ function PublishPageInner() {
             )}
           </div>
 
-          {/* Published history */}
-          {scheduledPosts.length > 0 && (
+          {/* Publish history */}
+          {historyPosts.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold text-foreground mb-3">
                 Publish history
               </h2>
               <div className="space-y-2">
-                {scheduledPosts.map((post) => (
+                {historyPosts.map((post) => (
                   <div key={post.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card text-sm">
                     <div className={cn(
                       "w-2 h-2 rounded-full shrink-0",
@@ -315,7 +475,9 @@ function PublishPageInner() {
                         )}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {post.status === "published" ? `Published ${formatRelativeTime(post.published_at ?? post.scheduled_at)}` : post.status}
+                        {post.status === "published"
+                          ? `Published ${formatRelativeTime(post.published_at ?? post.scheduled_at)}`
+                          : formatScheduledAt(post.scheduled_at)}
                       </p>
                     </div>
                     {post.platform_post_id && post.platform === "twitter" && (

@@ -102,5 +102,59 @@ export function useScheduledPosts(brandId: string) {
       return data ?? [];
     },
     enabled: !!brandId,
+    refetchInterval: 30000, // refresh every 30s to pick up status changes
+  });
+}
+
+export function useScheduleContent(brandId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      contentId,
+      platform,
+      scheduledAt,
+    }: {
+      contentId: string;
+      platform: string;
+      scheduledAt: string; // ISO 8601
+    }) => {
+      const res = await fetch("/api/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content_id: contentId,
+          brand_id: brandId,
+          platform,
+          scheduled_at: scheduledAt,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? "Scheduling failed");
+      }
+      return res.json() as Promise<{ scheduled: Record<string, unknown> }>;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["scheduled_posts", brandId] });
+    },
+  });
+}
+
+export function useCancelScheduled(brandId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (scheduledPostId: string) => {
+      const res = await fetch(`/api/schedule?id=${scheduledPostId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? "Cancel failed");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["scheduled_posts", brandId] });
+    },
   });
 }
