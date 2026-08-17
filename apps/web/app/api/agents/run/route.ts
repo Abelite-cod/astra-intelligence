@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
-// Prefer the dedicated agents model env var; fall back to gemini-2.0-flash-lite (generous free quota)
-const MODEL = process.env.AGENTS_AI_MODEL ?? process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash-lite";
+// Use a dedicated agents model env var; NEVER fall back to GOOGLE_AI_MODEL (may be a low-quota model).
+// gemini-2.0-flash-lite has 1,500 req/day on the free tier vs 20 for gemini-3.7-flash.
+const MODEL = process.env.AGENTS_AI_MODEL ?? "gemini-2.0-flash-lite";
 
 function isRetryable(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
