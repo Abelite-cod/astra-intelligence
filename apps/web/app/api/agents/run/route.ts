@@ -1,78 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
-// Use a dedicated agents model env var; NEVER fall back to GOOGLE_AI_MODEL (may be a low-quota model).
-// gemini-2.0-flash-lite has 1,500 req/day on the free tier vs 20 for gemini-3.7-flash.
-const MODEL = process.env.AGENTS_AI_MODEL ?? "gemini-2.0-flash-lite";
-
-function isRetryable(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-  const msg = error.message;
-  return (
-    msg.includes("503") || msg.includes("UNAVAILABLE") ||
-    msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") ||
-    msg.includes("overloaded")
-  );
-}
-
-function friendlyAgentError(error: unknown): string {
-  if (error instanceof Error) {
-    const msg = error.message;
-    if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("overloaded")) {
-      return "AI is experiencing high demand. Please try again in a moment.";
-    }
-    if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED")) {
-      return "AI rate limit reached. Please wait a few seconds and try again.";
-    }
-    if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("403")) {
-      return "AI service configuration error. Please contact support.";
-    }
-  }
-  return "Agent pipeline failed. Please try again.";
-}
-
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function callAgent(systemInstruction: string, prompt: string): Promise<string> {
-  const MAX_RETRIES = 3;
-  let lastError: unknown;
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: prompt,
-        config: { systemInstruction },
-      });
-      return response.text ?? "";
-    } catch (err) {
-      lastError = err;
-      if (isRetryable(err) && attempt < MAX_RETRIES - 1) {
-        const delay = Math.pow(2, attempt) * 1000;
-        console.warn(`[agents] attempt ${attempt + 1} failed (retryable), retrying in ${delay}ms…`);
-        await sleep(delay);
-        continue;
-      }
-      break;
-    }
-  }
-  throw lastError;
-}
+import { claudeGenerate, BEDROCK_MODEL, friendlyBedrockError } from "@/lib/bedrock";
 
 async function researchAgent(brand: Record<string, unknown>, goal: string): Promise<string> {
-  return callAgent(
+  return claudeGenerate(
     "You are a Research Agent. Identify key facts, insights, and audience pain points for marketing.",
-    `Brand: ${brand.name}\nIndustry: ${brand.industry ?? "General"}\nGoal: ${goal}\n\nProvide:\n1. Main audience pain points\n2. 3-5 key messages\n3. Best angle/hook\n4. Proof points to include`
+    `Brand: ${brand.name}\nIndustry: ${brand.industry ?? "General"}\nGoal: ${goal}\n\nProvide:\n1. Main audience pain points\n2. 3-5 key messages\n3. Best angle/hook\n4. Proof points to include`,
+    1024
   );
 }
 
 async function trendAgent(brand: Record<string, unknown>, goal: string): Promise<string> {
-  return callAgent(
+  return claudeGenerate(
     "You are a Trend Intelligence Agent. Identify trending topics, hashtags, and formats.",
-    `Brand: ${brand.name}\nIndustry: ${brand.industry ?? "General"}\nGoal: ${goal}\n\nProvide:\n1. 3 trending angles\n2. 5 trending hashtags\n3. Best content format\n4. One viral hook`
+    `Brand: ${brand.name}\nIndustry: ${brand.industry ?? "General"}\nGoal: ${goal}\n\nProvide:\n1. 3 trending angles\n2. 5 trending hashtags\n3. Best content format\n4. One viral hook`,
+    1024
   );
 }
 
@@ -82,15 +24,16 @@ async function writerAgent(
   research: string,
   trends: string
 ): Promise<Record<string, { body: string; hook: string; hashtags: string[] }>> {
-  const raw = await callAgent(
+  const raw = await claudeGenerate(
     `You are a Senior Marketing Copywriter for ${brand.name}. Tone: ${brand.tone_of_voice ?? "professional"}.`,
-    `RESEARCH:\n${research}\n\nTREND DATA:\n${trends}\n\nGOAL: ${goal}\n\nReturn ONLY raw JSON:\n{"linkedin":{"body":"...","hook":"...","hashtags":["tag1"]},"twitter":{"body":"under 280 chars","hook":"...","hashtags":["tag1"]}}`
+    `RESEARCH:\n${research}\n\nTREND DATA:\n${trends}\n\nGOAL: ${goal}\n\nReturn ONLY raw JSON (no markdown):\n{"linkedin":{"body":"...","hook":"...","hashtags":["tag1"]},"twitter":{"body":"under 280 chars","hook":"...","hashtags":["tag1"]}}`,
+    2048
   );
   try {
     const match = raw.match(/\{[\s\S]*\}/);
     return JSON.parse(match?.[0] ?? "{}");
   } catch {
-    return { linkedin: { body: raw, hook: "", hashtags: [] }, twitter: { body: raw.slice(0, 280), hook: "", hashtags: [] } };
+    return { linkedin: { body: raw, hook: "", hashtags: [] }, twitter: { body: (raw ?? "").slice(0, 280), hook: "", hashtags: [] } };
   }
 }
 
@@ -98,9 +41,10 @@ async function reviewerAgent(
   brand: Record<string, unknown>,
   content: Record<string, { body: string; hook: string; hashtags: string[] }>
 ): Promise<{ scores: Record<string, number>; feedback: string; improved: typeof content }> {
-  const raw = await callAgent(
+  const raw = await claudeGenerate(
     `You are a Content Quality Reviewer for ${brand.name}.`,
-    `Review and improve:\n${JSON.stringify(content, null, 2)}\n\nReturn ONLY raw JSON:\n{"scores":{"brand_voice":8,"engagement":7,"clarity":9,"cta_strength":7},"feedback":"2 sentence summary","improved":{"linkedin":{"body":"...","hook":"...","hashtags":[]},"twitter":{"body":"...","hook":"...","hashtags":[]}}}`
+    `Review and improve:\n${JSON.stringify(content, null, 2)}\n\nReturn ONLY raw JSON (no markdown):\n{"scores":{"brand_voice":8,"engagement":7,"clarity":9,"cta_strength":7},"feedback":"2 sentence summary","improved":{"linkedin":{"body":"...","hook":"...","hashtags":[]},"twitter":{"body":"...","hook":"...","hashtags":[]}}}`,
+    2048
   );
   try {
     const match = raw.match(/\{[\s\S]*\}/);
@@ -172,7 +116,7 @@ export async function POST(request: NextRequest) {
         type: platform === "twitter" ? "thread" : "post",
         body: content.body, hook: content.hook, hashtags: content.hashtags,
         status: "draft",
-        ai_metadata: { model: MODEL, goal, workflow: "multi_agent", agent_run_id: runId },
+        ai_metadata: { model: BEDROCK_MODEL, goal, workflow: "multi_agent", agent_run_id: runId },
         quality_scores: reviewOutput.scores,
       }).select().single();
       if (saved) savedContent.push(saved);
@@ -192,7 +136,7 @@ export async function POST(request: NextRequest) {
       saved_content: savedContent, duration_ms: Date.now() - startTime,
     });
   } catch (error) {
-    console.error("[agents/run] pipeline error:", error);
+    console.error("[agents/run] Bedrock error:", error);
     if (runId) {
       await supabase.from("agent_runs").update({
         status: "failed", error_message: String(error), agent_trace: trace, completed_at: new Date().toISOString(),
@@ -200,10 +144,11 @@ export async function POST(request: NextRequest) {
     }
     const isOverload =
       error instanceof Error &&
-      (error.message.includes("503") || error.message.includes("UNAVAILABLE") ||
-       error.message.includes("429") || error.message.includes("RESOURCE_EXHAUSTED"));
+      (error.message.includes("ThrottlingException") ||
+        error.message.includes("503") ||
+        error.message.includes("ServiceUnavailable"));
     return NextResponse.json(
-      { error: friendlyAgentError(error), trace },
+      { error: friendlyBedrockError(error), trace },
       { status: isOverload ? 503 : 500 }
     );
   }

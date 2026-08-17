@@ -1,77 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
-const MODEL = process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash-lite";
+import { claudeGenerate, BEDROCK_MODEL, friendlyBedrockError } from "@/lib/bedrock";
 
 function getAdmin() {
   return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-}
-
-function isRetryable(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-  const msg = error.message;
-  return (
-    msg.includes("503") ||
-    msg.includes("UNAVAILABLE") ||
-    msg.includes("429") ||
-    msg.includes("RESOURCE_EXHAUSTED") ||
-    msg.includes("overloaded")
-  );
-}
-
-function friendlyError(error: unknown): string {
-  if (error instanceof Error) {
-    const msg = error.message;
-    if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("overloaded")) {
-      return "AI is experiencing high demand right now. Please try again in a moment.";
-    }
-    if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED")) {
-      return "Rate limit reached. Please wait a few seconds and try again.";
-    }
-    if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("403")) {
-      return "AI service configuration error. Please contact support.";
-    }
-  }
-  return "Content generation failed. Please try again.";
-}
-
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function generate(systemPrompt: string, userPrompt: string): Promise<string> {
-  const MAX_RETRIES = 3;
-  let lastError: unknown;
-
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: userPrompt,
-        config: { systemInstruction: systemPrompt },
-      });
-      return response.text ?? "";
-    } catch (err) {
-      lastError = err;
-      if (isRetryable(err) && attempt < MAX_RETRIES - 1) {
-        // Exponential backoff: 1s → 2s before retry
-        const delay = Math.pow(2, attempt) * 1000;
-        console.warn(`[generate] attempt ${attempt + 1} failed (retryable), retrying in ${delay}ms…`);
-        await sleep(delay);
-        continue;
-      }
-      // Non-retryable or final attempt — break immediately
-      break;
-    }
-  }
-
-  throw lastError;
 }
 
 export async function POST(request: NextRequest) {
@@ -116,7 +52,7 @@ Return ONLY raw JSON (no markdown):
 Only include: ${platforms.join(", ")}.`;
 
   try {
-    const rawContent = await generate(systemPrompt, userPrompt);
+    const rawContent = await claudeGenerate(systemPrompt, userPrompt, 2048);
     let generated: Record<string, { body: string; hook: string; cta: string; hashtags: string[] }>;
     try {
       const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
@@ -131,21 +67,20 @@ Only include: ${platforms.join(", ")}.`;
         brand_id, platform, type: platform === "twitter" ? "thread" : "post",
         body: content.body, hook: content.hook, cta: content.cta,
         hashtags: content.hashtags, status: "draft",
-        ai_metadata: { model: MODEL, brief },
+        ai_metadata: { model: BEDROCK_MODEL, brief },
       }).select().single();
       if (saved) savedContent.push(saved);
     }
-    return NextResponse.json({ generated, saved_content: savedContent, model: MODEL });
+    return NextResponse.json({ generated, saved_content: savedContent, model: BEDROCK_MODEL });
   } catch (error) {
-    console.error("[generate] Gemini error:", error);
+    console.error("[generate] Bedrock error:", error);
     const isOverload =
-      (error instanceof Error &&
-        (error.message.includes("503") ||
-          error.message.includes("UNAVAILABLE") ||
-          error.message.includes("429") ||
-          error.message.includes("RESOURCE_EXHAUSTED")));
+      error instanceof Error &&
+      (error.message.includes("ThrottlingException") ||
+        error.message.includes("503") ||
+        error.message.includes("ServiceUnavailable"));
     return NextResponse.json(
-      { error: friendlyError(error) },
+      { error: friendlyBedrockError(error) },
       { status: isOverload ? 503 : 500 }
     );
   }

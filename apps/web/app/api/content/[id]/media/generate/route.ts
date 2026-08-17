@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
-import { GoogleGenAI } from "@google/genai";
+import { claudeGenerate } from "@/lib/bedrock";
 
 // ── Two-stage image generation pipeline ───────────────────────────────────────
-// Stage 1: Gemini analyzes the post and generates a structured visual brief
+// Stage 1: Claude (Bedrock) analyzes the post and generates a structured visual brief
 //          (subject, visual metaphor, mood, composition, platform guidance)
 // Stage 2: Pollinations.ai renders the visual brief as a real image
 //
 // This ensures the image is semantically relevant to the actual post content,
 // not a generic "professional marketing image."
 // ─────────────────────────────────────────────────────────────────────────────
-
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
-const BRIEF_MODEL = process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash-lite";
 
 function getAdmin() {
   return createAdminClient(
@@ -72,15 +69,9 @@ Requirements:
 - IMPORTANT: No generic stock photo clichés (handshakes, lightbulbs, magnifying glasses unless truly relevant)
 - The image should make a LinkedIn/X/Instagram viewer stop scrolling because it's visually interesting AND relevant to the post`;
 
-  const response = await ai.models.generateContent({
-    model: BRIEF_MODEL,
-    contents: userContent,
-    config: { systemInstruction: systemPrompt },
-  });
-
-  const brief = response.text ?? "";
+  const brief = await claudeGenerate(systemPrompt, userContent, 512);
   if (!brief || brief.length < 20) {
-    throw new Error("Gemini did not return a usable visual brief");
+    throw new Error("Claude did not return a usable visual brief");
   }
   return brief.trim();
 }
@@ -153,8 +144,8 @@ export async function POST(
       userPrompt: userPrompt ?? undefined,
     });
   } catch (briefError) {
-    // Fallback: if Gemini fails, use a structured manual prompt
-    console.warn("[media/generate] Gemini brief failed, using fallback:", briefError);
+    // Fallback: if Claude/Bedrock fails, use a structured manual prompt
+    console.warn("[media/generate] Claude brief failed, using fallback:", briefError);
     finalPrompt = buildFallbackPrompt(content, brand, userPrompt);
   }
 
