@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 import {
   LayoutDashboard, Brain, Megaphone, FileText,
-  BarChart3, Bot, Settings, Zap, LogOut, Send, Menu, X
+  BarChart3, Bot, Settings, Zap, LogOut, Send, Menu, X,
+  Sun, Moon, Monitor
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -30,6 +32,39 @@ interface SidebarProps {
 }
 
 // ── Shared nav content ────────────────────────────────────────────────────────
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  const options = [
+    { value: "light", icon: Sun, label: "Light" },
+    { value: "dark", icon: Moon, label: "Dark" },
+    { value: "system", icon: Monitor, label: "System" },
+  ] as const;
+
+  return (
+    <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5 mx-3 mb-2">
+      {options.map(({ value, icon: Icon, label }) => (
+        <button
+          key={value}
+          onClick={() => setTheme(value)}
+          title={label}
+          className={cn(
+            "flex-1 flex items-center justify-center py-1.5 rounded-md transition text-xs",
+            theme === value
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Icon className="w-3.5 h-3.5" />
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function NavContent({
   pathname,
@@ -82,6 +117,9 @@ function NavContent({
           );
         })}
       </nav>
+
+      {/* Theme toggle */}
+      <ThemeToggle />
 
       {/* User footer */}
       <div className="px-3 pb-4 border-t border-border pt-3 shrink-0">
