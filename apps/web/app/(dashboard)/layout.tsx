@@ -23,7 +23,8 @@ export default async function DashboardLayout({
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar user={user} />
-      <main className="flex-1 overflow-auto" suppressHydrationWarning>
+      {/* pt-14 on mobile offsets the fixed top bar; md:pt-0 removes it on desktop */}
+      <main className="flex-1 overflow-auto pt-14 md:pt-0" suppressHydrationWarning>
         {children}
       </main>
     </div>
