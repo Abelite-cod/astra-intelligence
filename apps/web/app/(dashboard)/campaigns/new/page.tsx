@@ -102,7 +102,7 @@ export default function CampaignsNewPage() {
           return res;
         }),
       {
-        loading: `Gemini is planning your ${duration}-day campaign…`,
+        loading: `Claude is planning your ${duration}-day campaign…`,
         success: (res) => `${res.total_posts} posts planned across ${res.platforms.length} platforms`,
         error: (e) => e.message,
       }

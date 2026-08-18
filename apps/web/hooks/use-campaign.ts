@@ -17,6 +17,18 @@ export interface SavedCampaign {
   calendar_with_ids: CalendarDay[];
 }
 
+export function useCampaign(campaignId: string) {
+  return useQuery({
+    queryKey: ["campaign", campaignId],
+    queryFn: async () => {
+      const res = await fetch(`/api/campaign/${campaignId}`);
+      if (!res.ok) throw new Error("Failed to load campaign");
+      return res.json() as Promise<Campaign>;
+    },
+    enabled: !!campaignId,
+  });
+}
+
 export function useCampaigns(brandId: string) {
   return useQuery({
     queryKey: ["campaigns", brandId],
