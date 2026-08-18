@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useBrands } from "@/hooks/use-brand";
 import { useSocialAccounts } from "@/hooks/use-publishing";
+import { useSubscription, useStartCheckout, useOpenBillingPortal } from "@/hooks/use-subscription";
+import { PLANS } from "@/lib/stripe";
 import { cn } from "@/lib/utils";
 import {
   User, Key, Users, CreditCard, Save, Loader2,
@@ -11,7 +15,7 @@ import {
   Mail, UserPlus, ExternalLink, Bell,
   CheckCircle2, XCircle, AlertCircle, Lock,
   Brain, BarChart3, Calendar, Globe, Settings2,
-  ChevronRight, Eye, EyeOff
+  ChevronRight, Eye, EyeOff, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,66 +31,6 @@ const TABS = [
   { id: "team" as const, label: "Team", icon: Users },
   { id: "billing" as const, label: "Billing & Plans", icon: CreditCard },
   { id: "notifications" as const, label: "Notifications", icon: Bell },
-];
-
-const PLANS = [
-  {
-    id: "starter",
-    name: "Starter",
-    price: "$39",
-    period: "/mo",
-    description: "Perfect for solo marketers",
-    features: [
-      "1 brand workspace",
-      "100K AI tokens/month",
-      "LinkedIn + Twitter",
-      "Brand Brain (10 docs)",
-      "Content generation",
-      "Email support",
-    ],
-    current: true,
-    color: "border-border",
-    highlight: false,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "$149",
-    period: "/mo",
-    description: "For growing marketing teams",
-    features: [
-      "3 brand workspaces",
-      "5 team seats",
-      "500K AI tokens/month",
-      "All platforms",
-      "Campaigns & calendar",
-      "Analytics dashboard",
-      "Priority support",
-    ],
-    current: false,
-    color: "border-astra-500",
-    highlight: true,
-  },
-  {
-    id: "business",
-    name: "Business",
-    price: "$499",
-    period: "/mo",
-    description: "For agencies and enterprises",
-    features: [
-      "10 brand workspaces",
-      "20 team seats",
-      "2M AI tokens/month",
-      "Multi-agent pipeline",
-      "White-label reports",
-      "CRM integration",
-      "Dedicated support",
-      "SLA guarantee",
-    ],
-    current: false,
-    color: "border-border",
-    highlight: false,
-  },
 ];
 
 // ── Helper components ─────────────────────────────────────────────────────────
@@ -124,6 +68,11 @@ function StatusBadge({ configured }: { configured: boolean }) {
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
+  const { data: sub } = useSubscription();
+  const checkout = useStartCheckout();
+  const portal = useOpenBillingPortal();
+  const currentPlanId = sub?.plan ?? "free";
+  const hasStripeCustomer = !!sub?.stripe_customer_id;
   const [authUser, setAuthUser] = useState<{
     id: string;
     email?: string;
@@ -573,50 +522,91 @@ export default function SettingsPage() {
                 ))}
               </div>
 
+              {/* Manage subscription (if subscribed) */}
+              {hasStripeCustomer && (
+                <button
+                  onClick={() => toast.promise(portal.mutateAsync(), {
+                    loading: "Opening billing portal…",
+                    success: "Redirecting…",
+                    error: (e) => e.message,
+                  })}
+                  disabled={portal.isPending}
+                  className="flex items-center gap-2 text-sm font-semibold border border-border hover:bg-accent px-4 py-2.5 rounded-xl transition disabled:opacity-50"
+                >
+                  {portal.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+                  Manage subscription in Stripe
+                </button>
+              )}
+
               {/* Plan cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {PLANS.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className={cn(
-                      "rounded-2xl border p-5 flex flex-col transition",
-                      plan.highlight
-                        ? "border-astra-500 bg-gradient-to-br from-astra-500/5 to-purple-500/5 shadow-lg shadow-astra-500/10"
-                        : "border-border bg-card"
-                    )}
-                  >
-                    {plan.highlight && (
-                      <span className="text-xs bg-gradient-to-r from-astra-500 to-purple-500 text-white px-2.5 py-1 rounded-full font-bold w-fit mb-3">Most Popular</span>
-                    )}
-                    <h3 className="font-bold text-foreground text-base">{plan.name}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5 mb-3">{plan.description}</p>
-                    <div className="flex items-baseline gap-0.5 mb-4">
-                      <span className="text-3xl font-black text-foreground">{plan.price}</span>
-                      <span className="text-muted-foreground text-sm">{plan.period}</span>
-                    </div>
-                    <ul className="space-y-2 flex-1 mb-5">
-                      {plan.features.map((f) => (
-                        <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                    <button
+                {PLANS.filter((p) => p.id !== "free").map((plan) => {
+                  const isCurrent = plan.id === currentPlanId;
+                  const isCheckoutPending = checkout.isPending;
+                  return (
+                    <div
+                      key={plan.id}
                       className={cn(
-                        "w-full py-2.5 rounded-xl text-sm font-semibold transition",
-                        plan.current
-                          ? "bg-muted text-muted-foreground cursor-default"
+                        "rounded-2xl border p-5 flex flex-col transition",
+                        isCurrent
+                          ? "border-emerald-500 bg-emerald-500/5"
                           : plan.highlight
-                          ? "bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white shadow-lg shadow-astra-500/20"
-                          : "border border-border hover:bg-accent text-foreground"
+                          ? "border-astra-500 bg-gradient-to-br from-astra-500/5 to-purple-500/5 shadow-lg shadow-astra-500/10"
+                          : "border-border bg-card"
                       )}
-                      disabled={plan.current}
                     >
-                      {plan.current ? "Current plan" : "Upgrade to " + plan.name}
-                    </button>
-                  </div>
-                ))}
+                      {isCurrent && (
+                        <span className="text-xs bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-1 rounded-full font-bold w-fit mb-3 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" /> Current plan
+                        </span>
+                      )}
+                      {!isCurrent && plan.highlight && (
+                        <span className="text-xs bg-gradient-to-r from-astra-500 to-purple-500 text-white px-2.5 py-1 rounded-full font-bold w-fit mb-3">Most Popular</span>
+                      )}
+                      <h3 className="font-bold text-foreground text-base">{plan.name}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5 mb-3">{plan.description}</p>
+                      <div className="flex items-baseline gap-0.5 mb-4">
+                        <span className="text-3xl font-black text-foreground">{plan.price}</span>
+                        <span className="text-muted-foreground text-sm">{plan.period}</span>
+                      </div>
+                      <ul className="space-y-2 flex-1 mb-5">
+                        {plan.features.map((f) => (
+                          <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                      {isCurrent ? (
+                        <button disabled className="w-full py-2.5 rounded-xl text-sm font-semibold bg-muted text-muted-foreground cursor-default">
+                          Current plan
+                        </button>
+                      ) : !plan.priceId ? (
+                        <button disabled className="w-full py-2.5 rounded-xl text-sm font-semibold border border-border text-muted-foreground cursor-not-allowed opacity-60">
+                          Coming soon
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => toast.promise(checkout.mutateAsync(plan.id), {
+                            loading: "Opening Stripe checkout…",
+                            success: "Redirecting to checkout…",
+                            error: (e) => e.message,
+                          })}
+                          disabled={isCheckoutPending}
+                          className={cn(
+                            "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50",
+                            plan.highlight
+                              ? "bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white shadow-lg shadow-astra-500/20"
+                              : "border border-border hover:bg-accent text-foreground"
+                          )}
+                        >
+                          {isCheckoutPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                          Upgrade to {plan.name}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="flex items-center gap-2 text-xs text-muted-foreground bg-card border border-border rounded-xl p-3.5">
