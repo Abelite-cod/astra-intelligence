@@ -57,7 +57,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/analytics") ||
     pathname.startsWith("/settings") ||
     pathname.startsWith("/agents") ||
-    pathname.startsWith("/publish");
+    pathname.startsWith("/publish") ||
+    pathname.startsWith("/onboarding");
 
   if (isProtectedRoute && !user) {
     const redirectUrl = request.nextUrl.clone();
@@ -71,7 +72,7 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthRoute && user) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
+    redirectUrl.pathname = "/brand";
     return NextResponse.redirect(redirectUrl);
   }
 
