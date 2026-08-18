@@ -1,10 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
-const MODEL = process.env.GOOGLE_AI_MODEL ?? "gemini-2.0-flash-lite";
+import { claudeGenerate, BEDROCK_MODEL, friendlyBedrockError } from "@/lib/bedrock";
+import type { CalendarDay } from "@/types/campaign";
 
 function getAdmin() {
   return createAdminClient(
@@ -12,8 +10,6 @@ function getAdmin() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 }
-
-import type { CalendarDay } from "@/types/campaign";
 
 export async function POST(request: NextRequest) {
   const supabase = createClient();
@@ -37,9 +33,9 @@ export async function POST(request: NextRequest) {
     brand.mission && `Mission: ${brand.mission}`,
   ].filter(Boolean).join("\n");
 
-  const systemInstruction = `You are a senior marketing strategist. You create comprehensive ${duration}-day content calendars that build audience, drive engagement, and achieve specific business goals. You think in terms of content arcs, themes, and narrative progression.`;
+  const systemPrompt = `You are a senior marketing strategist. You create comprehensive ${duration}-day content calendars that build audience, drive engagement, and achieve specific business goals. You think in terms of content arcs, themes, and narrative progression.`;
 
-  const prompt = `Create a ${duration}-day content calendar for this brand:
+  const userPrompt = `Create a ${duration}-day content calendar for this brand:
 
 ${brandContext}
 
@@ -53,7 +49,7 @@ Generate a strategic calendar with varied content types, platforms, and topics. 
 - Week 3: Social proof and case studies
 - Week 4: Conversion and calls to action
 
-Return ONLY a raw JSON array (no markdown, no backticks):
+Return ONLY a raw JSON array (no markdown, no backticks, no explanation):
 [
   {
     "day": 1,
@@ -72,24 +68,19 @@ Vary content types: post, thread, carousel, newsletter, article.
 Make each hook genuinely interesting and platform-appropriate.`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: MODEL,
-      contents: prompt,
-      config: { systemInstruction },
-    });
+    const raw = await claudeGenerate(systemPrompt, userPrompt, 4096);
 
-    const raw = response.text ?? "";
     let calendar: CalendarDay[];
-
     try {
       const jsonMatch = raw.match(/\[[\s\S]*\]/);
       calendar = JSON.parse(jsonMatch?.[0] ?? "[]");
     } catch {
-      return NextResponse.json({ error: "Failed to parse AI calendar output" }, { status: 500 });
+      console.error("[campaign/generate] Parse error, raw:", raw.slice(0, 200));
+      return NextResponse.json({ error: "Failed to parse AI calendar output. Please try again." }, { status: 500 });
     }
 
     if (!calendar.length) {
-      return NextResponse.json({ error: "AI returned empty calendar" }, { status: 500 });
+      return NextResponse.json({ error: "AI returned empty calendar. Please try again." }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -99,9 +90,13 @@ Make each hook genuinely interesting and platform-appropriate.`;
       duration,
       platforms,
       total_posts: calendar.length,
+      model: BEDROCK_MODEL,
     });
   } catch (error) {
-    console.error("Campaign generate error:", error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    console.error("[campaign/generate] Bedrock error:", error);
+    return NextResponse.json(
+      { error: friendlyBedrockError(error) },
+      { status: 500 }
+    );
   }
 }
