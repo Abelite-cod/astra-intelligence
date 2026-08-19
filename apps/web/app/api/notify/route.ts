@@ -7,7 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-initialize — do NOT instantiate at module load or Next.js build will crash
+// when RESEND_API_KEY is not set
 const FROM = process.env.RESEND_FROM_EMAIL ?? "Astra Intelligence <notifications@astra-intelligence.com>";
 
 type NotifyPayload =
@@ -18,9 +19,10 @@ type NotifyPayload =
 
 export async function POST(request: NextRequest) {
   if (!process.env.RESEND_API_KEY) {
-    // Silently skip if Resend not configured — don't error the app
     return NextResponse.json({ skipped: true, reason: "RESEND_API_KEY not configured" });
   }
+  // Instantiate inside handler so missing key doesn't crash the build
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
