@@ -9,6 +9,7 @@ import {
 } from "@/hooks/use-content";
 import { PlatformPreview } from "@/components/content/platform-preview";
 import { MediaPanel } from "@/components/content/media-panel";
+import { TikTokContentCard } from "@/components/tiktok/tiktok-content-card";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Loader2, CheckCircle2, XCircle, Trash2,
@@ -27,6 +28,7 @@ const PLATFORMS = [
   { id: "linkedin", label: "LinkedIn", icon: Linkedin, color: "text-[#0077B5]" },
   { id: "twitter", label: "Twitter / X", icon: Twitter, color: "text-[#1DA1F2]" },
   { id: "instagram", label: "Instagram", icon: Instagram, color: "text-[#E1306C]" },
+  { id: "tiktok", label: "TikTok", icon: null, color: "text-[#EE1D52]" },
 ];
 
 const STATUSES = [
@@ -680,28 +682,32 @@ export default function ContentPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              {paginatedContent.map((item) => (
-                <ContentCard
-                  key={item.id}
-                  item={item}
-                  editingId={editingId}
-                  editBody={editBody}
-                  onStartEdit={startEdit}
-                  onCancelEdit={cancelEdit}
-                  onSaveEdit={saveEdit}
-                  onEditBodyChange={setEditBody}
-                  onApprove={(id) => toast.promise(approveMutation.mutateAsync(id), {
-                    loading: "Approving…", success: "Content approved ✓", error: "Failed"
-                  })}
-                  onReject={(id) => toast.promise(rejectMutation.mutateAsync(id), {
-                    loading: "Rejecting…", success: "Content rejected", error: "Failed"
-                  })}
-                  onDelete={(id) => toast.promise(deleteMutation.mutateAsync(id), {
-                    loading: "Deleting…", success: "Deleted", error: "Failed"
-                  })}
-                  updatePending={updateMutation.isPending}
-                />
-              ))}
+              {paginatedContent.map((item) =>
+                item.platform === "tiktok" ? (
+                  <TikTokContentCard key={item.id} item={item} />
+                ) : (
+                  <ContentCard
+                    key={item.id}
+                    item={item}
+                    editingId={editingId}
+                    editBody={editBody}
+                    onStartEdit={startEdit}
+                    onCancelEdit={cancelEdit}
+                    onSaveEdit={saveEdit}
+                    onEditBodyChange={setEditBody}
+                    onApprove={(id) => toast.promise(approveMutation.mutateAsync(id), {
+                      loading: "Approving…", success: "Content approved ✓", error: "Failed"
+                    })}
+                    onReject={(id) => toast.promise(rejectMutation.mutateAsync(id), {
+                      loading: "Rejecting…", success: "Content rejected", error: "Failed"
+                    })}
+                    onDelete={(id) => toast.promise(deleteMutation.mutateAsync(id), {
+                      loading: "Deleting…", success: "Deleted", error: "Failed"
+                    })}
+                    updatePending={updateMutation.isPending}
+                  />
+                )
+              )}
             </div>
           )}
 

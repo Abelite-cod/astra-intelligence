@@ -3,6 +3,9 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { claudeGenerate, BEDROCK_MODEL, friendlyBedrockError } from "@/lib/bedrock";
 
+// TikTok platform gets its own native generation pipeline
+// to ensure scripts are TikTok-native, not repurposed LinkedIn content
+
 function getAdmin() {
   return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +20,27 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
   const { brand_id, brief, platforms = ["linkedin", "twitter", "instagram"] } = body;
+
+  // ── TikTok: delegate to TikTok-native generation ──────────────────────────
+  if (platforms.length === 1 && platforms[0] === "tiktok") {
+    const tiktokRes = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/tiktok/generate`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", cookie: request.headers.get("cookie") ?? "" },
+        body: JSON.stringify({ brand_id, brief }),
+      }
+    );
+    const tiktokData = await tiktokRes.json();
+    if (!tiktokRes.ok) return NextResponse.json(tiktokData, { status: tiktokRes.status });
+    // Wrap in the same shape as the multi-platform response
+    return NextResponse.json({
+      generated: { tiktok: { body: tiktokData.content?.body ?? "", hook: tiktokData.script?.hook ?? "", cta: tiktokData.script?.cta ?? "", hashtags: tiktokData.script?.hashtags ?? [] } },
+      saved_content: tiktokData.content ? [tiktokData.content] : [],
+      model: tiktokData.model,
+      tiktok_script: tiktokData.script,
+    });
+  }
 
   if (!brand_id || !brief) {
     return NextResponse.json({ error: "brand_id and brief are required" }, { status: 400 });
