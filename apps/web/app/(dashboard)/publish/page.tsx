@@ -19,7 +19,7 @@ import {
   Twitter, Linkedin, Send, CheckCircle2, XCircle,
   Loader2, Link2, Unlink, ChevronDown, Clock, ExternalLink,
   Zap, Calendar, X, Trash2, Eye, Pencil, Save, ChevronLeft,
-  ChevronRight, Hash, ImageIcon
+  ChevronRight, Hash, ImageIcon, Music2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,6 +43,15 @@ const PLATFORM_CONFIG = {
     border: "border-[#0077B5]/30",
     buttonBg: "bg-[#0077B5] hover:bg-[#006699]",
     connectHref: (brandId: string) => `/api/auth/linkedin?brand_id=${brandId}`,
+  },
+  tiktok: {
+    icon: Music2,
+    label: "TikTok",
+    color: "text-[#EE1D52]",
+    bg: "bg-[#EE1D52]/10",
+    border: "border-[#EE1D52]/30",
+    buttonBg: "bg-gradient-to-r from-[#EE1D52] to-[#69C9D0] hover:from-[#d01947] hover:to-[#5bb8bf]",
+    connectHref: (brandId: string) => `/api/auth/tiktok?brand_id=${brandId}`,
   },
 };
 

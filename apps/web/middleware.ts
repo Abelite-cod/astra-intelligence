@@ -58,7 +58,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/settings") ||
     pathname.startsWith("/agents") ||
     pathname.startsWith("/publish") ||
-    pathname.startsWith("/onboarding");
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/tiktok");
 
   if (isProtectedRoute && !user) {
     const redirectUrl = request.nextUrl.clone();
