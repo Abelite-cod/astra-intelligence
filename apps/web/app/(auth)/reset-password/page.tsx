@@ -113,12 +113,12 @@ export default function ResetPasswordPage() {
                     required
                     minLength={8}
                     placeholder="Min. 8 characters"
-                    className="w-full px-4 py-2.5 pr-10 rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
+                    className="w-full px-4 py-2.5 pr-10 rounded-xl bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -133,8 +133,8 @@ export default function ResetPasswordPage() {
                   required
                   placeholder="Repeat password"
                   className={cn(
-                    "w-full px-4 py-2.5 rounded-xl bg-white/8 border text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition",
-                    confirm && password !== confirm ? "border-red-500/50" : "border-white/15"
+                    "w-full px-4 py-2.5 rounded-xl bg-white border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition",
+                    confirm && password !== confirm ? "border-red-400" : "border-gray-200"
                   )}
                 />
                 {confirm && password !== confirm && (

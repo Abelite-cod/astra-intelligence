@@ -172,7 +172,7 @@ export default function RegisterPage() {
                   onChange={(e) => setFullName(e.target.value)}
                   required
                   placeholder="Alex Johnson"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
                 />
               </div>
               <div>
@@ -183,7 +183,7 @@ export default function RegisterPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="you@company.com"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
                 />
               </div>
               <div>
@@ -196,12 +196,12 @@ export default function RegisterPage() {
                     required
                     minLength={8}
                     placeholder="Min. 8 characters"
-                    className="w-full px-4 py-2.5 pr-10 rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
+                    className="w-full px-4 py-2.5 pr-10 rounded-xl bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
