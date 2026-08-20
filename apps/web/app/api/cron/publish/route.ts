@@ -127,11 +127,43 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // ── Poll TikTok processing posts ──────────────────────────────────────────
+  const { data: processingTikTok } = await admin
+    .from("scheduled_posts")
+    .select("id, brand_id, tiktok_publish_id")
+    .eq("platform", "tiktok")
+    .eq("status", "processing")
+    .not("tiktok_publish_id", "is", null)
+    .limit(10);
+
+  const tiktokPolled: Array<{ id: string; status: string }> = [];
+  if (processingTikTok?.length) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    for (const sp of processingTikTok) {
+      try {
+        const statusRes = await fetch(`${appUrl}/api/tiktok/status`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            publish_id: sp.tiktok_publish_id,
+            brand_id: sp.brand_id,
+            scheduled_post_id: sp.id,
+          }),
+        });
+        const statusData = await statusRes.json();
+        tiktokPolled.push({ id: sp.id, status: statusData.status ?? "unknown" });
+      } catch (e) {
+        console.warn(`[cron] TikTok status poll failed for ${sp.id}:`, e);
+      }
+    }
+  }
+
   return NextResponse.json({
     processed: results.length,
     published: results.filter((r) => r.status === "published").length,
     failed: results.filter((r) => r.status === "failed").length,
     results,
+    tiktok_polled: tiktokPolled.length,
   });
 }
 

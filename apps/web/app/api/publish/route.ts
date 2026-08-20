@@ -56,6 +56,20 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      // TikTok uses inbox upload flow — not a direct publish
+      if (platform === "tiktok") {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+        const uploadRes = await fetch(`${appUrl}/api/tiktok/upload`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", cookie: request.headers.get("cookie") ?? "" },
+          body: JSON.stringify({ content_id, brand_id }),
+        });
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadData.error ?? "TikTok upload failed");
+        results.push({ platform, status: "processing", post_id: uploadData.publish_id });
+        continue;
+      }
+
       let postId: string | undefined;
 
       if (platform === "twitter") {
