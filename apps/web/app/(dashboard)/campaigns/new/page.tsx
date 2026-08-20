@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   Sparkles, Loader2, ChevronDown, Zap, Calendar,
   Twitter, Linkedin, Instagram, Mail, BookOpen,
-  Check, ArrowRight, RotateCcw
+  Check, ArrowRight, RotateCcw, Music2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ const PLATFORM_CONFIG: Record<string, { icon: React.ElementType; color: string; 
   instagram: { icon: Instagram, color: "text-[#E1306C]", bg: "bg-[#E1306C]/10" },
   email: { icon: Mail, color: "text-amber-600", bg: "bg-amber-500/10" },
   blog: { icon: BookOpen, color: "text-emerald-600", bg: "bg-emerald-500/10" },
+  tiktok: { icon: Music2, color: "text-[#EE1D52]", bg: "bg-[#EE1D52]/10" },
 };
 
 const GOAL_SUGGESTIONS = [

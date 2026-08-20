@@ -35,6 +35,8 @@ export async function POST(request: NextRequest) {
 
   const systemPrompt = `You are a senior marketing strategist. You create comprehensive ${duration}-day content calendars that build audience, drive engagement, and achieve specific business goals. You think in terms of content arcs, themes, and narrative progression.`;
 
+  const hasTikTok = platforms.includes("tiktok");
+
   const userPrompt = `Create a ${duration}-day content calendar for this brand:
 
 ${brandContext}
@@ -43,7 +45,15 @@ CAMPAIGN GOAL: ${goal}
 PLATFORMS: ${platforms.join(", ")}
 DURATION: ${duration} days
 
-Generate a strategic calendar with varied content types, platforms, and topics. Think about:
+Generate a strategic calendar with varied content types, platforms, and topics.
+${hasTikTok ? `
+TIKTOK RULES (IMPORTANT — TikTok days must be NATIVE, not repurposed):
+- TikTok hooks must create pattern interrupt in 0-3 seconds
+- TikTok content_type: talking_head, voiceover_broll, text_animation, or screen_recording
+- Each TikTok day must include: format, estimated_duration_sec (15/30/60), narrative_arc
+- TikTok content is conversational, NOT corporate
+` : ""}
+Think about:
 - Week 1: Awareness and problem identification
 - Week 2: Education and value
 - Week 3: Social proof and case studies
@@ -60,11 +70,23 @@ Return ONLY a raw JSON array (no markdown, no backticks, no explanation):
     "goal": "Build awareness of the pain point",
     "hook": "Most companies are losing 40% of their marketing budget without knowing it."
   },
-  ...
+  {
+    "day": 3,
+    "date_offset": 2,
+    "platform": "tiktok",
+    "content_type": "talking_head",
+    "topic": "Why traditional marketing wastes your budget",
+    "goal": "Drive awareness of the pain point with viral potential",
+    "hook": "You're about to spend $15K on a marketing agency. Don't.",
+    "format": "talking_head",
+    "estimated_duration_sec": 30,
+    "narrative_arc": "problem_solution"
+  }
 ]
 
 Generate exactly ${duration} entries, distributed across: ${platforms.join(", ")}.
-Vary content types: post, thread, carousel, newsletter, article.
+Non-TikTok content types: post, thread, carousel, newsletter, article.
+TikTok content types: talking_head, voiceover_broll, text_animation, screen_recording.
 Make each hook genuinely interesting and platform-appropriate.`;
 
   try {

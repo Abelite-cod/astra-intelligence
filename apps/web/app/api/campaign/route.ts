@@ -42,14 +42,15 @@ export async function POST(request: NextRequest) {
   // Create content stubs for each calendar day
   const contentRows = (calendar as CalendarDay[]).map((day) => {
     const postDate = new Date(startDate.getTime() + day.date_offset * 24 * 60 * 60 * 1000);
+    const isTikTok = day.platform === "tiktok";
     return {
       brand_id,
       campaign_id: campaign.id,
       platform: day.platform,
-      type: day.content_type,
+      type: isTikTok ? "video" : day.content_type,
       title: day.topic,
       hook: day.hook,
-      body: `[Day ${day.day}] ${day.topic}\n\n${day.hook}`,
+      body: isTikTok ? "" : `[Day ${day.day}] ${day.topic}\n\n${day.hook}`,
       status: "draft",
       ai_metadata: {
         calendar_day: day.day,
@@ -57,6 +58,10 @@ export async function POST(request: NextRequest) {
         goal: day.goal,
         hook: day.hook,
         scheduled_date: postDate.toISOString().split("T")[0],
+        // TikTok-specific fields from calendar
+          format: day.format ?? null,
+          duration_sec: day.estimated_duration_sec ?? null,
+          narrative_arc: day.narrative_arc ?? null,
       },
     };
   });
@@ -65,6 +70,29 @@ export async function POST(request: NextRequest) {
     .from("content")
     .insert(contentRows)
     .select("id, platform, type, title, hook, ai_metadata");
+
+  // Create tiktok_scripts stubs for TikTok days
+  const tiktokCalendarDays = (calendar as CalendarDay[]).filter((d) => d.platform === "tiktok");
+  if (tiktokCalendarDays.length > 0 && contents) {
+    const tiktokContentIds = contents
+      .filter((c) => c.platform === "tiktok")
+      .map((c, i) => ({ id: c.id, day: tiktokCalendarDays[i] }));
+
+    if (tiktokContentIds.length > 0) {
+      const tiktokScriptStubs = tiktokContentIds.map(({ id, day }) => ({
+        content_id: id,
+          brand_id,
+          hook: day.hook ?? "",
+          concept: day.topic ?? "",
+          format: day.format ?? "talking_head",
+          duration_sec: day.estimated_duration_sec ?? 30,
+          narrative_arc: day.narrative_arc ?? "problem_solution",
+        upload_status: "pending_script",
+      }));
+
+      await admin.from("tiktok_scripts").insert(tiktokScriptStubs);
+    }
+  }
 
   if (contentErr) return NextResponse.json({ error: contentErr.message }, { status: 500 });
 
