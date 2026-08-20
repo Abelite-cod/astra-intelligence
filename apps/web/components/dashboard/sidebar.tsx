@@ -8,7 +8,7 @@ import { useTheme } from "next-themes";
 import {
   LayoutDashboard, Brain, Megaphone, FileText,
   BarChart3, Bot, Settings, Zap, LogOut, Send, Menu, X,
-  Sun, Moon, Monitor
+  Sun, Moon, Monitor, Music2
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { href: "/publish", icon: Send, label: "Publish" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/agents", icon: Bot, label: "AI Agents" },
+  { href: "/tiktok", icon: Music2, label: "TikTok Studio", highlight: true },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -93,7 +94,7 @@ function NavContent({
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
+        {NAV_ITEMS.map(({ href, icon: Icon, label, highlight }) => {
           const active =
             href === "/dashboard"
               ? pathname === href
@@ -107,7 +108,11 @@ function NavContent({
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                 active
-                  ? "bg-astra-500/10 text-astra-600 border border-astra-500/20"
+                  ? highlight
+                    ? "bg-gradient-to-r from-[#EE1D52]/10 to-[#69C9D0]/10 text-[#EE1D52] border border-[#EE1D52]/20"
+                    : "bg-astra-500/10 text-astra-600 border border-astra-500/20"
+                  : highlight
+                  ? "text-[#EE1D52]/80 hover:text-[#EE1D52] hover:bg-[#EE1D52]/5"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
             >
