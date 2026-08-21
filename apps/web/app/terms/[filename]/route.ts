@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Serves TikTok domain verification files for URL property verification.
-// TikTok checks: https://yourdomain.com/terms/[verification-file].txt
+// Serves TikTok domain verification files for Terms of Service URL verification.
+// TikTok checks: https://yourdomain.com/terms/tiktok[token].txt
+// Expected file content: tiktok-developers-site-verification=[token]
 export async function GET(
   _request: NextRequest,
   { params }: { params: { filename: string } }
 ) {
-  // Only serve known TikTok verification files
   if (!params.filename.startsWith("tiktok") || !params.filename.endsWith(".txt")) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  // The verification content is the filename without extension
-  const token = params.filename.replace(".txt", "");
+  // Extract token: tiktokABCD1234.txt → ABCD1234
+  const token = params.filename.replace(/^tiktok/, "").replace(/\.txt$/, "");
+  const content = `tiktok-developers-site-verification=${token}`;
 
-  return new NextResponse(token, {
+  return new NextResponse(content, {
     status: 200,
     headers: {
       "Content-Type": "text/plain",
