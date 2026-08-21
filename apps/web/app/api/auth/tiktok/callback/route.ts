@@ -83,8 +83,9 @@ export async function GET(request: NextRequest) {
     }
 
     // ── Step 2: Fetch TikTok user info ───────────────────────────────────────
+    // Sandbox mode: only use basic fields (profile_deep_link may not be available)
     const userRes = await fetch(
-      "https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url,profile_deep_link",
+      "https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url",
       {
         headers: {
           Authorization: `Bearer ${tokenData.access_token}`,
@@ -95,17 +96,22 @@ export async function GET(request: NextRequest) {
     const userData = await userRes.json() as {
       data?: {
         user?: {
-          open_id: string;
-          display_name: string;
-          avatar_url: string;
-          profile_deep_link?: string;
+          open_id?: string;
+          display_name?: string;
+          avatar_url?: string;
         };
       };
-      error?: { code: string; message: string };
+      error?: { code: string; message: string; log_id?: string };
     };
 
+    console.log("[tiktok/callback] User info response:", JSON.stringify(userData));
+
+    // In sandbox, open_id may come from token response directly
     const tiktokUser = userData.data?.user;
-    if (!tiktokUser) {
+    const openId = tiktokUser?.open_id ?? tokenData.open_id;
+    const displayName = tiktokUser?.display_name ?? `TikTok User (${openId?.slice(0, 8)})`;
+
+    if (!openId) {
       console.error("[tiktok/callback] Failed to get user info:", userData.error);
       return NextResponse.redirect(`${APP_URL}/publish?error=user_info_failed`);
     }
@@ -121,9 +127,9 @@ export async function GET(request: NextRequest) {
       {
         brand_id: brandId,
         platform: "tiktok",
-        account_id: tiktokUser.open_id,
-        account_name: tiktokUser.display_name,
-        account_url: tiktokUser.profile_deep_link ?? null,
+        account_id: openId,
+        account_name: displayName,
+        account_url: null,
         access_token: tokenData.access_token,
         refresh_token: tokenData.refresh_token ?? null,
         token_expires_at: expiresAt,
@@ -138,7 +144,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${APP_URL}/publish?error=db_error`);
     }
 
-    console.log(`[tiktok/callback] Connected TikTok account "${tiktokUser.display_name}" for brand ${brandId}`);
+    console.log(`[tiktok/callback] Connected TikTok account "${displayName}" for brand ${brandId}`);
     return NextResponse.redirect(`${APP_URL}/publish?connected=tiktok`);
 
   } catch (err) {
