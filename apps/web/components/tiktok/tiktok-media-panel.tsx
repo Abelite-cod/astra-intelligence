@@ -3,11 +3,11 @@
 import { useRef, useState } from "react";
 import {
   useContentMedia, useUploadMedia, useDeleteMedia,
-  useUpdateMedia, type ContentMedia,
+  useUpdateMedia, useGenerateMedia, type ContentMedia,
 } from "@/hooks/use-content-media";
 import { cn } from "@/lib/utils";
 import {
-  Upload, Trash2, CheckCircle2, Loader2, Eye, Video,
+  Upload, Sparkles, Trash2, CheckCircle2, Loader2, Eye, Video,
   ImageIcon, AlertCircle, Film, Grid, X
 } from "lucide-react";
 import { toast } from "sonner";
@@ -71,15 +71,34 @@ export function TikTokMediaPanel({
 }: TikTokMediaPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showGenerateForm, setShowGenerateForm] = useState(false);
+  const [generatePrompt, setGeneratePrompt] = useState("");
 
   const { data: mediaList = [], isLoading } = useContentMedia(contentId);
   const uploadMutation = useUploadMedia(contentId);
+  const generateMutation = useGenerateMedia(contentId);
   const deleteMutation = useDeleteMedia(contentId);
   const updateMutation = useUpdateMedia(contentId);
 
   const mode = getMediaMode(format);
   const cfg = MODE_CONFIG[mode];
   const Icon = cfg.icon;
+
+  function handleGenerate() {
+    const prompt = generatePrompt.trim() || undefined;
+    toast.promise(
+      generateMutation.mutateAsync({ prompt }).then((res) => {
+        setShowGenerateForm(false);
+        setGeneratePrompt("");
+        return res;
+      }),
+      {
+        loading: "Generating AI image…",
+        success: "AI image generated ✓",
+        error: (err) => err.message,
+      }
+    );
+  }
 
   // For video mode: look for video files; for image modes: look for images
   const videoMedia = mediaList.filter((m) =>
@@ -129,8 +148,8 @@ export function TikTokMediaPanel({
         <span>{cfg.note}</span>
       </div>
 
-      {/* Upload button */}
-      <div className="flex items-center gap-2">
+      {/* Upload + Generate buttons */}
+      <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadMutation.isPending || (mode === "video" && videoMedia.length >= 1)}
@@ -143,8 +162,57 @@ export function TikTokMediaPanel({
           )}
           {cfg.label}
         </button>
+
+        {/* AI image generation — only for image/carousel modes */}
+        {mode !== "video" && (
+          <button
+            onClick={() => setShowGenerateForm((v) => !v)}
+            disabled={generateMutation.isPending}
+            className="flex items-center gap-1.5 text-xs font-semibold bg-astra-500 hover:bg-astra-600 text-white px-3 py-2 rounded-xl transition disabled:opacity-50"
+          >
+            {generateMutation.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5" />
+            )}
+            Generate image
+          </button>
+        )}
         <span className="text-xs text-muted-foreground">{cfg.hint}</span>
       </div>
+
+      {/* AI generate form */}
+      {showGenerateForm && mode !== "video" && (
+        <div className="bg-astra-500/5 border border-astra-500/20 rounded-xl p-3 space-y-2.5">
+          <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-astra-500" />
+            AI Image — Claude writes brief, Pollinations renders
+          </p>
+          <textarea
+            value={generatePrompt}
+            onChange={(e) => setGeneratePrompt(e.target.value)}
+            rows={2}
+            placeholder="Optional: describe the image. Leave blank to generate from content context."
+            className="w-full px-3 py-2 text-xs rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleGenerate}
+              disabled={generateMutation.isPending}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-astra-500 hover:bg-astra-600 text-white transition disabled:opacity-50"
+            >
+              {generateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+              {generateMutation.isPending ? "Generating…" : "Generate"}
+            </button>
+            <button
+              onClick={() => { setShowGenerateForm(false); setGeneratePrompt(""); }}
+              className="text-xs text-muted-foreground hover:text-foreground transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       <input
         ref={fileInputRef}
