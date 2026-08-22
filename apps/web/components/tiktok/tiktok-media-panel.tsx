@@ -107,8 +107,9 @@ export function TikTokMediaPanel({
   const imageMedia = mediaList.filter((m) =>
     !m.public_url?.match(/\.(mp4|webm|mov)(\?|$)/i)
   );
+  // In video mode: show video files; also show any thumbnail/generated images separately
   const relevantMedia = mode === "video" ? videoMedia : imageMedia;
-  const selectedMedia = relevantMedia.filter((m) => m.selected);
+  const selectedMedia = mediaList.filter((m) => m.selected);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -278,10 +279,52 @@ export function TikTokMediaPanel({
               </div>
             </div>
           ))}
-          {selectedMedia.length === 0 && videoMedia.length > 0 && (
+          {videoMedia.filter(m => m.selected).length === 0 && videoMedia.length > 0 && (
             <p className="text-xs text-amber-600 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" /> Select a video to enable TikTok publishing
             </p>
+          )}
+          {/* Thumbnails / cover images (generated or uploaded images in video mode) */}
+          {imageMedia.length > 0 && (
+            <div className="space-y-1.5 pt-2 border-t border-border">
+              <p className="text-xs font-semibold text-muted-foreground">Thumbnails / Cover images ({imageMedia.length})</p>
+              <div className="grid grid-cols-4 gap-2">
+                {imageMedia.map((media) => (
+                  <div
+                    key={media.id}
+                    className={cn(
+                      "relative rounded-lg overflow-hidden border-2 aspect-square bg-muted group cursor-pointer transition",
+                      media.selected ? "border-[#EE1D52]" : "border-transparent"
+                    )}
+                    onClick={() => toggleSelect(media)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={media.public_url} alt="Thumbnail" className="w-full h-full object-cover" />
+                    <div className="absolute top-0.5 left-0.5">
+                      <span className="text-[9px] font-bold px-1 py-0.5 rounded-full bg-astra-500 text-white">
+                        {media.type === "generated" ? "AI" : "↑"}
+                      </span>
+                    </div>
+                    {media.selected && (
+                      <div className="absolute top-0.5 right-0.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#EE1D52] bg-white rounded-full" />
+                      </div>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toast.promise(deleteMutation.mutateAsync(media.id), {
+                          loading: "Deleting…", success: "Deleted", error: "Failed"
+                        });
+                      }}
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-white" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       ) : (
