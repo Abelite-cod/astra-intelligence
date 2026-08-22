@@ -4,12 +4,12 @@ import { useState } from "react";
 import { useTikTokScript } from "@/hooks/use-tiktok";
 import { useApproveContent, useRejectContent, useDeleteContent } from "@/hooks/use-content";
 import { TikTokScriptEditor } from "./tiktok-script-editor";
-import { MediaPanel } from "@/components/content/media-panel";
+import { TikTokMediaPanel } from "./tiktok-media-panel";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
 import {
   Music2, CheckCircle2, XCircle, Trash2, Edit3,
-  Clock, Play, Loader2, Film, Video
+  Clock, Play, Loader2, Film
 } from "lucide-react";
 import { toast } from "sonner";
 import type { ContentItem } from "@/hooks/use-content";
@@ -147,7 +147,7 @@ export function TikTokContentCard({ item }: TikTokContentCardProps) {
           </div>
         )}
 
-        {/* Media panel (upload video) */}
+        {/* TikTok Media Panel (video or images depending on format) */}
         <div className="pt-1">
           <button
             onClick={() => setMediaOpen((v) => !v)}
@@ -158,16 +158,15 @@ export function TikTokContentCard({ item }: TikTokContentCardProps) {
                 : "border border-border text-muted-foreground hover:border-[#EE1D52]/40 hover:text-[#EE1D52]"
             )}
           >
-            <Video className="w-3.5 h-3.5" />
-            {mediaOpen ? "Hide video" : "Upload video"}
+            <Film className="w-3.5 h-3.5" />
+            {mediaOpen ? "Hide media" : format === "carousel_video" ? "Upload images (carousel)" : "Upload video / image"}
           </button>
           {mediaOpen && (
             <div className="mb-3">
-              <MediaPanel
+              <TikTokMediaPanel
                 contentId={item.id}
                 contentBody={item.body}
-                contentHook={item.hook}
-                platform="tiktok"
+                format={format}
               />
             </div>
           )}
