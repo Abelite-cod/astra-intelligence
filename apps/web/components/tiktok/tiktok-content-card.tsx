@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useTikTokScript } from "@/hooks/use-tiktok";
 import { useApproveContent, useRejectContent, useDeleteContent } from "@/hooks/use-content";
 import { TikTokScriptEditor } from "./tiktok-script-editor";
+import { MediaPanel } from "@/components/content/media-panel";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
 import {
   Music2, CheckCircle2, XCircle, Trash2, Edit3,
-  Clock, Play, Loader2, X, Film
+  Clock, Play, Loader2, Film, Video
 } from "lucide-react";
 import { toast } from "sonner";
 import type { ContentItem } from "@/hooks/use-content";
@@ -35,6 +36,7 @@ const FORMAT_LABELS: Record<string, string> = {
 
 export function TikTokContentCard({ item }: TikTokContentCardProps) {
   const [showEditor, setShowEditor] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(false);
   const { data: script, isLoading: scriptLoading } = useTikTokScript(item.id);
   const approveMutation = useApproveContent(item.brand_id);
   const rejectMutation = useRejectContent(item.brand_id);
@@ -144,6 +146,32 @@ export function TikTokContentCard({ item }: TikTokContentCardProps) {
             )}
           </div>
         )}
+
+        {/* Media panel (upload video) */}
+        <div className="pt-1">
+          <button
+            onClick={() => setMediaOpen((v) => !v)}
+            className={cn(
+              "flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition mb-2",
+              mediaOpen
+                ? "bg-[#EE1D52]/10 text-[#EE1D52] border border-[#EE1D52]/30"
+                : "border border-border text-muted-foreground hover:border-[#EE1D52]/40 hover:text-[#EE1D52]"
+            )}
+          >
+            <Video className="w-3.5 h-3.5" />
+            {mediaOpen ? "Hide video" : "Upload video"}
+          </button>
+          {mediaOpen && (
+            <div className="mb-3">
+              <MediaPanel
+                contentId={item.id}
+                contentBody={item.body}
+                contentHook={item.hook}
+                platform="tiktok"
+              />
+            </div>
+          )}
+        </div>
 
         {/* Actions */}
         <div className="flex items-center gap-1.5 pt-1.5 border-t border-border">
