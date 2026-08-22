@@ -54,10 +54,15 @@ export async function POST(
 
   if (!file) return NextResponse.json({ error: "file is required" }, { status: 400 });
 
-  // Validate file type
-  const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  // Validate file type — allow images and videos (TikTok)
+  const allowedImages = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  const allowedVideos = ["video/mp4", "video/webm", "video/mov", "video/quicktime", "video/x-msvideo"];
+  const allowed = [...allowedImages, ...allowedVideos];
   if (!allowed.includes(file.type)) {
-    return NextResponse.json({ error: "Only JPEG, PNG, GIF, WEBP allowed" }, { status: 400 });
+    return NextResponse.json(
+      { error: `File type not allowed. Accepted: JPEG, PNG, GIF, WEBP, MP4, MOV, WebM` },
+      { status: 400 }
+    );
   }
 
   // Get current max sort_order
