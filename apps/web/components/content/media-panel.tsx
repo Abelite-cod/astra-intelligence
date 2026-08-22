@@ -147,7 +147,7 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
         ref={fileInputRef}
         type="file"
         multiple
-        accept="image/jpeg,image/png,image/gif,image/webp"
+        accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/mov,video/quicktime"
         className="hidden"
         onChange={handleFileChange}
       />
