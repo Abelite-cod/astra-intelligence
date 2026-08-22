@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useTikTokScript, useUpdateTikTokScript } from "@/hooks/use-tiktok";
+import { useContentMedia } from "@/hooks/use-content-media";
 import { cn } from "@/lib/utils";
 import {
   Music2, X, Save, Loader2, ChevronDown, ChevronUp,
-  Play, Clock, Eye, Mic2, Type, Film, Sparkles
+  Play, Clock, Eye, Mic2, Type, Film, Sparkles, ImageIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import type { TikTokScene } from "@/hooks/use-tiktok";
@@ -35,6 +36,8 @@ const NARRATIVE_LABELS: Record<string, string> = {
 
 export function TikTokScriptEditor({ contentId, brandId, onClose }: TikTokScriptEditorProps) {
   const { data: script, isLoading } = useTikTokScript(contentId);
+  const { data: mediaList = [] } = useContentMedia(contentId);
+  const selectedMedia = mediaList.filter((m) => m.selected);
   const updateMutation = useUpdateTikTokScript(brandId);
   const [expandedScene, setExpandedScene] = useState<number | null>(null);
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -139,6 +142,50 @@ export function TikTokScriptEditor({ contentId, brandId, onClose }: TikTokScript
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto p-6 space-y-5">
+
+        {/* Media preview — thumbnails / cover images */}
+        {mediaList.length > 0 && (
+          <div className="space-y-2">
+            <label className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wide">
+              <ImageIcon className="w-3.5 h-3.5" /> Media ({selectedMedia.length} selected)
+            </label>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {mediaList.map((m) => {
+                const isVid = /\.(mp4|webm|mov)(\?|$)/i.test(m.public_url);
+                return (
+                  <div
+                    key={m.id}
+                    className={cn(
+                      "relative rounded-xl overflow-hidden shrink-0 border-2 transition",
+                      m.selected ? "border-[#EE1D52]" : "border-transparent opacity-60",
+                      isVid ? "w-16 h-16 bg-slate-900 flex items-center justify-center" : "w-16 h-16"
+                    )}
+                  >
+                    {isVid ? (
+                      <Film className="w-6 h-6 text-white/50" />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.public_url} alt="Media" className="w-full h-full object-cover" />
+                    )}
+                    {m.selected && (
+                      <div className="absolute top-0.5 right-0.5">
+                        <div className="w-3 h-3 rounded-full bg-[#EE1D52] border border-white" />
+                      </div>
+                    )}
+                    <div className="absolute bottom-0.5 left-0.5">
+                      <span className="text-[9px] font-bold bg-black/60 text-white px-1 rounded">
+                        {m.type === "generated" ? "AI" : isVid ? "🎥" : "↑"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {selectedMedia.length === 0 && (
+              <p className="text-xs text-muted-foreground">No media selected — select in the Upload/Generate panel below</p>
+            )}
+          </div>
+        )}
 
         {/* Hook */}
         <div className="space-y-1.5">
