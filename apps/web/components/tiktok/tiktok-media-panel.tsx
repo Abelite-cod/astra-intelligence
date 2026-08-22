@@ -163,26 +163,24 @@ export function TikTokMediaPanel({
           {cfg.label}
         </button>
 
-        {/* AI image generation — only for image/carousel modes */}
-        {mode !== "video" && (
-          <button
-            onClick={() => setShowGenerateForm((v) => !v)}
-            disabled={generateMutation.isPending}
-            className="flex items-center gap-1.5 text-xs font-semibold bg-astra-500 hover:bg-astra-600 text-white px-3 py-2 rounded-xl transition disabled:opacity-50"
-          >
-            {generateMutation.isPending ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5" />
-            )}
-            Generate image
-          </button>
-        )}
+        {/* AI image generation — always available (thumbnail, cover, photo post) */}
+        <button
+          onClick={() => setShowGenerateForm((v) => !v)}
+          disabled={generateMutation.isPending}
+          className="flex items-center gap-1.5 text-xs font-semibold bg-astra-500 hover:bg-astra-600 text-white px-3 py-2 rounded-xl transition disabled:opacity-50"
+        >
+          {generateMutation.isPending ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="w-3.5 h-3.5" />
+          )}
+          {mode === "video" ? "Generate thumbnail" : "Generate image"}
+        </button>
         <span className="text-xs text-muted-foreground">{cfg.hint}</span>
       </div>
 
-      {/* AI generate form */}
-      {showGenerateForm && mode !== "video" && (
+      {/* AI generate form — always available */}
+      {showGenerateForm && (
         <div className="bg-astra-500/5 border border-astra-500/20 rounded-xl p-3 space-y-2.5">
           <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-astra-500" />
