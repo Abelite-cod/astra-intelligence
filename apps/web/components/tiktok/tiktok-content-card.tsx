@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTikTokScript } from "@/hooks/use-tiktok";
+import { useContentMedia, useDeleteMedia, useUpdateMedia } from "@/hooks/use-content-media";
 import { useApproveContent, useRejectContent, useDeleteContent } from "@/hooks/use-content";
 import { TikTokScriptEditor } from "./tiktok-script-editor";
 import { TikTokMediaPanel } from "./tiktok-media-panel";
@@ -9,7 +10,8 @@ import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
 import {
   Music2, CheckCircle2, XCircle, Trash2, Edit3,
-  Clock, Play, Loader2, Film
+  Clock, Play, Loader2, Film, ImageIcon, Video,
+  CheckSquare, Square, X
 } from "lucide-react";
 import { toast } from "sonner";
 import type { ContentItem } from "@/hooks/use-content";
@@ -37,10 +39,23 @@ const FORMAT_LABELS: Record<string, string> = {
 export function TikTokContentCard({ item }: TikTokContentCardProps) {
   const [showEditor, setShowEditor] = useState(false);
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightboxIsVideo, setLightboxIsVideo] = useState(false);
+
   const { data: script, isLoading: scriptLoading } = useTikTokScript(item.id);
+  const { data: mediaList = [] } = useContentMedia(item.id);
+  const deleteMediaMutation = useDeleteMedia(item.id);
+  const updateMediaMutation = useUpdateMedia(item.id);
   const approveMutation = useApproveContent(item.brand_id);
   const rejectMutation = useRejectContent(item.brand_id);
   const deleteMutation = useDeleteContent(item.brand_id);
+
+  const isVideo = (url: string) => /\.(mp4|webm|mov)(\?|$)/i.test(url);
+
+  function openLightbox(url: string) {
+    setLightboxUrl(url);
+    setLightboxIsVideo(isVideo(url));
+  }
 
   const aiMeta = item.ai_metadata as Record<string, unknown> | undefined;
   const format = (script?.format ?? aiMeta?.format ?? "talking_head") as string;
@@ -143,6 +158,96 @@ export function TikTokContentCard({ item }: TikTokContentCardProps) {
             ))}
             {item.hashtags.length > 4 && (
               <span className="text-xs text-muted-foreground">+{item.hashtags.length - 4}</span>
+            )}
+          </div>
+        )}
+
+        {/* ── Inline media preview strip (always visible) ──────────── */}
+        {mediaList.length > 0 && (
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" /> Media ({mediaList.length})
+            </p>
+            <div className="flex gap-1.5 flex-wrap">
+              {mediaList.map((m) => {
+                const isVid = isVideo(m.public_url);
+                return (
+                  <div
+                    key={m.id}
+                    className={cn(
+                      "relative rounded-lg overflow-hidden border-2 cursor-pointer shrink-0",
+                      m.selected ? "border-[#EE1D52]" : "border-border",
+                      isVid ? "w-14 h-14 bg-slate-900 flex items-center justify-center" : "w-14 h-14"
+                    )}
+                    onClick={() => openLightbox(m.public_url)}
+                    title={isVid ? "Click to preview video" : "Click to preview image"}
+                  >
+                    {isVid ? (
+                      <Film className="w-5 h-5 text-white/50" />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.public_url} alt="Media" className="w-full h-full object-cover" />
+                    )}
+                    {/* Selected indicator */}
+                    {m.selected && (
+                      <div className="absolute top-0.5 right-0.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#EE1D52] border border-white" />
+                      </div>
+                    )}
+                    {/* Type badge */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-[9px] text-white text-center font-bold py-0.5">
+                      {isVid ? "🎥" : m.type === "generated" ? "AI" : "↑"}
+                    </div>
+                    {/* Toggle select on long press area — separate from preview */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toast.promise(
+                          updateMediaMutation.mutateAsync({ mediaId: m.id, updates: { selected: !m.selected } }),
+                          { loading: "…", success: m.selected ? "Deselected" : "Selected", error: "Failed" }
+                        );
+                      }}
+                      className="absolute inset-0 opacity-0"
+                      title={m.selected ? "Click to deselect" : "Click to select"}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {mediaList.filter(m => m.selected).length} selected · click to preview · click badge to select/deselect
+            </p>
+          </div>
+        )}
+
+        {/* Lightbox */}
+        {lightboxUrl && (
+          <div
+            className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setLightboxUrl(null)}
+          >
+            <button
+              onClick={() => setLightboxUrl(null)}
+              className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 rounded-full p-2 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            {lightboxIsVideo ? (
+              <video
+                src={lightboxUrl}
+                controls
+                autoPlay
+                className="max-w-full max-h-full rounded-xl"
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={lightboxUrl}
+                alt="Preview"
+                className="max-w-full max-h-full rounded-xl object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
             )}
           </div>
         )}
