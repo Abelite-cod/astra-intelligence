@@ -54,6 +54,7 @@ const PLATFORM_GENERATE = [
   { id: "linkedin", label: "LinkedIn", icon: Linkedin, color: "text-[#0077B5]" },
   { id: "twitter", label: "Twitter / X", icon: Twitter, color: "text-[#1DA1F2]" },
   { id: "instagram", label: "Instagram", icon: Instagram, color: "text-[#E1306C]" },
+  { id: "tiktok", label: "TikTok", icon: null, color: "text-[#EE1D52]" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -65,10 +66,11 @@ const STATUS_STYLES: Record<string, string> = {
   published: "bg-blue-500/10 text-blue-600 border border-blue-500/20",
 };
 
-const PLATFORM_BADGE: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+const PLATFORM_BADGE: Record<string, { icon: React.ElementType | null; color: string; bg: string }> = {
   linkedin: { icon: Linkedin, color: "text-[#0077B5]", bg: "bg-[#0077B5]/10" },
   twitter: { icon: Twitter, color: "text-[#1DA1F2]", bg: "bg-[#1DA1F2]/10" },
   instagram: { icon: Instagram, color: "text-[#E1306C]", bg: "bg-[#E1306C]/10" },
+  tiktok: { icon: null, color: "text-[#EE1D52]", bg: "bg-[#EE1D52]/10" },
 };
 
 function safeErrorMessage(e: unknown): string {
@@ -524,7 +526,8 @@ export default function ContentPage() {
                           : "border-border text-muted-foreground hover:border-astra-500/40"
                       )}
                     >
-                      <p.icon className="w-3.5 h-3.5" />
+                      {p.icon && <p.icon className="w-3.5 h-3.5" />}
+                      {!p.icon && <span className="text-[#EE1D52] font-bold text-xs">🎵</span>}
                       {p.label}
                     </button>
                   ))}

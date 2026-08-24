@@ -393,10 +393,11 @@ export default function DashboardPage() {
                 Manage <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {[
                 { platform: "twitter", label: "Twitter / X", icon: Twitter, color: "text-[#1DA1F2]", bg: "bg-[#1DA1F2]/10", connectHref: `/api/auth/twitter?brand_id=${activeBrandId}` },
                 { platform: "linkedin", label: "LinkedIn", icon: Linkedin, color: "text-[#0077B5]", bg: "bg-[#0077B5]/10", connectHref: `/api/auth/linkedin?brand_id=${activeBrandId}` },
+                { platform: "tiktok", label: "TikTok", icon: null, color: "text-[#EE1D52]", bg: "bg-[#EE1D52]/10", connectHref: `/api/auth/tiktok?brand_id=${activeBrandId}` },
               ].map((p) => {
                 const account = socialAccounts.find((a) => a.platform === p.platform);
                 const Icon = p.icon;
@@ -406,7 +407,11 @@ export default function DashboardPage() {
                     account ? "border-emerald-500/20 bg-emerald-500/5" : "border-border bg-card"
                   )}>
                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", p.bg)}>
-                      <Icon className={cn("w-5 h-5", p.color)} />
+                      {Icon ? (
+                        <Icon className={cn("w-5 h-5", p.color)} />
+                      ) : (
+                        <span className="text-lg">🎵</span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-foreground">{p.label}</p>

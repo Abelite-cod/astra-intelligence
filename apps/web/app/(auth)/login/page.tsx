@@ -10,7 +10,7 @@ import { Loader2, Sparkles, ArrowRight, Eye, EyeOff, Brain, Bot, Send } from "lu
 const HIGHLIGHTS = [
   { icon: Brain, text: "Brand Brain remembers everything" },
   { icon: Bot, text: "4-agent pipeline in 60 seconds" },
-  { icon: Send, text: "Auto-publish to LinkedIn & Twitter" },
+  { icon: Send, text: "Publish to LinkedIn, Twitter & TikTok" },
 ];
 
 function LoginForm() {
