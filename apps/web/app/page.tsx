@@ -1,361 +1,303 @@
 import Link from "next/link";
 import {
-  ArrowRight, Zap, Brain, TrendingUp, Bot, BarChart3, Sparkles,
-  CheckCircle2, Twitter, Linkedin, Calendar, FileText, Send,
-  MessageSquare, Star, Shield, Clock, ChevronDown, Globe,
-  Users, Target, Image, Play
+  ArrowRight, Sparkles, Brain, Bot, Calendar,
+  Send, BarChart3, Zap, CheckCircle2, Music2,
+  Shield, ChevronRight
 } from "lucide-react";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
-const FEATURES = [
-  {
-    icon: Brain,
-    title: "Brand Brain",
-    desc: "Upload your brand guide, website, and docs once. Claude reads everything and remembers it forever — every piece of content is perfectly on-brand.",
-    gradient: "from-purple-500/20 to-astra-500/20",
-    iconColor: "text-purple-400",
-    iconBg: "bg-purple-500/15",
-  },
-  {
-    icon: Bot,
-    title: "4-Agent Pipeline",
-    desc: "Research Agent finds insights. Trend Agent spots what's viral. Writer Agent creates content. Reviewer Agent scores and improves it. All in under 60 seconds.",
-    gradient: "from-astra-500/20 to-blue-500/20",
-    iconColor: "text-astra-400",
-    iconBg: "bg-astra-500/15",
-  },
-  {
-    icon: Calendar,
-    title: "30-Day Campaign Builder",
-    desc: "Give AI one goal. Get a complete 30-day content calendar across all platforms — with topics, hooks, and goals for every single post.",
-    gradient: "from-blue-500/20 to-emerald-500/20",
-    iconColor: "text-blue-400",
-    iconBg: "bg-blue-500/15",
-  },
-  {
-    icon: Image,
-    title: "AI Image Generation",
-    desc: "Claude analyzes your post and creates a targeted visual brief. Our image AI renders stunning, on-brand visuals that make people stop scrolling.",
-    gradient: "from-emerald-500/20 to-teal-500/20",
-    iconColor: "text-emerald-400",
-    iconBg: "bg-emerald-500/15",
-  },
-  {
-    icon: Send,
-    title: "Auto-Publish & Schedule",
-    desc: "Approve content, set a time, done. Astra publishes directly to LinkedIn and Twitter — with images attached — at exactly the right moment.",
-    gradient: "from-teal-500/20 to-purple-500/20",
-    iconColor: "text-teal-400",
-    iconBg: "bg-teal-500/15",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics Dashboard",
-    desc: "Track content performance, agent runs, approval rates, and publishing history in one clean view. Know what's working and why.",
-    gradient: "from-orange-500/20 to-red-500/20",
-    iconColor: "text-orange-400",
-    iconBg: "bg-orange-500/15",
-  },
-];
-
 const HOW_IT_WORKS = [
   {
-    step: "01",
+    num: "01",
     title: "Train your Brand Brain",
-    desc: "Upload your brand guide, competitor analysis, customer personas, and past content. Claude learns your voice and never forgets it.",
+    desc: "Upload your brand guide, website, and docs. Claude learns your voice, audience, and products — permanently.",
     icon: Brain,
   },
   {
-    step: "02",
-    title: "Set your goal",
-    desc: "Type what you want to achieve: 'Generate leads from CTOs', 'Launch new product', 'Build thought leadership'. One sentence is enough.",
-    icon: Target,
-  },
-  {
-    step: "03",
-    title: "AI agents get to work",
-    desc: "Research, Trend, Writer, and Reviewer agents collaborate. In 60 seconds you get reviewed, scored, on-brand content for every platform.",
+    num: "02",
+    title: "AI Agents go to work",
+    desc: "Research, Trend, Writer, and Reviewer agents collaborate. In 60 seconds: researched, written, and reviewed content.",
     icon: Bot,
   },
   {
-    step: "04",
-    title: "Review, approve, publish",
-    desc: "Edit anything you want. Approve what's great. Schedule for the optimal time or publish immediately. Astra handles the rest.",
-    icon: CheckCircle2,
+    num: "03",
+    title: "Review & approve",
+    desc: "Edit anything you want. Your brand voice, your approval. Schedule for the perfect moment.",
+    icon: Sparkles,
+  },
+  {
+    num: "04",
+    title: "Publish everywhere",
+    desc: "One click publishes to LinkedIn, Twitter, and TikTok simultaneously — with images and videos attached.",
+    icon: Send,
   },
 ];
 
-const STATS = [
-  { value: "4", label: "AI agents working simultaneously" },
-  { value: "60s", label: "From goal to reviewed content" },
-  { value: "5+", label: "Platforms supported" },
-  { value: "∞", label: "Brand memory retained" },
+const FEATURES = [
+  { icon: Brain, title: "Brand Brain", desc: "Permanent AI memory of your brand, audience, and products" },
+  { icon: Bot, title: "4-Agent Pipeline", desc: "Research → Trend → Writer → Reviewer in under 60 seconds" },
+  { icon: Calendar, title: "Campaign Builder", desc: "Full 30-day content calendar from one goal" },
+  { icon: Music2, title: "TikTok Studio", desc: "Native TikTok scripts, memory patterns, inbox upload" },
+  { icon: BarChart3, title: "Analytics", desc: "Performance data from every platform in one view" },
+  { icon: Zap, title: "Auto-Publish", desc: "Scheduled posts with images across LinkedIn, Twitter, TikTok" },
 ];
 
 const PRICING = [
   {
     name: "Starter",
     price: "$39",
-    period: "/mo",
-    desc: "For solo founders and creators",
-    features: [
-      "1 brand workspace",
-      "Brand Brain (10 docs)",
-      "Claude AI content generation",
-      "LinkedIn + Twitter",
-      "Content scheduling",
-      "100K AI tokens/month",
-      "Email support",
-    ],
+    desc: "For solo founders",
+    features: ["1 brand workspace", "100K AI tokens/mo", "LinkedIn + Twitter", "Brand Brain", "Email support"],
     cta: "Start free trial",
     highlight: false,
-    trial: "14-day free trial",
   },
   {
     name: "Pro",
     price: "$149",
-    period: "/mo",
-    desc: "For growing marketing teams",
-    features: [
-      "3 brand workspaces",
-      "5 team seats",
-      "Multi-agent pipeline",
-      "All platforms + Instagram",
-      "Campaigns & calendar",
-      "Analytics dashboard",
-      "500K AI tokens/month",
-      "Priority support",
-    ],
+    desc: "For growing teams",
+    features: ["3 brands", "5 seats", "500K AI tokens/mo", "All platforms + TikTok", "Campaigns & calendar", "Analytics"],
     cta: "Start free trial",
     highlight: true,
     badge: "Most Popular",
-    trial: "14-day free trial",
   },
   {
     name: "Business",
     price: "$499",
-    period: "/mo",
-    desc: "For agencies and enterprises",
-    features: [
-      "10 brand workspaces",
-      "20 team seats",
-      "Custom AI workflows",
-      "White-label reports",
-      "CRM integration",
-      "2M AI tokens/month",
-      "SLA guarantee",
-      "Dedicated support",
-    ],
+    desc: "For agencies",
+    features: ["10 brands", "20 seats", "2M AI tokens/mo", "Multi-agent workflows", "White-label", "Dedicated support"],
     cta: "Start free trial",
     highlight: false,
-    trial: "14-day free trial",
   },
 ];
 
-const FAQS = [
-  {
-    q: "How is Astra different from ChatGPT or other AI writing tools?",
-    a: "ChatGPT is a blank canvas — you have to give it all the context every time. Astra permanently learns your brand, monitors your market, manages your entire content workflow, and publishes directly to social media. It's a marketing operating system, not a writing assistant.",
-  },
-  {
-    q: "How does the Brand Brain work?",
-    a: "You upload PDFs, brand guides, website content, or any documents. Claude (Amazon Bedrock) reads everything and uses it as permanent context for all content generation. Ask it questions about your own docs, generate content that references specific products, or let it write in your exact voice.",
-  },
-  {
-    q: "Which platforms can Astra publish to?",
-    a: "Currently LinkedIn and Twitter/X with direct OAuth publishing. Instagram and Facebook are on the roadmap.",
-  },
-  {
-    q: "What AI model powers Astra?",
-    a: "Astra uses Claude 3.5 Sonnet via Amazon Bedrock for all text generation — one of the world's most capable language models. Image generation uses Pollinations.ai.",
-  },
-  {
-    q: "Can I try it before paying?",
-    a: "Yes — all plans include a 14-day free trial. No credit card required to start.",
-  },
-];
-
-// ── Components ─────────────────────────────────────────────────────────────────
-
-function FaqItem({ q, a }: { q: string; a: string }) {
-  return (
-    <details className="group border border-white/10 rounded-2xl p-5 bg-white/5 hover:border-white/20 transition cursor-pointer">
-      <summary className="flex items-center justify-between font-semibold text-white list-none">
-        <span>{q}</span>
-        <ChevronDown className="w-4 h-4 text-white/40 group-open:rotate-180 transition-transform shrink-0 ml-4" />
-      </summary>
-      <p className="mt-3 text-white/60 text-sm leading-relaxed">{a}</p>
-    </details>
-  );
-}
-
-// ── Main landing page ─────────────────────────────────────────────────────────
+// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#020817] text-white overflow-x-hidden">
 
-      {/* ── Navigation ───────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      {/* ── Ambient background blobs ─────────────────────────────────────────── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-20%] left-[10%] w-[600px] h-[600px] rounded-full bg-astra-500/8 blur-[120px]" />
+        <div className="absolute top-[10%] right-[5%] w-[500px] h-[500px] rounded-full bg-purple-500/6 blur-[100px]" />
+        <div className="absolute bottom-[20%] left-[20%] w-[400px] h-[400px] rounded-full bg-[#69C9D0]/5 blur-[100px]" />
+        <div className="absolute bottom-[5%] right-[15%] w-[350px] h-[350px] rounded-full bg-astra-500/5 blur-[80px]" />
+      </div>
+
+      {/* ── Nav ──────────────────────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 px-6 py-4" style={{ background: "rgba(2,8,23,0.7)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-astra-500 to-purple-500 flex items-center justify-center shadow-lg shadow-astra-500/30">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <span className="font-black text-lg">Astra Intelligence</span>
+            <span className="font-black text-lg tracking-tight">Astra Intelligence</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm text-white/60 hover:text-white transition">Features</a>
-            <a href="#how-it-works" className="text-sm text-white/60 hover:text-white transition">How it works</a>
-            <a href="#pricing" className="text-sm text-white/60 hover:text-white transition">Pricing</a>
-            <a href="#faq" className="text-sm text-white/60 hover:text-white transition">FAQ</a>
+            {["Features", "How it works", "Pricing"].map((l) => (
+              <a key={l} href={`#${l.toLowerCase().replace(/ /g, "-")}`}
+                className="text-sm text-white/50 hover:text-white transition">{l}</a>
+            ))}
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-white/70 hover:text-white transition hidden sm:block">
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-astra-500/20"
-            >
+            <Link href="/login" className="text-sm text-white/50 hover:text-white transition hidden sm:block">Sign in</Link>
+            <Link href="/register"
+              className="text-sm font-semibold bg-white text-[#020817] hover:bg-white/90 px-4 py-2 rounded-xl transition shadow-lg">
               Start free
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative px-6 pt-20 pb-24 text-center overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-astra-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-20 left-1/4 w-[300px] h-[300px] bg-purple-500/10 rounded-full blur-[80px] pointer-events-none" />
+      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
+      <section className="relative px-6 pt-24 pb-20 text-center">
+        {/* Spotlight */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-[300px] bg-gradient-to-b from-astra-500/60 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px]"
+            style={{ background: "radial-gradient(ellipse at top, rgba(99,102,241,0.12) 0%, transparent 70%)" }} />
+        </div>
 
         <div className="relative max-w-5xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-astra-500/10 border border-astra-500/30 rounded-full px-4 py-1.5 text-sm text-astra-300 mb-8">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Powered by Claude 3.5 on Amazon Bedrock</span>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm text-white/60 mb-8"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Powered by Claude 3.5 on Amazon Bedrock
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black mb-6 leading-[1.05] tracking-tight">
-            The AI that runs
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-astra-400 via-purple-400 to-pink-400">
-              your entire marketing
+          {/* Headline */}
+          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black leading-[0.95] tracking-tighter mb-6">
+            <span className="block text-white">Your AI</span>
+            <span className="block" style={{
+              background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 30%, #ec4899 60%, #f97316 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}>
+              Marketing OS
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Upload your brand. Astra learns everything, runs 4 specialized AI agents, generates campaigns, creates on-brand content with images, and publishes — automatically.
+          <p className="text-lg sm:text-xl text-white/45 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Upload your brand once. Claude learns everything, plans campaigns, generates on-brand content, and publishes to LinkedIn, Twitter, and TikTok — automatically.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <Link
-              href="/register"
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white font-bold px-8 py-4 rounded-2xl text-lg transition shadow-2xl shadow-astra-500/30"
-            >
-              Start free — no card needed
-              <ArrowRight className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+            <Link href="/register"
+              className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition text-white"
+              style={{ background: "linear-gradient(135deg, #6366f1, #a855f7)", boxShadow: "0 0 40px rgba(99,102,241,0.3)" }}>
+              Start free — no card needed <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link
-              href="/login"
-              className="flex items-center justify-center gap-2 bg-white/8 hover:bg-white/12 text-white font-semibold px-8 py-4 rounded-2xl text-lg transition border border-white/15"
-            >
+            <Link href="/login"
+              className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-base text-white/70 hover:text-white transition"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
               Sign in
             </Link>
           </div>
+          <p className="text-white/25 text-sm">14-day free trial · No credit card · Cancel anytime</p>
+        </div>
 
-          <p className="text-white/35 text-sm">
-            14-day free trial · No credit card required · Cancel anytime
-          </p>
+        {/* Dashboard mockup */}
+        <div className="relative max-w-5xl mx-auto mt-16">
+          <div className="rounded-2xl overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px rgba(0,0,0,0.6), 0 0 80px rgba(99,102,241,0.1)",
+            }}>
+            {/* Mock browser bar */}
+            <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="w-3 h-3 rounded-full bg-red-500/60" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+              <div className="w-3 h-3 rounded-full bg-emerald-500/60" />
+              <div className="flex-1 ml-2 h-5 rounded-md" style={{ background: "rgba(255,255,255,0.05)" }} />
+            </div>
+            {/* Mock dashboard content */}
+            <div className="p-6 grid grid-cols-12 gap-4 min-h-[280px]">
+              {/* Sidebar */}
+              <div className="col-span-2 space-y-2">
+                {["Intelligence Hub", "Brand Brain", "Campaigns", "Content", "Publish", "TikTok Studio", "Analytics", "AI Agents"].map((item, i) => (
+                  <div key={item} className="h-5 rounded-md text-[10px] flex items-center px-2"
+                    style={{
+                      background: i === 0 ? "rgba(99,102,241,0.2)" : "transparent",
+                      color: i === 0 ? "#818cf8" : "rgba(255,255,255,0.3)",
+                      fontSize: "10px"
+                    }}>
+                    {item}
+                  </div>
+                ))}
+              </div>
+              {/* Main area */}
+              <div className="col-span-10 space-y-3">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-7 w-48 rounded-lg" style={{ background: "rgba(255,255,255,0.06)" }} />
+                  <div className="h-7 w-32 rounded-lg ml-auto" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.4), rgba(168,85,247,0.4))" }} />
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  {[["Total content", "24", "text-blue-400"], ["Campaigns", "3", "text-astra-400"], ["Scheduled", "8", "text-amber-400"], ["Agent runs", "12", "text-purple-400"]].map(([l, v, c]) => (
+                    <div key={l} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <p className="text-[10px] text-white/30 mb-1">{l}</p>
+                      <p className={`text-xl font-black ${c}`}>{v}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl p-3 space-y-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    {["LinkedIn · approved", "Twitter · draft", "TikTok · approved"].map((t) => (
+                      <div key={t} className="h-6 rounded-lg flex items-center px-2 gap-2" style={{ background: "rgba(255,255,255,0.03)" }}>
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        <span className="text-[9px] text-white/30">{t}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <p className="text-[9px] text-white/20 mb-2">Activity</p>
+                    <div className="flex items-end gap-1 h-16">
+                      {[3, 6, 4, 8, 5, 9, 7, 11, 8, 12, 9, 14].map((h, i) => (
+                        <div key={i} className="flex-1 rounded-sm" style={{ height: `${h * 5}px`, background: `rgba(99,102,241,${0.2 + i * 0.04})` }} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Glow under mockup */}
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-20 blur-[40px]"
+            style={{ background: "linear-gradient(90deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1), rgba(99,102,241,0.15))" }} />
         </div>
       </section>
 
-      {/* ── Stats row ─────────────────────────────────────────────────────── */}
-      <section className="px-6 py-12 border-y border-white/10 bg-white/3">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {STATS.map((s) => (
-              <div key={s.label}>
-                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-astra-400 to-purple-400 mb-1">{s.value}</p>
-                <p className="text-white/50 text-sm">{s.label}</p>
+      {/* ── Trusted by strip ─────────────────────────────────────────────────── */}
+      <section className="px-6 py-10 border-y" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-xs uppercase tracking-[0.2em] text-white/25 mb-8">Publishes directly to</p>
+          <div className="flex flex-wrap justify-center gap-8">
+            {[
+              { name: "LinkedIn", color: "#0077B5" },
+              { name: "Twitter / X", color: "#1DA1F2" },
+              { name: "TikTok", color: "#EE1D52" },
+            ].map((p) => (
+              <div key={p.name} className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: p.color }}>
+                <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                {p.name}
               </div>
             ))}
+            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white/25"
+              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              + more coming
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Features ─────────────────────────────────────────────────────── */}
-      <section id="features" className="px-6 py-24">
+      {/* ── How it works ────────────────────────────────────────────────────── */}
+      <section id="how-it-works" className="px-6 py-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-astra-500/10 border border-astra-500/20 rounded-full px-3 py-1 text-xs text-astra-300 mb-4">
-              <Zap className="w-3 h-3" /> Platform capabilities
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs text-white/40 mb-5"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              Our workflow
+              <span className="w-px h-3" style={{ background: "rgba(255,255,255,0.15)" }} />
+              <span className="text-white/25">4 steps to autonomous marketing</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">
-              Not a writing tool.
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-white">
+              How our platform
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-astra-400 to-purple-400">A marketing system.</span>
+              <span style={{
+                background: "linear-gradient(135deg, #818cf8, #a78bfa)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
+              }}>makes you unstoppable</span>
             </h2>
-            <p className="text-white/55 text-lg max-w-xl mx-auto">
-              Astra replaces a 5-person marketing team — not just a copywriter.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className={`bg-gradient-to-br ${f.gradient} border border-white/10 rounded-2xl p-6 hover:border-white/20 transition group`}
-              >
-                <div className={`w-11 h-11 rounded-xl ${f.iconBg} flex items-center justify-center mb-4`}>
-                  <f.icon className={`w-5 h-5 ${f.iconColor}`} />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-white">{f.title}</h3>
-                <p className="text-white/55 text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="px-6 py-24 border-t border-white/10 bg-white/3">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-3 py-1 text-xs text-purple-300 mb-4">
-              <Play className="w-3 h-3" /> Setup to publish in under an hour
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">
-              How Astra works
-            </h2>
-            <p className="text-white/55 text-lg max-w-xl mx-auto">
-              Four simple steps to a fully autonomous marketing system.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {HOW_IT_WORKS.map((step, i) => {
               const Icon = step.icon;
               return (
-                <div
-                  key={step.step}
-                  className="relative border border-white/10 rounded-2xl p-6 bg-white/5 hover:border-white/20 transition"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-astra-500/15 flex items-center justify-center shrink-0">
-                      <Icon className="w-5 h-5 text-astra-400" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-black text-astra-400 font-mono">{step.step}</span>
-                        <h3 className="font-bold text-white">{step.title}</h3>
-                      </div>
-                      <p className="text-white/55 text-sm leading-relaxed">{step.desc}</p>
-                    </div>
+                <div key={step.num} className="relative rounded-2xl p-6 transition hover:scale-[1.02] duration-200"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                  }}>
+                  {/* Large num */}
+                  <div className="absolute top-4 right-5 text-6xl font-black select-none"
+                    style={{ color: "rgba(255,255,255,0.04)", lineHeight: 1 }}>
+                    {step.num}
                   </div>
+                  <div className="w-10 h-10 rounded-xl mb-4 flex items-center justify-center"
+                    style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                    <Icon className="w-5 h-5 text-astra-400" />
+                  </div>
+                  <h3 className="font-bold text-white text-sm mb-2">{step.title}</h3>
+                  <p className="text-xs text-white/40 leading-relaxed">{step.desc}</p>
                   {i < 3 && (
-                    <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 text-white/20 text-xl">→</div>
+                    <div className="hidden lg:block absolute top-1/2 -right-3 -translate-y-1/2 z-10">
+                      <ChevronRight className="w-5 h-5 text-white/15" />
+                    </div>
                   )}
                 </div>
               );
@@ -364,155 +306,169 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Platform logos strip ─────────────────────────────────────────── */}
-      <section className="px-6 py-12 border-t border-white/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-white/30 text-sm mb-8 uppercase tracking-widest font-semibold">Publishes directly to</p>
-          <div className="flex flex-wrap justify-center gap-10">
-            {[
-              { icon: Linkedin, label: "LinkedIn", color: "text-[#0077B5]" },
-              { icon: Twitter, label: "Twitter / X", color: "text-[#1DA1F2]" },
-            ].map((p) => {
-              const Icon = p.icon;
+      {/* ── Features ─────────────────────────────────────────────────────────── */}
+      <section id="features" className="px-6 py-24"
+        style={{ background: "linear-gradient(180deg, transparent 0%, rgba(99,102,241,0.03) 50%, transparent 100%)" }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">
+              Not a writing tool.
+              <br />
+              <span style={{
+                background: "linear-gradient(135deg, #f97316, #ec4899)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
+              }}>A marketing system.</span>
+            </h2>
+            <p className="text-white/35 text-lg max-w-xl mx-auto">
+              Astra replaces a 5-person marketing team — Research, Strategy, Writing, Design, and Publishing.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {FEATURES.map((f, i) => {
+              const Icon = f.icon;
+              const accents = ["#818cf8", "#a78bfa", "#ec4899", "#EE1D52", "#f97316", "#22d3ee"];
+              const accent = accents[i % accents.length];
               return (
-                <div key={p.label} className="flex items-center gap-2.5 text-white/40 hover:text-white/60 transition">
-                  <Icon className={`w-6 h-6 ${p.color}`} />
-                  <span className="font-semibold">{p.label}</span>
+                <div key={f.title} className="group rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02]"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                  }}>
+                  <div className="w-10 h-10 rounded-xl mb-4 flex items-center justify-center transition-all duration-300"
+                    style={{ background: `${accent}18`, border: `1px solid ${accent}25` }}>
+                    <Icon className="w-5 h-5" style={{ color: accent }} />
+                  </div>
+                  <h3 className="font-bold text-white mb-2">{f.title}</h3>
+                  <p className="text-sm text-white/40 leading-relaxed">{f.desc}</p>
                 </div>
               );
             })}
-            <div className="flex items-center gap-2.5 text-white/25">
-              <Globe className="w-5 h-5" />
-              <span className="text-sm">+ more coming</span>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Pricing ───────────────────────────────────────────────────────── */}
-      <section id="pricing" className="px-6 py-24 border-t border-white/10 bg-white/3">
+      {/* ── Stats strip ──────────────────────────────────────────────────────── */}
+      <section className="px-6 py-16 border-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            ["60s", "From goal to reviewed content"],
+            ["4", "AI agents working simultaneously"],
+            ["3+", "Social platforms auto-published"],
+            ["∞", "Brand memory retained forever"],
+          ].map(([val, label]) => (
+            <div key={label}>
+              <p className="text-4xl md:text-5xl font-black mb-2"
+                style={{
+                  background: "linear-gradient(135deg, #818cf8, #a78bfa, #ec4899)",
+                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
+                }}>
+                {val}
+              </p>
+              <p className="text-sm text-white/35">{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Pricing ───────────────────────────────────────────────────────────── */}
+      <section id="pricing" className="px-6 py-24">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 text-xs text-emerald-300 mb-4">
-              <Shield className="w-3 h-3" /> 14-day free trial on all plans
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">
               Simple, honest pricing
             </h2>
-            <p className="text-white/55 text-lg">Start free. Scale when you grow.</p>
+            <p className="text-white/35 text-lg">Start free. Scale when you grow. Cancel anytime.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {PRICING.map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-3xl p-6 flex flex-col relative ${
-                  plan.highlight
-                    ? "bg-gradient-to-br from-astra-500 to-purple-600 border-2 border-astra-400 shadow-2xl shadow-astra-500/30"
-                    : "bg-white/6 border border-white/12 hover:border-white/20 transition"
-                }`}
-              >
+              <div key={plan.name} className="relative rounded-3xl p-7 flex flex-col"
+                style={plan.highlight ? {
+                  background: "linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(168,85,247,0.1) 100%)",
+                  border: "1px solid rgba(99,102,241,0.3)",
+                  boxShadow: "0 0 40px rgba(99,102,241,0.1)",
+                } : {
+                  background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                }}>
                 {plan.badge && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="bg-white text-astra-600 text-xs font-black px-4 py-1.5 rounded-full shadow-lg">
+                    <span className="px-4 py-1.5 rounded-full text-xs font-black text-white"
+                      style={{ background: "linear-gradient(135deg, #6366f1, #a855f7)" }}>
                       {plan.badge}
                     </span>
                   </div>
                 )}
-
-                <div className="mb-6">
-                  <h3 className="font-black text-xl mb-1">{plan.name}</h3>
-                  <p className={`text-sm mb-4 ${plan.highlight ? "text-white/80" : "text-white/50"}`}>
-                    {plan.desc}
-                  </p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black">{plan.price}</span>
-                    <span className={`${plan.highlight ? "text-white/70" : "text-white/40"} text-lg`}>{plan.period}</span>
-                  </div>
-                  <p className={`text-xs mt-1.5 ${plan.highlight ? "text-white/60" : "text-white/35"}`}>
-                    {plan.trial}
-                  </p>
+                <h3 className="font-black text-white text-lg mb-1">{plan.name}</h3>
+                <p className="text-white/35 text-sm mb-5">{plan.desc}</p>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-5xl font-black text-white">{plan.price}</span>
+                  <span className="text-white/35">/mo</span>
                 </div>
-
                 <ul className="space-y-2.5 flex-1 mb-7">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${plan.highlight ? "text-white/90" : "text-astra-400"}`} />
-                      <span className={plan.highlight ? "text-white/90" : "text-white/70"}>{f}</span>
+                    <li key={f} className="flex items-center gap-2.5 text-sm text-white/60">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                      {f}
                     </li>
                   ))}
                 </ul>
-
-                <Link
-                  href="/register"
-                  className={`text-center py-3.5 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 ${
-                    plan.highlight
-                      ? "bg-white text-astra-600 hover:bg-white/95 shadow-lg"
-                      : "bg-white/10 text-white hover:bg-white/18 border border-white/15"
-                  }`}
-                >
+                <Link href="/register"
+                  className="w-full text-center py-3.5 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2"
+                  style={plan.highlight ? {
+                    background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                    color: "white",
+                    boxShadow: "0 0 20px rgba(99,102,241,0.3)",
+                  } : {
+                    background: "rgba(255,255,255,0.06)",
+                    color: "rgba(255,255,255,0.7)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}>
                   {plan.cta} <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             ))}
           </div>
-
-          <p className="text-center text-white/30 text-sm mt-8">
-            All prices in USD. Billed monthly. Cancel anytime.
-          </p>
         </div>
       </section>
 
-      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section id="faq" className="px-6 py-24 border-t border-white/10">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-white/8 border border-white/15 rounded-full px-3 py-1 text-xs text-white/50 mb-4">
-              <MessageSquare className="w-3 h-3" /> Frequently asked questions
-            </div>
-            <h2 className="text-4xl font-black tracking-tight">Got questions?</h2>
-          </div>
-          <div className="space-y-3">
-            {FAQS.map((faq) => (
-              <FaqItem key={faq.q} q={faq.q} a={faq.a} />
-            ))}
-          </div>
+      {/* ── Final CTA ─────────────────────────────────────────────────────────── */}
+      <section className="px-6 py-24 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] blur-[100px]"
+            style={{ background: "radial-gradient(ellipse, rgba(99,102,241,0.12) 0%, transparent 70%)" }} />
         </div>
-      </section>
-
-      {/* ── Final CTA ─────────────────────────────────────────────────────── */}
-      <section className="px-6 py-24 border-t border-white/10 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-astra-500/8 via-transparent to-purple-500/8 pointer-events-none" />
-        <div className="relative max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-astra-500/10 border border-astra-500/20 rounded-full px-3 py-1 text-xs text-astra-300 mb-6">
-            <Clock className="w-3 h-3" /> First campaign in under an hour
-          </div>
-          <h2 className="text-4xl md:text-5xl font-black mb-5 tracking-tight">
-            Ready to hire your
+        <div className="relative max-w-3xl mx-auto text-center">
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-5">
+            <span className="text-white">Your AI marketing team</span>
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-astra-400 to-purple-400">
-              AI marketing team?
+            <span style={{
+              background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 40%, #ec4899 70%, #f97316 100%)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
+            }}>
+              is waiting.
             </span>
           </h2>
-          <p className="text-white/55 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-            Set up your Brand Brain in 15 minutes. Let Claude generate your first campaign. Publish to LinkedIn and Twitter in under an hour.
+          <p className="text-white/40 text-lg mb-10 leading-relaxed">
+            Setup takes 15 minutes. First campaign in under an hour. Claude handles the rest.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/register"
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white font-bold px-10 py-4 rounded-2xl text-lg transition shadow-2xl shadow-astra-500/30"
-            >
-              <Sparkles className="w-5 h-5" />
-              Get started free
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
-          <p className="text-white/30 text-sm mt-4">14-day free trial · No credit card · Cancel anytime</p>
+          <Link href="/register"
+            className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-black text-lg text-white transition"
+            style={{
+              background: "linear-gradient(135deg, #6366f1, #a855f7)",
+              boxShadow: "0 0 60px rgba(99,102,241,0.35)",
+            }}>
+            <Sparkles className="w-5 h-5" />
+            Get started free
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+          <p className="text-white/20 text-sm mt-4">14-day free trial · No credit card · Cancel anytime</p>
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="px-6 py-10 border-t border-white/10">
+      {/* ── Footer ───────────────────────────────────────────────────────────── */}
+      <footer className="px-6 py-10 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
@@ -520,16 +476,17 @@ export default function LandingPage() {
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
               <span className="font-black text-white">Astra Intelligence</span>
-              <span className="text-white/25 text-sm">— The AI Marketing OS</span>
+              <span className="text-white/20 text-sm">— The AI Marketing OS</span>
             </div>
-            <div className="flex items-center gap-6 text-sm text-white/35">
+            <div className="flex items-center gap-6 text-sm text-white/25">
               <Link href="/privacy" className="hover:text-white/60 transition">Privacy</Link>
               <Link href="/terms" className="hover:text-white/60 transition">Terms</Link>
               <Link href="/login" className="hover:text-white/60 transition">Sign in</Link>
               <Link href="/register" className="hover:text-white/60 transition">Get started</Link>
             </div>
           </div>
-          <div className="mt-6 pt-6 border-t border-white/8 text-center text-white/25 text-xs">
+          <div className="mt-6 pt-6 text-center text-white/15 text-xs"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
             © {new Date().getFullYear()} Astra Intelligence. Built to replace your marketing department.
           </div>
         </div>
