@@ -698,7 +698,7 @@ export default function ContentPage() {
                     onCancelEdit={cancelEdit}
                     onSaveEdit={saveEdit}
                     onEditBodyChange={setEditBody}
-                    onApprove={(id) => toast.promise(approveMutation.mutateAsync(id), {
+                    onApprove={(id) => toast.promise(approveMutation.mutateAsync({ id, body: item.body }), {
                       loading: "Approving…", success: "Content approved ✓", error: "Failed"
                     })}
                     onReject={(id) => toast.promise(rejectMutation.mutateAsync(id), {

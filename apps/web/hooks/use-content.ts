@@ -71,14 +71,24 @@ export function useGenerateContent(brandId: string) {
   });
 }
 
+/** Strip the [Day X] prefix added by the campaign builder, e.g. "[Day 3] Topic\n\nhook" → "Topic\n\nhook" */
+function stripDayPrefix(body: string): string {
+  return body.replace(/^\[Day\s*\d+\]\s*/i, "").trimStart();
+}
+
 export function useApproveContent(brandId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (contentId: string) => {
+    mutationFn: async ({ id, body }: { id: string; body?: string }) => {
+      const update: Record<string, unknown> = { status: "approved" };
+      // If body is provided and starts with [Day X], strip it before approving
+      if (body && /^\[Day\s*\d+\]/i.test(body)) {
+        update.body = stripDayPrefix(body);
+      }
       const { error } = await supabase()
         .from("content")
-        .update({ status: "approved" })
-        .eq("id", contentId);
+        .update(update)
+        .eq("id", id);
       if (error) throw new Error(error.message);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["content", brandId] }),

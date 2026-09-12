@@ -152,7 +152,7 @@ function ContentCard({
         {item.status === "draft" && (
           <>
             <button
-              onClick={() => toast.promise(approveMutation.mutateAsync(item.id), {
+              onClick={() => toast.promise(approveMutation.mutateAsync({ id: item.id, body: item.body }), {
                 loading: "Approving…", success: "Approved ✓", error: "Failed"
               })}
               className="flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1.5 rounded-lg transition"
