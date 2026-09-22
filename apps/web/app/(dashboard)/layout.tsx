@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import dynamic from "next/dynamic";
+import { AuthGuard } from "@/components/dashboard/auth-guard";
 
 // Import Sidebar with no SSR to prevent hydration mismatch
 const Sidebar = dynamic(
@@ -25,7 +26,7 @@ export default async function DashboardLayout({
       <Sidebar user={user} />
       {/* pt-14 on mobile offsets the fixed top bar; md:pt-0 removes it on desktop */}
       <main className="flex-1 overflow-auto pt-14 md:pt-0" suppressHydrationWarning>
-        {children}
+        <AuthGuard>{children}</AuthGuard>
       </main>
     </div>
   );
