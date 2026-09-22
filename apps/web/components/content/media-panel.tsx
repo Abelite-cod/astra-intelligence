@@ -47,17 +47,17 @@ function MediaThumbnail({
   return (
     <div
       className={cn(
-        "relative rounded-xl overflow-hidden border-2 transition group aspect-square bg-muted",
-        media.selected ? "border-astra-500" : "border-transparent"
+        "relative rounded-sm overflow-hidden border-2 transition group aspect-square bg-[#1F1B17]",
+        media.selected ? "border-[#C8843A]" : "border-transparent"
       )}
     >
       {isVid ? (
         /* Video thumbnail */
-        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 cursor-pointer"
+        <div className="w-full h-full flex flex-col items-center justify-center bg-[#0D0B09] cursor-pointer"
           onClick={() => onPreview(media.public_url)}
         >
-          <Film className="w-8 h-8 text-white/50 mb-1" />
-          <span className="text-[10px] text-white/40 px-1 text-center truncate max-w-full">
+          <Film className="w-8 h-8 text-[#524D47] mb-1" />
+          <span className="text-[10px] text-[#524D47] px-1 text-center truncate max-w-full">
             {media.storage_path?.split("/").pop()?.slice(0, 16) ?? "video"}
           </span>
         </div>
@@ -74,8 +74,10 @@ function MediaThumbnail({
       {/* Type badge */}
       <div className="absolute top-1 left-1 flex gap-1">
         <span className={cn(
-          "text-[10px] font-medium px-1.5 py-0.5 rounded-full",
-          media.type === "generated" ? "bg-astra-500 text-white" : "bg-black/60 text-white"
+          "text-[10px] font-medium px-1.5 py-0.5 rounded-sm",
+          media.type === "generated"
+            ? "bg-[#C8843A] text-[#0D0B09]"
+            : "bg-[#0D0B09]/80 text-[#B8B2A9]"
         )}>
           {isVid ? "🎥" : media.type === "generated" ? "AI" : "↑"}
         </span>
@@ -84,7 +86,7 @@ function MediaThumbnail({
       {/* Selected indicator */}
       {media.selected && (
         <div className="absolute top-1 right-1">
-          <CheckCircle2 className="w-4 h-4 text-astra-500 bg-white rounded-full" />
+          <CheckCircle2 className="w-4 h-4 text-[#C8843A] bg-[#0D0B09] rounded-full" />
         </div>
       )}
 
@@ -92,23 +94,23 @@ function MediaThumbnail({
       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-1.5">
         <button
           onClick={() => onPreview(media.public_url)}
-          className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
+          className="w-7 h-7 rounded-sm bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition"
           title={isVid ? "Play preview" : "Preview"}
         >
           <Eye className="w-3.5 h-3.5 text-white" />
         </button>
         <button
           onClick={() => onSelect(media)}
-          className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
+          className="w-7 h-7 rounded-sm bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition"
           title={media.selected ? "Deselect" : "Select"}
         >
-          <CheckCircle2 className={cn("w-3.5 h-3.5", media.selected ? "text-astra-400" : "text-white")} />
+          <CheckCircle2 className={cn("w-3.5 h-3.5", media.selected ? "text-[#C8843A]" : "text-white")} />
         </button>
         {!isVid && media.type === "generated" && onRegenerate && (
           <button
             onClick={() => onRegenerate(media)}
             disabled={isGenerating}
-            className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition disabled:opacity-50"
+            className="w-7 h-7 rounded-sm bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition disabled:opacity-50"
             title="Regenerate variation"
           >
             <RotateCcw className="w-3.5 h-3.5 text-white" />
@@ -116,7 +118,7 @@ function MediaThumbnail({
         )}
         <button
           onClick={() => onDelete(media.id)}
-          className="w-7 h-7 rounded-full bg-red-500/80 hover:bg-red-600 flex items-center justify-center transition"
+          className="w-7 h-7 rounded-sm bg-red-900/60 hover:bg-red-800 flex items-center justify-center transition"
           title="Delete"
         >
           <Trash2 className="w-3.5 h-3.5 text-white" />
@@ -208,19 +210,17 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
 
   const isGenerating = generateMutation.isPending;
   const isUploading = uploadMutation.isPending;
-  const hasVideos = mediaList.some((m) => isVideo(m.public_url));
-  const hasImages = mediaList.some((m) => !isVideo(m.public_url));
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ImageIcon className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-semibold text-foreground">
+          <ImageIcon className="w-4 h-4 text-[#6E6860]" />
+          <span className="text-sm font-medium text-[#F5F2EE]">
             Media
             {selectedMedia.length > 0 && (
-              <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+              <span className="ml-1.5 text-xs font-normal text-[#6E6860]">
                 ({selectedMedia.length} selected)
               </span>
             )}
@@ -230,7 +230,7 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-accent transition disabled:opacity-50"
+            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-sm border border-[#3A3530] bg-transparent text-[#B8B2A9] hover:border-[#524D47] hover:text-[#F5F2EE] transition-colors disabled:opacity-50"
           >
             {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
             Upload
@@ -238,7 +238,7 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
           <button
             onClick={() => setShowGenerateForm((v) => !v)}
             disabled={isGenerating}
-            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-astra-500 hover:bg-astra-600 text-white transition disabled:opacity-50"
+            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-sm bg-[#C8843A] hover:bg-[#DE913A] text-[#0D0B09] transition-colors disabled:opacity-50"
           >
             {isGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             Generate image
@@ -258,11 +258,11 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
 
       {/* AI generate form */}
       {showGenerateForm && (
-        <div className="bg-astra-500/5 border border-astra-500/20 rounded-xl p-4 space-y-3">
-          <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-astra-500" />
+        <div className="bg-[#1F1B17] border border-[#2A2520] rounded-sm p-4 space-y-3">
+          <p className="text-xs font-medium text-[#F5F2EE] flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#C8843A]" />
             ASTRA Image Generation
-            <span className="font-normal text-muted-foreground ml-1">
+            <span className="font-normal text-[#6E6860] ml-1">
               — ASTRA writes visual brief, Pollinations renders
             </span>
           </p>
@@ -271,20 +271,20 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
             onChange={(e) => setGeneratePrompt(e.target.value)}
             rows={2}
             placeholder={`Optional: describe the image you want${platform ? ` for ${platform}` : ""}. Leave blank to generate from content context.`}
-            className="w-full px-3 py-2 text-xs rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+            className="w-full px-3 py-2 text-xs rounded-sm border border-[#3A3530] bg-[#161310] text-[#F5F2EE] placeholder:text-[#524D47] focus:border-[#C8843A] focus:outline-none transition-colors resize-none"
           />
           <div className="flex gap-2">
             <button
               onClick={handleGenerate}
               disabled={isGenerating}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-astra-500 hover:bg-astra-600 text-white transition disabled:opacity-50"
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-sm bg-[#C8843A] hover:bg-[#DE913A] text-[#0D0B09] transition-colors disabled:opacity-50"
             >
               {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
               {isGenerating ? "Generating…" : "Generate image"}
             </button>
             <button
               onClick={() => { setShowGenerateForm(false); setGeneratePrompt(""); }}
-              className="text-xs text-muted-foreground hover:text-foreground transition"
+              className="text-xs text-[#6E6860] hover:text-[#B8B2A9] transition-colors"
             >
               Cancel
             </button>
@@ -295,17 +295,18 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
       {/* Media grid */}
       {isLoading ? (
         <div className="flex items-center justify-center h-20">
-          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          <Loader2 className="w-5 h-5 animate-spin text-[#524D47]" />
         </div>
       ) : mediaList.length === 0 ? (
-        <div className="border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-astra-500/30 transition"
+        <div
+          className="border border-dashed border-[#3A3530] rounded-sm p-6 text-center cursor-pointer hover:border-[#524D47] transition-colors"
           onClick={() => fileInputRef.current?.click()}
         >
           <div className="flex justify-center gap-2 mb-2">
-            <ImageIcon className="w-6 h-6 text-muted-foreground opacity-40" />
-            <Video className="w-6 h-6 text-muted-foreground opacity-40" />
+            <ImageIcon className="w-6 h-6 text-[#524D47]" />
+            <Video className="w-6 h-6 text-[#524D47]" />
           </div>
-          <p className="text-xs text-muted-foreground">Upload images or videos, or generate an AI image above.</p>
+          <p className="text-xs text-[#6E6860]">Upload images or videos, or generate an AI image above.</p>
         </div>
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -325,8 +326,8 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
 
       {/* Selected count hint */}
       {mediaList.length > 0 && (
-        <p className="text-xs text-muted-foreground">
-          Only <strong>selected</strong> media will be attached when publishing.
+        <p className="text-xs text-[#6E6860]">
+          Only <strong className="text-[#B8B2A9]">selected</strong> media will be attached when publishing.
           {selectedMedia.length === 0 && " No media selected — post will be text-only."}
         </p>
       )}
@@ -339,7 +340,7 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
         >
           <button
             onClick={() => setPreviewUrl(null)}
-            className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 rounded-full p-2 transition"
+            className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 rounded-sm p-2 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -348,7 +349,7 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
               src={previewUrl}
               controls
               autoPlay
-              className="max-w-full max-h-full rounded-xl"
+              className="max-w-full max-h-full rounded-sm"
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
@@ -356,7 +357,7 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
             <img
               src={previewUrl}
               alt="Preview"
-              className="max-w-full max-h-full rounded-xl object-contain"
+              className="max-w-full max-h-full rounded-sm object-contain"
               onClick={(e) => e.stopPropagation()}
             />
           )}

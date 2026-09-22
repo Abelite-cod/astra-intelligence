@@ -7,16 +7,16 @@ export default function TermsOfServicePage() {
   const contactEmail = "legal@astra-intelligence.com";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-astra-950 via-slate-900 to-slate-950 text-white">
-      <nav className="border-b border-white/10 px-6 py-4">
+    <div className="min-h-screen bg-[#0D0B09] text-[#F5F2EE]">
+      <nav className="border-b border-[#2A2520] px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-astra-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded bg-[#C8843A] flex items-center justify-center">
               <Zap className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-lg">Astra Intelligence</span>
           </Link>
-          <Link href="/login" className="text-sm text-white/60 hover:text-white transition">
+          <Link href="/login" className="text-sm text-[#6E6860] hover:text-[#F5F2EE] transition">
             Sign in
           </Link>
         </div>
@@ -24,9 +24,9 @@ export default function TermsOfServicePage() {
 
       <main className="max-w-4xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold mb-2">Terms of Service</h1>
-        <p className="text-white/50 mb-12">Last updated: {lastUpdated}</p>
+        <p className="text-[#6E6860] mb-12">Last updated: {lastUpdated}</p>
 
-        <div className="prose prose-invert max-w-none space-y-8 text-white/80">
+        <div className="prose prose-invert max-w-none space-y-8 text-[#B8B2A9]">
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Acceptance of Terms</h2>
@@ -103,12 +103,12 @@ export default function TermsOfServicePage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">11. Contact</h2>
-            <p>For questions about these Terms, contact us at: <a href={`mailto:${contactEmail}`} className="text-astra-400 hover:text-astra-300">{contactEmail}</a></p>
+            <p>For questions about these Terms, contact us at: <a href={`mailto:${contactEmail}`} className="text-[#C8843A] hover:text-[#DE913A]">{contactEmail}</a></p>
           </section>
 
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/10 flex items-center gap-6 text-sm text-white/40">
+        <div className="mt-12 pt-8 border-t border-[#2A2520] flex items-center gap-6 text-sm text-[#524D47]">
           <Link href="/" className="hover:text-white/70 transition">Home</Link>
           <Link href="/privacy" className="hover:text-white/70 transition">Privacy Policy</Link>
         </div>

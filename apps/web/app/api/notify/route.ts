@@ -133,7 +133,7 @@ function emailTemplate({
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
       <div style="display:inline-flex;align-items:center;gap:10px;">
-        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#a855f7);display:inline-flex;align-items:center;justify-content:center;">
+        <div style="width:36px;height:36px;border-radius:4px;background:#C8843A;display:inline-flex;align-items:center;justify-content:center;">
           <span style="color:white;font-weight:900;font-size:18px;">⚡</span>
         </div>
         <span style="color:white;font-size:20px;font-weight:900;">Astra Intelligence</span>
@@ -141,12 +141,12 @@ function emailTemplate({
     </div>
 
     <!-- Card -->
-    <div style="background:#1e293b;border:1px solid #334155;border-radius:20px;padding:32px;">
+    <div style="background:#161310;border:1px solid #2A2520;border-radius:4px;padding:32px;">
       <h1 style="color:white;font-size:22px;font-weight:800;margin:0 0 12px 0;">${title}</h1>
       <p style="color:#94a3b8;font-size:15px;line-height:1.6;margin:0 0 20px 0;">Hi ${userName},</p>
       <p style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:0 0 20px 0;">${body}</p>
-      ${preview ? `<div style="background:#0f172a;border-left:3px solid #6366f1;border-radius:0 8px 8px 0;padding:12px 16px;margin:0 0 24px 0;"><p style="color:#94a3b8;font-size:14px;font-style:italic;margin:0;">${preview}</p></div>` : ""}
-      <a href="${cta.href}" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#a855f7);color:white;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:700;font-size:14px;">${cta.label} →</a>
+      ${preview ? `<div style="background:#0D0B09;border-left:3px solid #C8843A;border-radius:0 4px 4px 0;padding:12px 16px;margin:0 0 24px 0;"><p style="color:#6E6860;font-size:14px;font-style:italic;margin:0;">${preview}</p></div>` : ""}
+      <a href="${cta.href}" style="display:inline-block;background:#C8843A;color:white;text-decoration:none;padding:14px 28px;border-radius:4px;font-weight:700;font-size:14px;">${cta.label} →</a>
     </div>
 
     <!-- Footer -->

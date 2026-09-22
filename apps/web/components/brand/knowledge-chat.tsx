@@ -123,21 +123,21 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
   ];
 
   return (
-    <div className="border border-border rounded-2xl overflow-hidden bg-card shadow-sm">
+    <div className="border border-[#2A2520] rounded-sm overflow-hidden bg-[#0D0B09]">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-background">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#2A2520] bg-[#161310]">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-astra-500/10 flex items-center justify-center">
-            <MessageCircle className="w-3.5 h-3.5 text-astra-500" />
+          <div className="w-7 h-7 rounded-sm bg-[#1F1B17] border border-[#2A2520] flex items-center justify-center">
+            <MessageCircle className="w-3.5 h-3.5 text-[#6E6860]" />
           </div>
-          <span className="font-semibold text-sm text-foreground">Chat with your knowledge</span>
+          <span className="font-medium text-sm text-[#F5F2EE]">Chat with your knowledge</span>
         </div>
 
         {/* Document selector */}
         <select
           value={selectedDocId}
           onChange={(e) => setSelectedDocId(e.target.value)}
-          className="text-xs border border-input bg-background rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring text-muted-foreground"
+          className="text-xs border border-[#3A3530] bg-[#161310] text-[#6E6860] rounded-sm px-2.5 py-1.5 focus:outline-none focus:border-[#C8843A] transition-colors"
         >
           <option value="all">All documents</option>
           {indexedDocs.map((doc) => (
@@ -152,19 +152,19 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
       <div className="h-96 overflow-y-auto p-5 space-y-5">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-astra-500/10 flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-astra-500" />
+            <div className="w-10 h-10 rounded-sm bg-[#1F1B17] border border-[#2A2520] flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-[#6E6860]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">
+              <p className="text-sm font-medium text-[#F5F2EE]">
                 Ask anything about your documents
               </p>
               {indexedDocs.length === 0 ? (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-[#524D47] mt-1">
                   Upload and index a document above first.
                 </p>
               ) : (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-[#524D47] mt-1">
                   {indexedDocs.length} document{indexedDocs.length !== 1 ? "s" : ""} ready
                 </p>
               )}
@@ -175,7 +175,7 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
                   <button
                     key={s}
                     onClick={() => setInput(s)}
-                    className="text-xs px-3 py-1.5 rounded-full border border-border bg-background hover:border-astra-500/50 hover:text-astra-600 transition text-muted-foreground"
+                    className="text-xs px-3 py-1.5 rounded-sm border border-[#3A3530] bg-transparent hover:border-[#524D47] hover:text-[#F5F2EE] transition-colors text-[#6E6860]"
                   >
                     {s}
                   </button>
@@ -195,24 +195,24 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
           >
             <div
               className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5",
+                "w-7 h-7 rounded-sm flex items-center justify-center shrink-0 mt-0.5 border",
                 msg.role === "user"
-                  ? "bg-astra-500"
-                  : "bg-muted border border-border"
+                  ? "bg-[#C8843A] border-[#C8843A]"
+                  : "bg-[#1F1B17] border-[#2A2520]"
               )}
             >
               {msg.role === "user" ? (
-                <User className="w-3.5 h-3.5 text-white" />
+                <User className="w-3.5 h-3.5 text-[#0D0B09]" />
               ) : (
-                <Bot className="w-3.5 h-3.5 text-muted-foreground" />
+                <Bot className="w-3.5 h-3.5 text-[#6E6860]" />
               )}
             </div>
             <div
               className={cn(
-                "max-w-[80%] rounded-2xl px-4 py-3 text-sm",
+                "max-w-[80%] rounded-sm px-4 py-3 text-sm border",
                 msg.role === "user"
-                  ? "bg-astra-500 text-white rounded-tr-none"
-                  : "bg-muted text-foreground rounded-tl-none"
+                  ? "bg-[#C8843A] text-[#0D0B09] border-[#C8843A]"
+                  : "bg-[#1F1B17] text-[#B8B2A9] border-[#2A2520]"
               )}
             >
               {msg.role === "assistant" ? (
@@ -226,18 +226,18 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
 
         {loading && (
           <div className="flex gap-3">
-            <div className="w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center shrink-0">
-              <Bot className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="w-7 h-7 rounded-sm bg-[#1F1B17] border border-[#2A2520] flex items-center justify-center shrink-0">
+              <Bot className="w-3.5 h-3.5 text-[#6E6860]" />
             </div>
-            <div className="bg-muted rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-2">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Thinking…</span>
+            <div className="bg-[#1F1B17] border border-[#2A2520] rounded-sm px-4 py-3 flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#524D47]" />
+              <span className="text-xs text-[#524D47]">Thinking…</span>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="text-xs text-red-500 bg-red-500/10 px-4 py-2.5 rounded-xl">
+          <div className="text-xs text-red-400 bg-red-900/20 border border-red-500/20 px-4 py-2.5 rounded-sm">
             {error}
           </div>
         )}
@@ -246,7 +246,7 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-border p-4 bg-background">
+      <div className="border-t border-[#2A2520] p-4 bg-[#161310]">
         <form onSubmit={handleSend} className="flex gap-2">
           <input
             value={input}
@@ -257,12 +257,12 @@ export function KnowledgeChat({ brandId }: KnowledgeChatProps) {
                 : "Ask anything about your documents…"
             }
             disabled={loading || indexedDocs.length === 0}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-input bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            className="flex-1 h-10 px-3 rounded-sm border border-[#3A3530] bg-[#0D0B09] text-sm text-[#F5F2EE] placeholder:text-[#524D47] focus:border-[#C8843A] focus:outline-none transition-colors disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={loading || !input.trim() || indexedDocs.length === 0}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-astra-500 hover:bg-astra-600 text-white transition disabled:opacity-50 shrink-0"
+            className="w-10 h-10 flex items-center justify-center rounded-sm bg-[#C8843A] hover:bg-[#DE913A] text-[#0D0B09] transition-colors disabled:opacity-50 shrink-0"
           >
             <Send className="w-4 h-4" />
           </button>

@@ -35,20 +35,20 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-astra-950 via-astra-900 to-slate-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#0D0B09] px-4">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-astra-500 flex items-center justify-center">
+          <div className="w-10 h-10 rounded bg-[#C8843A] flex items-center justify-center">
             <Zap className="w-5 h-5 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white">Astra</span>
+          <span className="text-2xl font-bold text-[#F5F2EE]">Astra</span>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
-          <h1 className="text-2xl font-bold text-white mb-1">Set new password</h1>
-          <p className="text-white/60 text-sm mb-6">Choose a strong password for your account.</p>
+        <div className="bg-[#161310] border border-[#2A2520] rounded p-8">
+          <h1 className="text-2xl font-bold text-[#F5F2EE] mb-1">Set new password</h1>
+          <p className="text-[#6E6860] text-sm mb-6">Choose a strong password for your account.</p>
           <form onSubmit={handleReset} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-white/80 mb-1.5">New password</label>
+              <label className="block text-sm font-medium text-[#B8B2A9] mb-1.5">New password</label>
               <input
                 type="password"
                 value={password}
@@ -56,27 +56,27 @@ export default function ResetPasswordPage() {
                 required
                 minLength={8}
                 placeholder="Min. 8 characters"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-astra-500 text-sm"
+                className="w-full px-3.5 py-2.5 rounded border border-[#3A3530] bg-[#0D0B09] text-[#F5F2EE] placeholder-[#524D47] focus:outline-none focus:ring-1 focus:ring-[#C8843A] text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/80 mb-1.5">Confirm password</label>
+              <label className="block text-sm font-medium text-[#B8B2A9] mb-1.5">Confirm password</label>
               <input
                 type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required
                 placeholder="Repeat your password"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-astra-500 text-sm"
+                className="w-full px-3.5 py-2.5 rounded border border-[#3A3530] bg-[#0D0B09] text-[#F5F2EE] placeholder-[#524D47] focus:outline-none focus:ring-1 focus:ring-[#C8843A] text-sm"
               />
             </div>
             {error && (
-              <p className="text-red-400 text-sm bg-red-400/10 px-3 py-2 rounded-lg">{error}</p>
+              <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 px-3 py-2 rounded">{error}</p>
             )}
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-white text-sm bg-astra-500 hover:bg-astra-600 transition disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded font-medium text-white text-sm bg-[#C8843A] hover:bg-[#A86830] transition disabled:opacity-50"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Update password

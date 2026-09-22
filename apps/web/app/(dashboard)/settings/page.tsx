@@ -182,7 +182,7 @@ export default function SettingsPage() {
       configured: true,
       icon: Zap,
       color: "text-purple-600",
-      bg: "bg-purple-500/10",
+      bg: "bg-[#1F1B17]",
     },
   ];
 
@@ -207,7 +207,7 @@ export default function SettingsPage() {
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left",
                   activeTab === id
-                    ? "bg-astra-500/10 text-astra-600 border border-astra-500/20"
+                    ? "bg-[#C8843A]/10 text-[#C8843A] border border-[#C8843A]/20"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
               >
@@ -219,9 +219,9 @@ export default function SettingsPage() {
           </nav>
 
           {/* Account summary card */}
-          <div className="mt-6 p-4 bg-card border border-border rounded-2xl">
+          <div className="mt-6 p-4 bg-card border border-border rounded">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-astra-500 to-purple-500 flex items-center justify-center text-white font-bold shrink-0">
+              <div className="w-10 h-10 rounded bg-[#C8843A] flex items-center justify-center text-white font-bold shrink-0">
                 {initials}
               </div>
               <div className="min-w-0">
@@ -258,9 +258,9 @@ export default function SettingsPage() {
               </div>
 
               {/* Avatar + name form */}
-              <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
+              <div className="bg-card border border-border rounded p-6 space-y-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-18 h-18 rounded-2xl bg-gradient-to-br from-astra-500 to-purple-500 flex items-center justify-center text-white text-3xl font-bold shrink-0 w-[4.5rem] h-[4.5rem]">
+                  <div className="w-18 h-18 rounded bg-[#C8843A] flex items-center justify-center text-white text-3xl font-bold shrink-0 w-[4.5rem] h-[4.5rem]">
                     {initials}
                   </div>
                   <div>
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Your full name"
-                      className="w-full px-4 py-2.5 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40"
+                      className="w-full px-4 py-2.5 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40"
                     />
                   </div>
                   <div>
@@ -285,14 +285,14 @@ export default function SettingsPage() {
                     <input
                       value={authUser?.email ?? ""}
                       disabled
-                      className="w-full px-4 py-2.5 rounded-xl border border-input bg-muted text-sm text-muted-foreground cursor-not-allowed"
+                      className="w-full px-4 py-2.5 rounded border border-input bg-muted text-sm text-muted-foreground cursor-not-allowed"
                     />
                     <p className="text-xs text-muted-foreground mt-1">Email changes require contacting support.</p>
                   </div>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-2 bg-astra-500 hover:bg-astra-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition disabled:opacity-50 shadow-lg shadow-astra-500/20"
+                    className="flex items-center gap-2 bg-[#C8843A] hover:bg-[#A86830] text-white text-sm font-semibold px-5 py-2.5 rounded transition disabled:opacity-50"
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Save profile
@@ -301,7 +301,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Password change */}
-              <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+              <div className="bg-card border border-border rounded p-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-muted-foreground" />
                   <h3 className="text-sm font-bold text-foreground">Change password</h3>
@@ -315,7 +315,7 @@ export default function SettingsPage() {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Minimum 8 characters"
-                        className="w-full px-4 py-2.5 pr-10 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40"
+                        className="w-full px-4 py-2.5 pr-10 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40"
                       />
                       <button
                         type="button"
@@ -329,7 +329,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={changingPassword || newPassword.length < 8}
-                    className="flex items-center gap-2 border border-border bg-background hover:bg-accent text-sm font-semibold px-5 py-2.5 rounded-xl transition disabled:opacity-50"
+                    className="flex items-center gap-2 border border-border bg-background hover:bg-accent text-sm font-semibold px-5 py-2.5 rounded transition disabled:opacity-50"
                   >
                     {changingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
                     Update password
@@ -338,10 +338,10 @@ export default function SettingsPage() {
               </div>
 
               {/* Danger zone */}
-              <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5">
+              <div className="bg-red-500/5 border border-red-500/20 rounded p-5">
                 <h3 className="text-sm font-bold text-red-600 mb-2">Danger zone</h3>
                 <p className="text-xs text-muted-foreground mb-3">Permanently delete your account and all associated data. This cannot be undone.</p>
-                <button className="text-sm text-red-600 font-semibold hover:text-red-700 border border-red-500/30 hover:border-red-500/60 px-4 py-2 rounded-xl transition">
+                <button className="text-sm text-red-600 font-semibold hover:text-red-700 border border-red-500/30 hover:border-red-500/60 px-4 py-2 rounded transition">
                   Delete account
                 </button>
               </div>
@@ -363,7 +363,7 @@ export default function SettingsPage() {
                   const Icon = integration.icon;
                   return (
                     <div key={integration.id} className={cn(
-                      "flex items-center gap-4 p-4 rounded-2xl border transition",
+                      "flex items-center gap-4 p-4 rounded border transition",
                       integration.configured ? "border-border bg-card hover:border-border/80" : "border-border bg-card opacity-70"
                     )}>
                       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", integration.bg)}>
@@ -390,7 +390,7 @@ export default function SettingsPage() {
                         {integration.connectHref && !integration.configured && (
                           <a
                             href={integration.connectHref}
-                            className="text-xs font-semibold text-astra-500 hover:text-astra-600 border border-astra-500/30 hover:border-astra-500 px-3 py-1.5 rounded-lg transition"
+                            className="text-xs font-semibold text-[#C8843A] hover:text-[#DE913A] border border-[#C8843A]/30 hover:border-[#C8843A] px-3 py-1.5 rounded transition"
                           >
                             Connect
                           </a>
@@ -401,18 +401,18 @@ export default function SettingsPage() {
                 })}
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="bg-[#2A1E08] border border-[#4D3810] rounded p-5 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-[#D4924A] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-amber-800">Updating API keys on Railway</p>
-                  <p className="text-sm text-amber-700 mt-1">
+                  <p className="text-sm font-semibold text-[#D4924A]">Updating API keys on Railway</p>
+                  <p className="text-sm text-[#B8B2A9] mt-1">
                     Go to <strong>Railway → your web service → Variables</strong> and add or update environment variables. Railway automatically redeploys when variables change.
                   </p>
                   <a
                     href="https://railway.app"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800 mt-2 transition"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#D4924A] hover:text-[#DE913A] mt-2 transition"
                   >
                     Open Railway dashboard <ExternalLink className="w-3 h-3" />
                   </a>
@@ -429,7 +429,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Manage workspace members and access.</p>
               </div>
 
-              <div className="bg-astra-500/5 border border-astra-500/20 rounded-2xl p-4 flex items-center gap-3">
+              <div className="bg-[#1F1B17] border border-[#2A2520] rounded p-4 flex items-center gap-3">
                 <Shield className="w-5 h-5 text-astra-500 shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-foreground">Free Trial — 1 seat</p>
@@ -437,7 +437,7 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={() => setActiveTab("billing")}
-                  className="flex items-center gap-1 text-xs font-semibold text-astra-500 hover:text-astra-600 border border-astra-500/30 hover:border-astra-500 px-3 py-1.5 rounded-lg transition"
+                  className="flex items-center gap-1 text-xs font-semibold text-[#C8843A] hover:text-[#DE913A] border border-[#C8843A]/30 hover:border-[#C8843A] px-3 py-1.5 rounded transition"
                 >
                   Upgrade <ChevronRight className="w-3 h-3" />
                 </button>
@@ -445,15 +445,15 @@ export default function SettingsPage() {
 
               <div>
                 <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">Members (1/1)</p>
-                <div className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-astra-500 to-purple-500 flex items-center justify-center text-white font-bold shrink-0">
+                <div className="flex items-center gap-3 p-4 rounded border border-border bg-card">
+                  <div className="w-10 h-10 rounded bg-[#C8843A] flex items-center justify-center text-white font-bold shrink-0">
                     {initials}
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">{fullName || authUser?.email}</p>
                     <p className="text-xs text-muted-foreground">{authUser?.email}</p>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs bg-astra-500/10 text-astra-600 border border-astra-500/20 px-2.5 py-1 rounded-full font-semibold">
+                  <div className="flex items-center gap-1.5 text-xs bg-[#C8843A]/10 text-[#C8843A] border border-[#C8843A]/20 px-2.5 py-1 rounded-full font-semibold">
                     <Crown className="w-3 h-3" /> Owner
                   </div>
                 </div>
@@ -472,7 +472,7 @@ export default function SettingsPage() {
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-input bg-background text-sm"
                     />
                   </div>
-                  <button disabled className="flex items-center gap-2 bg-astra-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl opacity-50 cursor-not-allowed">
+                  <button disabled className="flex items-center gap-2 bg-[#C8843A] text-white text-sm font-semibold px-4 py-2.5 rounded opacity-50 cursor-not-allowed">
                     <UserPlus className="w-4 h-4" /> Invite
                   </button>
                 </div>
@@ -490,7 +490,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Current plan banner */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+              <div className="flex items-center justify-between p-4 rounded bg-emerald-500/5 border border-emerald-500/20">
                 <div>
                   <p className="text-sm font-bold text-foreground flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Current plan: Free Trial
@@ -503,8 +503,8 @@ export default function SettingsPage() {
               {/* Usage stats */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: "Brands", used: brands.length, limit: 1, icon: Brain, color: "text-astra-500", bg: "bg-astra-500/10" },
-                  { label: "Team seats", used: 1, limit: 1, icon: Users, color: "text-purple-600", bg: "bg-purple-500/10" },
+                  { label: "Brands", used: brands.length, limit: 1, icon: Brain, color: "text-[#C8843A]", bg: "bg-[#C8843A]/10" },
+                  { label: "Team seats", used: 1, limit: 1, icon: Users, color: "text-[#B8B2A9]", bg: "bg-[#1F1B17]" },
                   { label: "Campaigns", used: 0, limit: 3, icon: Calendar, color: "text-blue-600", bg: "bg-blue-500/10" },
                 ].map((s) => (
                   <div key={s.label} className="bg-card border border-border rounded-xl p-3.5">
@@ -531,7 +531,7 @@ export default function SettingsPage() {
                     error: (e) => e.message,
                   })}
                   disabled={portal.isPending}
-                  className="flex items-center gap-2 text-sm font-semibold border border-border hover:bg-accent px-4 py-2.5 rounded-xl transition disabled:opacity-50"
+                  className="flex items-center gap-2 text-sm font-semibold border border-border hover:bg-accent px-4 py-2.5 rounded transition disabled:opacity-50"
                 >
                   {portal.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
                   Manage subscription in Stripe
@@ -547,11 +547,11 @@ export default function SettingsPage() {
                     <div
                       key={plan.id}
                       className={cn(
-                        "rounded-2xl border p-5 flex flex-col transition",
+                        "rounded border p-5 flex flex-col transition",
                         isCurrent
                           ? "border-emerald-500 bg-emerald-500/5"
                           : plan.highlight
-                          ? "border-astra-500 bg-gradient-to-br from-astra-500/5 to-purple-500/5 shadow-lg shadow-astra-500/10"
+                          ? "border-[#C8843A] bg-[#1F1B17]"
                           : "border-border bg-card"
                       )}
                     >
@@ -561,7 +561,7 @@ export default function SettingsPage() {
                         </span>
                       )}
                       {!isCurrent && plan.highlight && (
-                        <span className="text-xs bg-gradient-to-r from-astra-500 to-purple-500 text-white px-2.5 py-1 rounded-full font-bold w-fit mb-3">Most Popular</span>
+                        <span className="text-xs bg-[#C8843A] text-white px-2.5 py-1 rounded font-bold w-fit mb-3">Most Popular</span>
                       )}
                       <h3 className="font-bold text-foreground text-base">{plan.name}</h3>
                       <p className="text-xs text-muted-foreground mt-0.5 mb-3">{plan.description}</p>
@@ -578,11 +578,11 @@ export default function SettingsPage() {
                         ))}
                       </ul>
                       {isCurrent ? (
-                        <button disabled className="w-full py-2.5 rounded-xl text-sm font-semibold bg-muted text-muted-foreground cursor-default">
+                        <button disabled className="w-full py-2.5 rounded text-sm font-semibold bg-muted text-muted-foreground cursor-default">
                           Current plan
                         </button>
                       ) : !plan.priceId ? (
-                        <button disabled className="w-full py-2.5 rounded-xl text-sm font-semibold border border-border text-muted-foreground cursor-not-allowed opacity-60">
+                        <button disabled className="w-full py-2.5 rounded text-sm font-semibold border border-border text-muted-foreground cursor-not-allowed opacity-60">
                           Coming soon
                         </button>
                       ) : (
@@ -594,9 +594,9 @@ export default function SettingsPage() {
                           })}
                           disabled={isCheckoutPending}
                           className={cn(
-                            "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50",
+                            "w-full flex items-center justify-center gap-2 py-2.5 rounded text-sm font-semibold transition disabled:opacity-50",
                             plan.highlight
-                              ? "bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white shadow-lg shadow-astra-500/20"
+                              ? "bg-[#C8843A] hover:bg-[#A86830] text-white"
                               : "border border-border hover:bg-accent text-foreground"
                           )}
                         >
@@ -624,7 +624,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Choose what Astra notifies you about.</p>
               </div>
 
-              <div className="bg-card border border-border rounded-2xl divide-y divide-border">
+              <div className="bg-card border border-border rounded divide-y divide-border">
                 {[
                   { key: "content_approved" as const, label: "Content approved", description: "When a team member approves content for publishing" },
                   { key: "agent_completed" as const, label: "Agent pipeline complete", description: "When the multi-agent pipeline finishes running" },
@@ -653,16 +653,16 @@ export default function SettingsPage() {
                 ))}
               </div>
 
-              <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-4 flex gap-3">
-                <Bell className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <p className="text-sm text-blue-800">
+              <div className="bg-[#0E1E2A] border border-[#1C3650] rounded p-4 flex gap-3">
+                <Bell className="w-4 h-4 text-[#5B9BD5] shrink-0 mt-0.5" />
+                <p className="text-sm text-[#B8B2A9]">
                   Email notifications will be sent to <strong>{authUser?.email}</strong>. In-app toasts are always enabled.
                 </p>
               </div>
 
               <button
                 onClick={() => toast.success("Notification preferences saved ✓")}
-                className="flex items-center gap-2 bg-astra-500 hover:bg-astra-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-astra-500/20"
+                className="flex items-center gap-2 bg-[#C8843A] hover:bg-[#A86830] text-white text-sm font-semibold px-5 py-2.5 rounded transition"
               >
                 <Save className="w-4 h-4" /> Save preferences
               </button>

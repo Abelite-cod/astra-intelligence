@@ -57,77 +57,6 @@ function getGreeting() {
   return "Good evening";
 }
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
-
-function StatCard({
-  label, value, sub, icon: Icon, color, bg, href
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-  href?: string;
-}) {
-  const content = (
-    <div className={cn(
-      "bg-card border border-border rounded-2xl p-5 transition",
-      href && "hover:border-astra-500/40 hover:shadow-sm cursor-pointer"
-    )}>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm text-muted-foreground font-medium">{label}</span>
-        <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", bg)}>
-          <Icon className={cn("w-4.5 h-4.5 w-[1.125rem] h-[1.125rem]", color)} />
-        </div>
-      </div>
-      <p className="text-3xl font-black text-foreground">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
-      {href && (
-        <div className="flex items-center gap-1 text-xs text-astra-500 font-semibold mt-3">
-          View <ChevronRight className="w-3.5 h-3.5" />
-        </div>
-      )}
-    </div>
-  );
-  return href ? <Link href={href}>{content}</Link> : content;
-}
-
-// ── Quick action ──────────────────────────────────────────────────────────────
-
-function QuickAction({
-  href, icon: Icon, title, desc, color, bg, badge
-}: {
-  href: string;
-  icon: React.ElementType;
-  title: string;
-  desc: string;
-  color: string;
-  bg: string;
-  badge?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group bg-card border border-border rounded-2xl p-5 hover:border-astra-500/50 hover:shadow-md transition-all"
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center", bg)}>
-          <Icon className={cn("w-5 h-5", color)} />
-        </div>
-        {badge && (
-          <span className="text-xs font-bold bg-astra-500/10 text-astra-600 px-2 py-0.5 rounded-full">{badge}</span>
-        )}
-      </div>
-      <h3 className="font-bold text-foreground group-hover:text-astra-600 transition text-sm">{title}</h3>
-      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{desc}</p>
-      <div className="flex items-center gap-1 text-xs text-astra-500 font-semibold mt-3 opacity-0 group-hover:opacity-100 transition">
-        Go <ArrowRight className="w-3.5 h-3.5" />
-      </div>
-    </Link>
-  );
-}
-
 // ── Main dashboard ────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -210,223 +139,177 @@ export default function DashboardPage() {
   if (brandsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-6 h-6 border-2 border-astra-500 border-t-transparent rounded-full" />
+        <div className="animate-spin w-5 h-5 border-2 border-[#C8843A] border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 max-w-7xl">
 
-      {/* ── Hero greeting ─────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between">
+      {/* ── Page header ───────────────────────────────────────────────────── */}
+      <div className="mb-8 pb-6 border-b border-[#2A2520] flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-black text-foreground">
-            {greeting}, {displayName} 👋
+          <h1 className="text-2xl font-semibold text-[#F5F2EE] tracking-tight">
+            {greeting}, {displayName}
           </h1>
-          <p className="text-muted-foreground mt-1.5">
+          <p className="mt-1 text-sm text-[#928C83]">
             {brands.length === 0
               ? "Let's get your ASTRA marketing system set up."
               : `${brands[0]?.name ?? "Your brand"} · ASTRA is ready to work.`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/content"
-            className="flex items-center gap-2 bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-astra-500/20"
-          >
-            <Sparkles className="w-4 h-4" /> Generate content
-          </Link>
-        </div>
+        <Link
+          href="/content"
+          className="flex items-center gap-2 bg-[#C8843A] text-[#0D0B09] px-4 py-2 text-sm font-medium rounded-sm hover:bg-[#DE913A] transition-colors"
+        >
+          <Sparkles className="w-4 h-4" /> Generate content
+        </Link>
       </div>
 
       {/* ── Setup banner (shown when no brands) ──────────────────────────── */}
       {brands.length === 0 && (
-        <div className="bg-gradient-to-br from-astra-500 via-astra-600 to-purple-600 rounded-3xl p-7 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
-          <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-white/5 rounded-full translate-y-1/2" />
-          <div className="relative">
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
-                    <Brain className="w-4 h-4" />
-                  </div>
-                  <span className="font-semibold text-sm text-white/80">First step</span>
-                </div>
-                <h2 className="text-2xl font-black mb-2">Activate your Brand Brain</h2>
-                <p className="text-white/80 max-w-lg leading-relaxed">
-                  Train ASTRA on your company, products, and audience. Once set up, every piece of content will be perfectly on-brand — automatically.
-                </p>
-                <div className="flex items-center gap-5 mt-4 text-sm text-white/70">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-white/60" /> On-brand content</span>
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-white/60" /> Knows your audience</span>
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-white/60" /> Never loses context</span>
-                </div>
+        <div className="border-l-4 border-[#C8843A] bg-[#1F1B17] p-6 rounded-sm mb-8">
+          <div className="flex items-start justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Brain className="w-4 h-4 text-[#C8843A]" />
+                <span className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em]">First step</span>
               </div>
-              <div className="flex flex-col gap-2 shrink-0">
-                <Link
-                  href="/onboarding"
-                  className="flex items-center gap-2 bg-white text-astra-600 font-bold px-5 py-3 rounded-xl text-sm hover:bg-white/90 transition shadow-lg"
-                >
-                  <Rocket className="w-4 h-4" /> Start setup <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/brand"
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-medium px-5 py-2.5 rounded-xl text-sm transition text-center justify-center"
-                >
-                  Manual setup
-                </Link>
+              <h2 className="text-base font-semibold text-[#F5F2EE] mb-2">Activate your Brand Brain</h2>
+              <p className="text-sm text-[#928C83] max-w-lg leading-relaxed">
+                Train ASTRA on your company, products, and audience. Once set up, every piece of content will be perfectly on-brand — automatically.
+              </p>
+              <div className="flex items-center gap-5 mt-4 text-xs text-[#6E6860]">
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#3D7A5A]" /> On-brand content</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#3D7A5A]" /> Knows your audience</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#3D7A5A]" /> Never loses context</span>
               </div>
+            </div>
+            <div className="flex flex-col gap-2 shrink-0">
+              <Link
+                href="/onboarding"
+                className="flex items-center gap-2 bg-[#C8843A] text-[#0D0B09] font-medium px-4 py-2 rounded-sm text-sm hover:bg-[#DE913A] transition-colors"
+              >
+                <Rocket className="w-4 h-4" /> Start setup <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/brand"
+                className="flex items-center gap-2 border border-[#3A3530] text-[#B8B2A9] px-4 py-2 text-sm font-medium rounded-sm hover:border-[#524D47] hover:text-[#F5F2EE] bg-transparent transition-colors justify-center"
+              >
+                Manual setup
+              </Link>
             </div>
           </div>
         </div>
       )}
 
       {/* ── Stats row ─────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard
-          label="Total content"
-          value={stats.totalContent}
-          sub={`${stats.approvedContent} approved · ${stats.publishedContent} published`}
-          icon={FileText}
-          color="text-blue-600"
-          bg="bg-blue-500/10"
-          href="/content"
-        />
-        <StatCard
-          label="Campaigns"
-          value={campaigns.length}
-          sub={`${stats.activeCampaigns} active`}
-          icon={Target}
-          color="text-astra-600"
-          bg="bg-astra-500/10"
-          href="/campaigns"
-        />
-        <StatCard
-          label="Scheduled posts"
-          value={stats.scheduledPosts}
-          sub="upcoming"
-          icon={Clock}
-          color="text-amber-600"
-          bg="bg-amber-500/10"
-          href="/publish"
-        />
-        <StatCard
-          label="Agent runs"
-          value={agentRuns.length}
-          sub={`${stats.recentAgentRuns} completed`}
-          icon={Bot}
-          color="text-purple-600"
-          bg="bg-purple-500/10"
-          href="/agents"
-        />
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[#2A2520] border border-[#2A2520] rounded-sm mb-8">
+        <Link href="/content" className="p-6 hover:bg-[#161310] transition-colors">
+          <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Total content</p>
+          <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.totalContent}</p>
+          <p className="text-xs text-[#6E6860] mt-1">{stats.approvedContent} approved · {stats.publishedContent} published</p>
+        </Link>
+        <Link href="/campaigns" className="p-6 hover:bg-[#161310] transition-colors">
+          <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Campaigns</p>
+          <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{campaigns.length}</p>
+          <p className="text-xs text-[#3D7A5A] mt-1">{stats.activeCampaigns} active</p>
+        </Link>
+        <Link href="/publish" className="p-6 hover:bg-[#161310] transition-colors">
+          <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Scheduled posts</p>
+          <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.scheduledPosts}</p>
+          <p className="text-xs text-[#6E6860] mt-1">upcoming</p>
+        </Link>
+        <Link href="/agents" className="p-6 hover:bg-[#161310] transition-colors">
+          <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Agent runs</p>
+          <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{agentRuns.length}</p>
+          <p className="text-xs text-[#3D7A5A] mt-1">{stats.recentAgentRuns} completed</p>
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* ── Left col: Quick actions + Platform status ──────────────────── */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
+
           {/* Quick actions */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-foreground">Quick actions</h2>
+              <h2 className="text-base font-medium text-[#F5F2EE]">Quick actions</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <QuickAction
-                href="/content"
-                icon={Sparkles}
-                title="Generate content"
-                desc="ASTRA writes platform-optimised posts in seconds"
-                color="text-astra-500"
-                bg="bg-astra-500/10"
-                badge={stats.draftContent > 0 ? `${stats.draftContent} drafts` : undefined}
-              />
-              <QuickAction
-                href="/agents"
-                icon={Bot}
-                title="Run ASTRA Agents"
-                desc="4 agents build a complete campaign strategy"
-                color="text-purple-600"
-                bg="bg-purple-500/10"
-              />
-              <QuickAction
-                href="/campaigns/new"
-                icon={Calendar}
-                title="New campaign"
-                desc="AI plans your full 30-day content calendar"
-                color="text-blue-600"
-                bg="bg-blue-500/10"
-              />
-              <QuickAction
-                href="/publish"
-                icon={Send}
-                title="Publish"
-                desc="Publish now or schedule for later"
-                color="text-emerald-600"
-                bg="bg-emerald-500/10"
-                badge={stats.approvedContent > 0 ? `${stats.approvedContent} ready` : undefined}
-              />
-              <QuickAction
-                href="/brand"
-                icon={Brain}
-                title="Brand Brain"
-                desc="Upload docs and manage your AI's knowledge"
-                color="text-rose-600"
-                bg="bg-rose-500/10"
-              />
-              <QuickAction
-                href="/analytics"
-                icon={BarChart3}
-                title="Analytics"
-                desc="Track content performance and engagement"
-                color="text-orange-600"
-                bg="bg-orange-500/10"
-              />
+            <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
+              {[
+                { href: "/content", icon: Sparkles, title: "Generate content", desc: "ASTRA writes platform-optimised posts in seconds", badge: stats.draftContent > 0 ? `${stats.draftContent} drafts` : undefined },
+                { href: "/agents", icon: Bot, title: "Run ASTRA Agents", desc: "4 agents build a complete campaign strategy", badge: undefined },
+                { href: "/campaigns/new", icon: Calendar, title: "New campaign", desc: "AI plans your full 30-day content calendar", badge: undefined },
+                { href: "/publish", icon: Send, title: "Publish", desc: "Publish now or schedule for later", badge: stats.approvedContent > 0 ? `${stats.approvedContent} ready` : undefined },
+                { href: "/brand", icon: Brain, title: "Brand Brain", desc: "Upload docs and manage your AI's knowledge", badge: undefined },
+                { href: "/analytics", icon: BarChart3, title: "Analytics", desc: "Track content performance and engagement", badge: undefined },
+              ].map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-[#161310] transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-sm bg-[#1F1B17] flex items-center justify-center">
+                      <action.icon className="w-4 h-4 text-[#6E6860]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-[#F5F2EE]">{action.title}</p>
+                      <p className="text-xs text-[#6E6860]">{action.desc}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {action.badge && (
+                      <span className="text-xs text-[#C8843A] font-medium">{action.badge}</span>
+                    )}
+                    <ChevronRight className="w-3.5 h-3.5 text-[#3A3530]" />
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* Platform connections */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-foreground">Social platforms</h2>
-              <Link href="/publish" className="text-xs text-astra-500 hover:text-astra-600 font-semibold transition flex items-center gap-1">
+              <h2 className="text-base font-medium text-[#F5F2EE]">Social platforms</h2>
+              <Link href="/publish" className="text-xs text-[#6E6860] hover:text-[#B8B2A9] transition-colors flex items-center gap-1">
                 Manage <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="grid grid-cols-1 gap-3">
+            <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
               {[
-                { platform: "twitter", label: "Twitter / X", icon: Twitter, color: "text-[#1DA1F2]", bg: "bg-[#1DA1F2]/10", connectHref: `/api/auth/twitter?brand_id=${activeBrandId}` },
-                { platform: "linkedin", label: "LinkedIn", icon: Linkedin, color: "text-[#0077B5]", bg: "bg-[#0077B5]/10", connectHref: `/api/auth/linkedin?brand_id=${activeBrandId}` },
-                { platform: "tiktok", label: "TikTok", icon: null, color: "text-[#EE1D52]", bg: "bg-[#EE1D52]/10", connectHref: `/api/auth/tiktok?brand_id=${activeBrandId}` },
+                { platform: "twitter", label: "Twitter / X", icon: Twitter, color: "text-[#1DA1F2]", connectHref: `/api/auth/twitter?brand_id=${activeBrandId}` },
+                { platform: "linkedin", label: "LinkedIn", icon: Linkedin, color: "text-[#0077B5]", connectHref: `/api/auth/linkedin?brand_id=${activeBrandId}` },
+                { platform: "tiktok", label: "TikTok", icon: null, color: "text-[#EE1D52]", connectHref: `/api/auth/tiktok?brand_id=${activeBrandId}` },
               ].map((p) => {
                 const account = socialAccounts.find((a) => a.platform === p.platform);
                 const Icon = p.icon;
                 return (
-                  <div key={p.platform} className={cn(
-                    "flex items-center gap-3 p-4 rounded-2xl border transition",
-                    account ? "border-emerald-500/20 bg-emerald-500/5" : "border-border bg-card"
-                  )}>
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", p.bg)}>
+                  <div key={p.platform} className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-8 h-8 rounded-sm bg-[#1F1B17] flex items-center justify-center shrink-0">
                       {Icon ? (
-                        <Icon className={cn("w-5 h-5", p.color)} />
+                        <Icon className={cn("w-4 h-4", p.color)} />
                       ) : (
-                        <span className="text-lg">🎵</span>
+                        <span className="text-sm">🎵</span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground">{p.label}</p>
+                      <p className="text-sm font-medium text-[#F5F2EE]">{p.label}</p>
                       {account ? (
-                        <p className="text-xs text-emerald-600 font-semibold">{account.account_name}</p>
+                        <p className="text-xs text-[#3D7A5A]">{account.account_name}</p>
                       ) : (
-                        <p className="text-xs text-muted-foreground">Not connected</p>
+                        <p className="text-xs text-[#6E6860]">Not connected</p>
                       )}
                     </div>
                     {account ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-[#3D7A5A] shrink-0" />
                     ) : (
                       <a
                         href={activeBrandId ? p.connectHref : "#"}
-                        className={cn("text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition", p.color, "border-current hover:opacity-80")}
+                        className="text-xs font-medium px-3 py-1.5 rounded-sm border border-[#3A3530] text-[#B8B2A9] hover:border-[#524D47] hover:text-[#F5F2EE] transition-colors"
                       >
                         Connect
                       </a>
@@ -438,44 +321,41 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Right col: Activity + Upcoming ────────────────────────────── */}
-        <div className="space-y-6">
+        {/* ── Right col: Upcoming + Activity ────────────────────────────── */}
+        <div className="space-y-8">
+
           {/* Upcoming scheduled */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-500" /> Upcoming
-              </h2>
-              <Link href="/publish" className="text-xs text-astra-500 hover:text-astra-600 font-semibold transition flex items-center gap-1">
+              <h2 className="text-base font-medium text-[#F5F2EE]">Upcoming</h2>
+              <Link href="/publish" className="text-xs text-[#6E6860] hover:text-[#B8B2A9] transition-colors flex items-center gap-1">
                 All <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
             {upcoming.length === 0 ? (
-              <div className="text-center py-8 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
-                <Calendar className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                <p className="text-xs font-semibold">No scheduled posts</p>
-                <Link href="/publish" className="text-xs text-astra-500 hover:text-astra-600 mt-1 inline-block font-medium transition">
+              <div className="border border-[#2A2520] border-dashed rounded-sm p-8 text-center">
+                <p className="text-sm font-medium text-[#6E6860]">No scheduled posts</p>
+                <Link href="/publish" className="text-xs text-[#C8843A] hover:text-[#DE913A] mt-2 inline-block transition-colors">
                   Schedule one →
                 </Link>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
                 {upcoming.map((post) => {
                   const Icon = post.platform === "twitter" ? Twitter : Linkedin;
                   const color = post.platform === "twitter" ? "text-[#1DA1F2]" : "text-[#0077B5]";
-                  const bg = post.platform === "twitter" ? "bg-[#1DA1F2]/10" : "bg-[#0077B5]/10";
                   return (
-                    <div key={post.id} className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl">
-                      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", bg)}>
+                    <div key={post.id} className="flex items-center gap-3 px-4 py-3">
+                      <div className="w-7 h-7 rounded-sm bg-[#1F1B17] flex items-center justify-center shrink-0">
                         <Icon className={cn("w-3.5 h-3.5", color)} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-foreground capitalize">{post.platform}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs font-medium text-[#F5F2EE] capitalize">{post.platform}</p>
+                        <p className="text-xs text-[#6E6860]">
                           {new Date(post.scheduled_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                         </p>
                       </div>
-                      <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C8843A] shrink-0" />
                     </div>
                   );
                 })}
@@ -486,25 +366,22 @@ export default function DashboardPage() {
           {/* Recent activity */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-astra-500" /> Recent activity
-              </h2>
+              <h2 className="text-base font-medium text-[#F5F2EE]">Recent activity</h2>
             </div>
             {recentActivity.length === 0 ? (
-              <div className="text-center py-8 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
-                <Zap className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                <p className="text-xs font-semibold">No activity yet</p>
-                <p className="text-xs mt-0.5">Start by generating content</p>
+              <div className="border border-[#2A2520] border-dashed rounded-sm p-8 text-center">
+                <p className="text-sm font-medium text-[#6E6860]">No activity yet</p>
+                <p className="text-xs text-[#524D47] mt-1">Start by generating content</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
                 {recentActivity.map((item, i) => {
-                  const statusDot =
+                  const statusColor =
                     item.status === "approved" || item.status === "published" || item.status === "completed"
-                      ? "bg-emerald-500"
+                      ? "bg-[#3D7A5A]"
                       : item.status === "rejected" || item.status === "failed"
-                      ? "bg-red-500"
-                      : "bg-amber-400";
+                      ? "bg-[#8A3030]"
+                      : "bg-[#C8843A]";
                   const typeIcon = item.type === "agent"
                     ? Bot
                     : item.type === "published"
@@ -512,17 +389,17 @@ export default function DashboardPage() {
                     : FileText;
                   const TypeIcon = typeIcon;
                   return (
-                    <div key={i} className="flex items-start gap-3 p-3 bg-card border border-border rounded-xl">
-                      <div className="w-6 h-6 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
-                        <TypeIcon className="w-3 h-3 text-muted-foreground" />
+                    <div key={i} className="flex items-start gap-3 px-4 py-3">
+                      <div className="w-7 h-7 rounded-sm bg-[#1F1B17] flex items-center justify-center shrink-0 mt-0.5">
+                        <TypeIcon className="w-3 h-3 text-[#6E6860]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-foreground capitalize line-clamp-1">{item.label}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{item.sub}</p>
+                        <p className="text-xs font-medium text-[#F5F2EE] capitalize line-clamp-1">{item.label}</p>
+                        <p className="text-xs text-[#6E6860] line-clamp-1 mt-0.5">{item.sub}</p>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
-                        <span className={cn("w-2 h-2 rounded-full", statusDot)} />
-                        <span className="text-xs text-muted-foreground">{formatRelativeTime(item.time)}</span>
+                        <span className={cn("w-1.5 h-1.5 rounded-full", statusColor)} />
+                        <span className="text-xs text-[#6E6860]">{formatRelativeTime(item.time)}</span>
                       </div>
                     </div>
                   );
@@ -533,35 +410,42 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Brand overview strip ──────────────────────────────────────────── */}
+      {/* ── Brand workspaces ──────────────────────────────────────────────── */}
       {brands.length > 0 && (
-        <div>
+        <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-foreground">Brand workspaces</h2>
-            <Link href="/brand" className="flex items-center gap-1.5 text-xs font-semibold text-astra-500 hover:text-astra-600 transition">
+            <h2 className="text-base font-medium text-[#F5F2EE]">Brand workspaces</h2>
+            <Link href="/brand" className="flex items-center gap-1.5 text-xs text-[#6E6860] hover:text-[#B8B2A9] transition-colors">
               <Plus className="w-3.5 h-3.5" /> New brand
             </Link>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
             {brands.map((brand) => (
               <Link
                 key={brand.id}
                 href={`/brand/${brand.id}`}
-                className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-2xl hover:border-astra-500/40 hover:shadow-sm transition group"
+                className="flex items-center justify-between px-4 py-3 hover:bg-[#161310] transition-colors"
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-astra-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                  {brand.name.charAt(0).toUpperCase()}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-sm bg-[#1F1B17] border border-[#2A2520] flex items-center justify-center text-[#B8B2A9] font-medium text-sm shrink-0">
+                    {brand.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#F5F2EE]">{brand.name}</p>
+                    <p className="text-xs text-[#6E6860]">{brand.industry || "No industry set"}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground group-hover:text-astra-600 transition">{brand.name}</p>
-                  <p className="text-xs text-muted-foreground">{brand.industry || "No industry set"}</p>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    "inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.06em] rounded-sm border",
+                    brand.onboarded
+                      ? "bg-[#0E2A1A] text-[#4D9A6A] border-[#1E4D30]"
+                      : "bg-[#2A1E08] text-[#C8943A] border-[#4D3810]"
+                  )}>
+                    {brand.onboarded ? "Active" : "Setup needed"}
+                  </span>
+                  <ChevronRight className="w-3.5 h-3.5 text-[#3A3530]" />
                 </div>
-                <span className={cn(
-                  "text-xs px-2 py-0.5 rounded-full font-semibold ml-2",
-                  brand.onboarded ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
-                )}>
-                  {brand.onboarded ? "Active" : "Setup needed"}
-                </span>
               </Link>
             ))}
           </div>

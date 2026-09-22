@@ -1,12 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Providers } from "@/components/providers";
 
-const inter = Inter({
+// geist package not installed — DM Sans is the approved fallback (see DESIGN_AUDIT.md §3.3)
+// Both are mapped to the --font-geist-sans / --font-geist-mono CSS variable names so that
+// tailwind.config.ts `fontFamily.sans: ["var(--font-geist-sans)", ...]` resolves correctly.
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-geist-sans",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
+
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+  weight: ["300", "400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -50,7 +62,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${dmSans.variable} ${dmMono.variable} font-sans antialiased`}>
         <Providers>
           {children}
           <Toaster position="bottom-right" richColors />

@@ -15,26 +15,23 @@ const PLATFORM_CONFIG = {
   linkedin: {
     icon: Linkedin,
     color: "text-[#0077B5]",
-    bg: "bg-[#0077B5]/5 border-[#0077B5]/20",
     label: "LinkedIn",
     charLimit: 3000,
-    avatar: "bg-[#0077B5]",
+    avatarBg: "bg-[#0077B5]",
   },
   twitter: {
     icon: Twitter,
     color: "text-[#1DA1F2]",
-    bg: "bg-[#1DA1F2]/5 border-[#1DA1F2]/20",
     label: "Twitter / X",
     charLimit: 280,
-    avatar: "bg-[#1DA1F2]",
+    avatarBg: "bg-[#1DA1F2]",
   },
   instagram: {
     icon: Instagram,
     color: "text-[#E1306C]",
-    bg: "bg-[#E1306C]/5 border-[#E1306C]/20",
     label: "Instagram",
     charLimit: 2200,
-    avatar: "bg-gradient-to-br from-[#833AB4] via-[#E1306C] to-[#F77737]",
+    avatarBg: "bg-[#E1306C]",
   },
 };
 
@@ -45,53 +42,58 @@ export function PlatformPreview({ platform, body, hook, cta, hashtags }: Platfor
   const isOverLimit = charCount > config.charLimit;
 
   return (
-    <div className={cn("rounded-xl border p-4", config.bg)}>
-      {/* Platform header */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", config.avatar)}>
-          <Icon className="w-4 h-4 text-white" />
+    <div className="border border-[#2A2520] rounded-sm overflow-hidden bg-[#1F1B17]">
+      {/* Platform header bar */}
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-[#2A2520] bg-[#161310]">
+        <div className="w-6 h-6 rounded-sm flex items-center justify-center bg-[#1F1B17] border border-[#2A2520]">
+          <Icon className="w-3.5 h-3.5 text-[#6E6860]" />
         </div>
-        <span className={cn("font-semibold text-sm", config.color)}>{config.label}</span>
+        <span className="text-[10px] font-medium text-[#6E6860] uppercase tracking-[0.06em]">{config.label}</span>
         <span className={cn(
-          "ml-auto text-xs font-mono",
-          isOverLimit ? "text-red-500" : "text-muted-foreground"
+          "ml-auto text-[10px] font-mono",
+          isOverLimit ? "text-red-400" : "text-[#524D47]"
         )}>
           {charCount}/{config.charLimit}
         </span>
       </div>
 
-      {/* Mock social card */}
-      <div className="bg-background border border-border rounded-lg p-4 space-y-2">
-        {/* User row */}
-        <div className="flex items-center gap-2">
-          <div className={cn("w-8 h-8 rounded-full", config.avatar)} />
-          <div>
-            <p className="text-sm font-semibold text-foreground">Your Brand</p>
-            <p className="text-xs text-muted-foreground">Just now</p>
+      {/* Preview content */}
+      <div className="p-4">
+        {/* Mock social card */}
+        <div className="bg-[#161310] border border-[#2A2520] rounded-sm p-4 space-y-2">
+          {/* User row */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-sm bg-[#2A2520] flex items-center justify-center">
+              <Icon className="w-4 h-4 text-[#524D47]" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[#F5F2EE]">Your Brand</p>
+              <p className="text-xs text-[#524D47]">Just now</p>
+            </div>
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-          {body}
-        </div>
-
-        {/* Hashtags */}
-        {hashtags && hashtags.length > 0 && (
-          <div className="flex flex-wrap gap-1 pt-1">
-            {hashtags.map((tag) => (
-              <span key={tag} className={cn("text-xs font-medium", config.color)}>
-                #{tag.replace(/^#/, "")}
-              </span>
-            ))}
+          {/* Content */}
+          <div className="text-sm text-[#B8B2A9] whitespace-pre-wrap leading-relaxed">
+            {body}
           </div>
-        )}
 
-        {/* Engagement row */}
-        <div className="flex items-center gap-4 pt-2 border-t border-border text-xs text-muted-foreground">
-          <span>👍 Like</span>
-          <span>💬 Comment</span>
-          <span>🔁 Share</span>
+          {/* Hashtags */}
+          {hashtags && hashtags.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-1">
+              {hashtags.map((tag) => (
+                <span key={tag} className="text-xs font-medium text-[#C8843A]">
+                  #{tag.replace(/^#/, "")}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Engagement row */}
+          <div className="flex items-center gap-4 pt-2 border-t border-[#2A2520] text-xs text-[#524D47]">
+            <span>👍 Like</span>
+            <span>💬 Comment</span>
+            <span>🔁 Share</span>
+          </div>
         </div>
       </div>
     </div>

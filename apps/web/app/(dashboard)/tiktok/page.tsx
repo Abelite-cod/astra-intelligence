@@ -158,7 +158,7 @@ export default function TikTokStudioPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#EE1D52]/20 to-[#69C9D0]/20 flex items-center justify-center">
+          <div className="w-11 h-11 rounded bg-[#1F1B17] flex items-center justify-center">
             <Music2 className="w-6 h-6 text-[#EE1D52]" />
           </div>
           <div>
@@ -249,7 +249,7 @@ export default function TikTokStudioPage() {
               <button
                 type="submit"
                 disabled={generateMutation.isPending || !brief.trim()}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-white text-sm transition bg-gradient-to-r from-[#EE1D52] to-[#69C9D0] hover:from-[#d01947] hover:to-[#5bb8bf] disabled:opacity-50 shadow-lg"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded font-bold text-white text-sm transition bg-[#EE1D52] hover:bg-[#d01947] disabled:opacity-50"
               >
                 {generateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 {generateMutation.isPending ? "Writing TikTok script…" : "Generate TikTok script"}
@@ -261,7 +261,7 @@ export default function TikTokStudioPage() {
           <div className="lg:col-span-3 space-y-4">
             <h2 className="text-sm font-bold text-foreground">Recent TikTok content</h2>
             {tiktokContent.length === 0 ? (
-              <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl text-muted-foreground text-sm gap-2">
+              <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-border rounded text-muted-foreground text-sm gap-2">
                 <Music2 className="w-8 h-8 opacity-30" />
                 <p className="font-semibold">No TikTok content yet</p>
                 <p className="text-xs">Generate your first TikTok script above</p>
@@ -285,7 +285,7 @@ export default function TikTokStudioPage() {
       {/* ═══ IMPORT TAB ═══ */}
       {activeTab === "import" && (
         <div className="max-w-2xl space-y-6">
-          <div className="bg-card border border-border rounded-2xl p-6">
+          <div className="bg-card border border-border rounded p-6">
             <h2 className="text-base font-bold text-foreground mb-1">Feed Astra your TikTok history</h2>
             <p className="text-sm text-muted-foreground mb-5">
               Claude analyzes your past posts and extracts reusable patterns — hooks, formats, topics, CTAs. These improve every future generation.
@@ -359,7 +359,7 @@ Likes: 890`}
               <button
                 type="submit"
                 disabled={analyzeMutation.isPending || (!importText.trim() && !manualText.trim())}
-                className="flex items-center gap-2 bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white text-sm font-bold px-5 py-3 rounded-xl transition shadow-lg shadow-astra-500/20 disabled:opacity-50"
+                className="flex items-center gap-2 bg-[#C8843A] hover:bg-[#A86830] text-white text-sm font-bold px-5 py-3 rounded transition disabled:opacity-50"
               >
                 {analyzeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
                 {analyzeMutation.isPending ? "Claude is extracting patterns…" : "Extract patterns"}
@@ -368,7 +368,7 @@ Likes: 890`}
           </div>
 
           {/* Tips */}
-          <div className="bg-muted/50 border border-border rounded-2xl p-5">
+          <div className="bg-muted/50 border border-border rounded p-5">
             <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Best content to import
             </p>
@@ -406,7 +406,7 @@ Likes: 890`}
       {activeTab === "respond" && (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-card border border-border rounded p-5 space-y-4">
               <div>
                 <h2 className="text-sm font-bold text-foreground mb-1">Respond to a video</h2>
                 <p className="text-xs text-muted-foreground">Turn trending content into growth opportunities for your brand.</p>
@@ -505,7 +505,7 @@ Likes: 890`}
           <div className="lg:col-span-3">
             <h2 className="text-sm font-bold text-foreground mb-3">Response queue ({respondQueue.length})</h2>
             {respondQueue.length === 0 ? (
-              <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
+              <div className="text-center py-12 border-2 border-dashed border-border rounded text-muted-foreground">
                 <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-40" />
                 <p className="font-semibold text-foreground">No videos in queue</p>
                 <p className="text-sm mt-1">Add a TikTok video URL to get started</p>
@@ -513,7 +513,7 @@ Likes: 890`}
             ) : (
               <div className="space-y-2">
                 {respondQueue.map((item) => (
-                  <div key={item.id} className="flex items-start gap-3 p-4 bg-card border border-border rounded-2xl">
+                  <div key={item.id} className="flex items-start gap-3 p-4 bg-card border border-border rounded">
                     <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
                       <MessageSquare className="w-4 h-4 text-blue-600" />
                     </div>

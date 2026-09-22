@@ -12,7 +12,7 @@ import { MediaPanel } from "@/components/content/media-panel";
 import { TikTokContentCard } from "@/components/tiktok/tiktok-content-card";
 import { cn } from "@/lib/utils";
 import {
-  Sparkles, Loader2, CheckCircle2, XCircle, Trash2,
+  Sparkles, CheckCircle2, XCircle, Trash2,
   Linkedin, Twitter, Instagram, FileText, ChevronDown,
   Pencil, Save, X as XIcon, ImageIcon, Copy, Check,
   ChevronLeft, ChevronRight, Filter, BarChart3, Hash,
@@ -59,18 +59,18 @@ const PLATFORM_GENERATE = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const STATUS_STYLES: Record<string, string> = {
-  draft: "bg-amber-500/10 text-amber-600 border border-amber-500/20",
-  approved: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
-  rejected: "bg-red-500/10 text-red-500 border border-red-500/20",
-  published: "bg-blue-500/10 text-blue-600 border border-blue-500/20",
+const STATUS_BADGE: Record<string, string> = {
+  draft:     "bg-[#2A1E08] text-[#C8943A] border-[#4D3810]",
+  approved:  "bg-[#0E2A1A] text-[#4D9A6A] border-[#1E4D30]",
+  rejected:  "bg-[#2A0E0E] text-[#D97070] border-[#5A2020]",
+  published: "bg-[#0E1E2A] text-[#5B9BD5] border-[#1C3650]",
 };
 
-const PLATFORM_BADGE: Record<string, { icon: React.ElementType | null; color: string; bg: string }> = {
-  linkedin: { icon: Linkedin, color: "text-[#0077B5]", bg: "bg-[#0077B5]/10" },
-  twitter: { icon: Twitter, color: "text-[#1DA1F2]", bg: "bg-[#1DA1F2]/10" },
-  instagram: { icon: Instagram, color: "text-[#E1306C]", bg: "bg-[#E1306C]/10" },
-  tiktok: { icon: null, color: "text-[#EE1D52]", bg: "bg-[#EE1D52]/10" },
+const PLATFORM_ICON: Record<string, { icon: React.ElementType | null; color: string }> = {
+  linkedin:  { icon: Linkedin,  color: "text-[#0077B5]" },
+  twitter:   { icon: Twitter,   color: "text-[#1DA1F2]" },
+  instagram: { icon: Instagram, color: "text-[#E1306C]" },
+  tiktok:    { icon: null,      color: "text-[#EE1D52]" },
 };
 
 function safeErrorMessage(e: unknown): string {
@@ -109,7 +109,7 @@ function ContentCard({
 }) {
   const [copied, setCopied] = useState(false);
   const [mediaOpen, setMediaOpen] = useState(false);
-  const platform = PLATFORM_BADGE[item.platform];
+  const platform = PLATFORM_ICON[item.platform];
   const Icon = platform?.icon;
   const charCount = item.body?.length ?? 0;
   const charLimit = item.platform === "twitter" ? 280 : item.platform === "linkedin" ? 3000 : 2200;
@@ -122,61 +122,57 @@ function ContentCard({
   }
 
   const isEditing = editingId === item.id;
+  const badgeClass = STATUS_BADGE[item.status] ?? "bg-[#1F1B17] text-[#6E6860] border-[#2A2520]";
 
   return (
-    <div className={cn(
-      "group bg-card rounded-2xl border transition-all duration-200",
-      "hover:shadow-md hover:border-border/80",
-      item.status === "approved" ? "border-emerald-500/30" :
-      item.status === "published" ? "border-blue-500/30" :
-      "border-border"
-    )}>
+    <div className="border border-[#2A2520] rounded-sm bg-[#161310] hover:border-[#3A3530] transition-colors group">
       {/* Card header */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+      <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[#1F1B17]">
         <div className="flex items-center gap-2.5">
-          {Icon && (
-            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", platform.bg)}>
-              <Icon className={cn("w-4 h-4", platform.color)} />
-            </div>
-          )}
+          <div className="w-7 h-7 rounded-sm bg-[#1F1B17] flex items-center justify-center">
+            {Icon ? <Icon className={cn("w-3.5 h-3.5", platform.color)} /> : <span className="text-xs">🎵</span>}
+          </div>
           <div>
-            <span className="text-sm font-semibold text-foreground capitalize">{item.platform}</span>
-            <p className="text-xs text-muted-foreground">{formatRelativeTime(item.created_at)}</p>
+            <span className="text-sm font-medium text-[#F5F2EE] capitalize">{item.platform}</span>
+            <p className="text-xs text-[#6E6860]">{formatRelativeTime(item.created_at)}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={cn("text-xs px-2.5 py-1 rounded-full font-semibold capitalize", STATUS_STYLES[item.status] ?? "bg-muted text-muted-foreground")}>
+          <span className={cn(
+            "inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.06em] rounded-sm border",
+            badgeClass
+          )}>
             {item.status}
           </span>
-          <span className={cn("text-xs font-mono", charCount > charLimit ? "text-red-500" : "text-muted-foreground")}>
+          <span className={cn("text-xs font-mono", charCount > charLimit ? "text-[#D97070]" : "text-[#6E6860]")}>
             {charCount}/{charLimit}
           </span>
         </div>
       </div>
 
       {/* Body */}
-      <div className="px-5 pb-3">
+      <div className="px-4 py-3">
         {isEditing ? (
           <div className="space-y-3">
             <textarea
               value={editBody}
               onChange={(e) => onEditBodyChange(e.target.value)}
               rows={5}
-              className="w-full px-3.5 py-3 rounded-xl border border-astra-500 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/30 resize-none leading-relaxed"
+              className="w-full px-3 py-2 bg-[#0D0B09] border border-[#3A3530] rounded-sm text-sm text-[#F5F2EE] focus:border-[#C8843A] focus:outline-none resize-none leading-relaxed"
               autoFocus
             />
             <div className="flex items-center gap-2">
               <button
                 onClick={() => onSaveEdit(item.id)}
                 disabled={updatePending}
-                className="flex items-center gap-1.5 text-xs font-semibold bg-astra-500 hover:bg-astra-600 text-white px-4 py-2 rounded-lg transition disabled:opacity-50"
+                className="flex items-center gap-1.5 text-xs font-medium bg-[#C8843A] text-[#0D0B09] px-3 py-1.5 rounded-sm hover:bg-[#DE913A] transition-colors disabled:opacity-50"
               >
-                {updatePending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                {updatePending ? <div className="w-3 h-3 border-2 border-[#0D0B09] border-t-transparent rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
                 Save changes
               </button>
               <button
                 onClick={onCancelEdit}
-                className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg border border-border transition"
+                className="flex items-center gap-1.5 text-xs font-medium text-[#6E6860] hover:text-[#F5F2EE] px-3 py-1.5 rounded-sm border border-[#3A3530] transition-colors"
               >
                 <XIcon className="w-3 h-3" /> Cancel
               </button>
@@ -184,12 +180,12 @@ function ContentCard({
           </div>
         ) : (
           <div className="relative">
-            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed line-clamp-4 pr-6">
+            <p className="text-sm text-[#B8B2A9] whitespace-pre-wrap leading-relaxed line-clamp-4 pr-6">
               {item.body}
             </p>
             <button
               onClick={() => onStartEdit(item.id, item.body)}
-              className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition p-1 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground"
+              className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-sm hover:bg-[#2A2520] text-[#6E6860] hover:text-[#F5F2EE]"
               title="Edit"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -200,28 +196,23 @@ function ContentCard({
 
       {/* Hashtags */}
       {item.hashtags && item.hashtags.length > 0 && (
-        <div className="px-5 pb-3 flex flex-wrap gap-1">
+        <div className="px-4 pb-3 flex flex-wrap gap-1">
           {item.hashtags.slice(0, 6).map((tag) => (
-            <span key={tag} className={cn("text-xs font-medium", platform?.color ?? "text-astra-500")}>
+            <span key={tag} className="text-xs font-medium text-[#6E6860]">
               #{tag.replace(/^#/, "")}
             </span>
           ))}
           {item.hashtags.length > 6 && (
-            <span className="text-xs text-muted-foreground">+{item.hashtags.length - 6} more</span>
+            <span className="text-xs text-[#524D47]">+{item.hashtags.length - 6} more</span>
           )}
         </div>
       )}
 
       {/* Media toggle */}
-      <div className="px-5 pb-3">
+      <div className="px-4 pb-3">
         <button
           onClick={() => setMediaOpen((v) => !v)}
-          className={cn(
-            "flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition",
-            mediaOpen
-              ? "bg-astra-500/10 text-astra-600 border border-astra-500/30"
-              : "border border-border text-muted-foreground hover:border-astra-500/40 hover:text-astra-600"
-          )}
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-sm border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9] transition-colors"
         >
           <ImageIcon className="w-3.5 h-3.5" />
           {mediaOpen ? "Hide media" : "Manage media"}
@@ -235,20 +226,20 @@ function ContentCard({
 
       {/* Actions footer */}
       <div className={cn(
-        "flex items-center gap-1 px-5 py-3 border-t border-border",
+        "flex items-center gap-1 px-4 py-3 border-t border-[#1F1B17]",
         item.status === "draft" ? "justify-between" : "justify-end"
       )}>
         {item.status === "draft" && (
           <div className="flex items-center gap-1">
             <button
               onClick={() => onApprove(item.id)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg transition"
+              className="flex items-center gap-1.5 text-xs font-medium text-[#4D9A6A] bg-[#0E2A1A] border border-[#1E4D30] hover:bg-[#122E1E] px-3 py-1.5 rounded-sm transition-colors"
             >
               <CheckCircle2 className="w-3.5 h-3.5" /> Approve
             </button>
             <button
               onClick={() => onReject(item.id)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-600 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition"
+              className="flex items-center gap-1.5 text-xs font-medium text-[#D97070] bg-[#2A0E0E] border border-[#5A2020] hover:bg-[#321010] px-3 py-1.5 rounded-sm transition-colors"
             >
               <XCircle className="w-3.5 h-3.5" /> Reject
             </button>
@@ -257,15 +248,15 @@ function ContentCard({
         <div className="flex items-center gap-1">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg border border-transparent hover:border-border transition"
+            className="flex items-center gap-1.5 text-xs font-medium text-[#6E6860] hover:text-[#B8B2A9] px-3 py-1.5 rounded-sm transition-colors"
             title="Copy text"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-[#4D9A6A]" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? "Copied" : "Copy"}
           </button>
           <button
             onClick={() => onDelete(item.id)}
-            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-destructive px-3 py-1.5 rounded-lg border border-transparent hover:border-red-500/30 transition"
+            className="flex items-center gap-1.5 text-xs font-medium text-[#6E6860] hover:text-[#D97070] px-3 py-1.5 rounded-sm transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" /> Delete
           </button>
@@ -282,11 +273,11 @@ function Pagination({
 }: { page: number; totalPages: number; onChange: (p: number) => void }) {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-1.5">
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
-        className="p-2 rounded-lg border border-border bg-card hover:bg-accent disabled:opacity-40 transition"
+        className="p-2 rounded-sm border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9] disabled:opacity-40 transition-colors"
       >
         <ChevronLeft className="w-4 h-4" />
       </button>
@@ -295,10 +286,10 @@ function Pagination({
           key={p}
           onClick={() => onChange(p)}
           className={cn(
-            "w-8 h-8 rounded-lg text-sm font-medium transition",
+            "w-8 h-8 rounded-sm text-sm font-medium transition-colors",
             p === page
-              ? "bg-astra-500 text-white"
-              : "border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground"
+              ? "bg-[#C8843A] text-[#0D0B09]"
+              : "border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9]"
           )}
         >
           {p}
@@ -307,7 +298,7 @@ function Pagination({
       <button
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
-        className="p-2 rounded-lg border border-border bg-card hover:bg-accent disabled:opacity-40 transition"
+        className="p-2 rounded-sm border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9] disabled:opacity-40 transition-colors"
       >
         <ChevronRight className="w-4 h-4" />
       </button>
@@ -417,24 +408,28 @@ export default function ContentPage() {
 
   if (brands.length === 0) {
     return (
-      <div className="p-8 max-w-2xl mx-auto text-center">
-        <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-foreground mb-2">No brands yet</h2>
-        <p className="text-muted-foreground mb-4">Create a Brand Brain first.</p>
-        <a href="/brand" className="inline-flex items-center gap-2 bg-astra-500 hover:bg-astra-600 text-white font-medium px-5 py-2.5 rounded-xl transition text-sm">
-          Set up Brand Brain
-        </a>
+      <div className="p-8 max-w-2xl">
+        <div className="border border-[#2A2520] border-dashed rounded-sm p-16 text-center">
+          <p className="text-sm font-medium text-[#6E6860]">No brands yet</p>
+          <p className="text-xs text-[#524D47] mt-1 mb-4">Create a Brand Brain first to generate content.</p>
+          <a
+            href="/brand"
+            className="inline-flex items-center gap-2 bg-[#C8843A] text-[#0D0B09] px-4 py-2 text-sm font-medium rounded-sm hover:bg-[#DE913A] transition-colors"
+          >
+            Set up Brand Brain
+          </a>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-8 max-w-7xl">
+      {/* Page header */}
+      <div className="mb-8 pb-6 border-b border-[#2A2520] flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Content</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h1 className="text-2xl font-semibold text-[#F5F2EE] tracking-tight">Content</h1>
+          <p className="mt-1 text-sm text-[#928C83]">
             Generate, manage, and publish on-brand content across every platform.
           </p>
         </div>
@@ -443,38 +438,40 @@ export default function ContentPage() {
             <select
               value={activeBrandId}
               onChange={(e) => setSelectedBrandId(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="appearance-none h-9 pl-3 pr-8 bg-[#161310] border border-[#3A3530] rounded-sm text-sm text-[#F5F2EE] focus:border-[#C8843A] focus:outline-none"
             >
               {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6E6860] pointer-events-none" />
           </div>
         )}
       </div>
 
-      {/* ── Tabs ── */}
-      <div className="flex gap-1 bg-muted p-1 rounded-xl w-fit mb-6">
+      {/* Tabs */}
+      <div className="flex border-b border-[#2A2520] mb-6 gap-6">
         {(["generate", "library"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "px-5 py-2 rounded-lg text-sm font-semibold transition capitalize",
+              "pb-3 text-sm font-medium border-b-2 -mb-px flex items-center gap-1.5 transition-colors",
               activeTab === tab
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "text-[#F5F2EE] border-[#C8843A]"
+                : "text-[#6E6860] border-transparent hover:text-[#B8B2A9]"
             )}
           >
             {tab === "generate" ? (
-              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Generate</span>
+              <><Sparkles className="w-3.5 h-3.5" /> Generate</>
             ) : (
-              <span className="flex items-center gap-1.5">
+              <>
                 <BarChart3 className="w-3.5 h-3.5" />
                 Library
                 {contentList.length > 0 && (
-                  <span className="bg-astra-500/15 text-astra-600 text-xs font-bold px-1.5 py-0.5 rounded-full">{contentList.length}</span>
+                  <span className="text-[10px] font-medium text-[#6E6860] bg-[#1F1B17] border border-[#2A2520] px-1.5 py-0.5 rounded-sm">
+                    {contentList.length}
+                  </span>
                 )}
-              </span>
+              </>
             )}
           </button>
         ))}
@@ -482,12 +479,12 @@ export default function ContentPage() {
 
       {/* ══ GENERATE TAB ══ */}
       {activeTab === "generate" && (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Left: brief form */}
           <div className="lg:col-span-2 space-y-5">
             <form onSubmit={handleGenerate} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">
+                <label className="block text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-2">
                   Content brief
                 </label>
                 <textarea
@@ -495,15 +492,15 @@ export default function ContentPage() {
                   onChange={(e) => setBrief(e.target.value)}
                   rows={5}
                   placeholder="What do you want to post about? Describe the topic, key message, or goal…"
-                  className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40 resize-none leading-relaxed"
+                  className="w-full px-3 py-2 bg-[#161310] border border-[#3A3530] rounded-sm text-sm text-[#F5F2EE] placeholder:text-[#524D47] focus:border-[#C8843A] focus:outline-none resize-none leading-relaxed"
                 />
-                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                <div className="mt-3 flex flex-wrap gap-1.5">
                   {BRIEF_SUGGESTIONS.map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => setBrief(s)}
-                      className="text-xs px-2.5 py-1 rounded-full border border-border bg-background hover:border-astra-500/50 hover:text-astra-600 transition text-muted-foreground"
+                      className="text-xs px-2.5 py-1 rounded-sm border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9] bg-transparent transition-colors"
                     >
                       {s.length > 36 ? s.slice(0, 36) + "…" : s}
                     </button>
@@ -512,39 +509,41 @@ export default function ContentPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Target platforms</label>
+                <label className="block text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-2">Target platforms</label>
                 <div className="flex flex-wrap gap-2">
-                  {PLATFORM_GENERATE.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => togglePlatform(p.id)}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-medium transition",
-                        selectedPlatforms.includes(p.id)
-                          ? "border-astra-500 bg-astra-500/8 text-astra-600"
-                          : "border-border text-muted-foreground hover:border-astra-500/40"
-                      )}
-                    >
-                      {p.icon && <p.icon className="w-3.5 h-3.5" />}
-                      {!p.icon && <span className="text-[#EE1D52] font-bold text-xs">🎵</span>}
-                      {p.label}
-                    </button>
-                  ))}
+                  {PLATFORM_GENERATE.map((p) => {
+                    const selected = selectedPlatforms.includes(p.id);
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => togglePlatform(p.id)}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-2 rounded-sm border text-sm font-medium transition-colors",
+                          selected
+                            ? "border-[#C8843A] text-[#F5F2EE]"
+                            : "border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9]"
+                        )}
+                      >
+                        {p.icon && <p.icon className={cn("w-3.5 h-3.5", selected ? p.color : "text-[#6E6860]")} />}
+                        {!p.icon && <span className="text-xs">🎵</span>}
+                        {p.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={generateMutation.isPending || !brief.trim() || selectedPlatforms.length === 0}
-                className={cn(
-                  "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-white text-sm transition",
-                  "bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 shadow-lg shadow-astra-500/20",
-                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-                )}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-sm font-medium text-[#0D0B09] text-sm bg-[#C8843A] hover:bg-[#DE913A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {generateMutation.isPending ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Writing content…</>
+                  <>
+                    <div className="w-4 h-4 border-2 border-[#0D0B09] border-t-transparent rounded-full animate-spin" />
+                    Writing content…
+                  </>
                 ) : (
                   <><Sparkles className="w-4 h-4" /> Generate with ASTRA</>
                 )}
@@ -555,22 +554,17 @@ export default function ContentPage() {
           {/* Right: previews */}
           <div className="lg:col-span-3 space-y-4">
             {!generated && !generateMutation.isPending && (
-              <div className="h-72 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl text-muted-foreground text-sm gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-astra-500/8 flex items-center justify-center">
-                  <Sparkles className="w-7 h-7 text-astra-500" />
-                </div>
-                <div className="text-center">
-                  <p className="font-semibold text-foreground">Your platform previews will appear here</p>
-                  <p className="text-xs mt-1">ASTRA reads your brand brief and generates platform-optimised posts</p>
-                </div>
+              <div className="h-64 flex flex-col items-center justify-center border border-[#2A2520] border-dashed rounded-sm text-center">
+                <p className="text-sm font-medium text-[#6E6860]">Platform previews will appear here</p>
+                <p className="text-xs text-[#524D47] mt-1">ASTRA reads your brand brief and generates platform-optimised posts</p>
               </div>
             )}
             {generateMutation.isPending && (
-              <div className="h-72 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-astra-500/30 rounded-2xl bg-astra-500/5">
-                <Loader2 className="w-10 h-10 text-astra-500 animate-spin" />
+              <div className="h-64 flex flex-col items-center justify-center gap-4 border border-[#2A2520] border-dashed rounded-sm">
+                <div className="w-8 h-8 border-2 border-[#C8843A] border-t-transparent rounded-full animate-spin" />
                 <div className="text-center">
-                  <p className="text-sm font-semibold text-foreground">ASTRA is reading your brand context…</p>
-                  <p className="text-xs text-muted-foreground mt-1">Writing optimised posts for {selectedPlatforms.join(", ")}</p>
+                  <p className="text-sm font-medium text-[#F5F2EE]">ASTRA is reading your brand context…</p>
+                  <p className="text-xs text-[#6E6860] mt-1">Writing optimised posts for {selectedPlatforms.join(", ")}</p>
                 </div>
               </div>
             )}
@@ -588,7 +582,7 @@ export default function ContentPage() {
               <div className="flex justify-center">
                 <button
                   onClick={() => setActiveTab("library")}
-                  className="flex items-center gap-1.5 text-sm text-astra-500 hover:text-astra-600 font-medium transition"
+                  className="flex items-center gap-1.5 text-sm text-[#C8843A] hover:text-[#DE913A] font-medium transition-colors"
                 >
                   <Eye className="w-4 h-4" /> View in library → approve or edit
                 </button>
@@ -600,33 +594,32 @@ export default function ContentPage() {
 
       {/* ══ LIBRARY TAB ══ */}
       {activeTab === "library" && (
-        <div className="space-y-5">
-          {/* Stats bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Total", value: stats.total, icon: FileText, color: "text-foreground", bg: "bg-muted" },
-              { label: "Drafts", value: stats.draft, icon: Pencil, color: "text-amber-600", bg: "bg-amber-500/10" },
-              { label: "Approved", value: stats.approved, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10" },
-              { label: "Published", value: stats.published, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-500/10" },
-            ].map((s) => (
-              <div key={s.label} className="bg-card border border-border rounded-xl p-3.5 flex items-center gap-3">
-                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", s.bg)}>
-                  <s.icon className={cn("w-4 h-4", s.color)} />
-                </div>
-                <div>
-                  <p className={cn("text-xl font-bold", s.color)}>{s.value}</p>
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
-                </div>
-              </div>
-            ))}
+        <div className="space-y-6">
+          {/* Stats row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[#2A2520] border border-[#2A2520] rounded-sm">
+            <div className="p-6">
+              <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Total</p>
+              <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.total}</p>
+            </div>
+            <div className="p-6">
+              <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Drafts</p>
+              <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.draft}</p>
+            </div>
+            <div className="p-6">
+              <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Approved</p>
+              <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.approved}</p>
+              {stats.approved > 0 && <p className="text-xs text-[#3D7A5A] mt-1">ready to publish</p>}
+            </div>
+            <div className="p-6">
+              <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Published</p>
+              <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.published}</p>
+            </div>
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3 p-4 bg-card border border-border rounded-xl">
-            <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-
+          <div className="flex flex-wrap items-center gap-4">
             {/* Platform tabs */}
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex border-b border-[#2A2520] gap-4">
               {PLATFORMS.map((p) => {
                 const Icon = p.icon;
                 return (
@@ -634,50 +627,45 @@ export default function ContentPage() {
                     key={p.id}
                     onClick={() => handleFilterChange(p.id, filterStatus)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition",
+                      "pb-2 text-xs font-medium border-b-2 -mb-px flex items-center gap-1 transition-colors",
                       filterPlatform === p.id
-                        ? "bg-astra-500 text-white"
-                        : "border border-border text-muted-foreground hover:text-foreground"
+                        ? "text-[#F5F2EE] border-[#C8843A]"
+                        : "text-[#6E6860] border-transparent hover:text-[#B8B2A9]"
                     )}
                   >
-                    {Icon && <Icon className="w-3 h-3" />}
+                    {Icon && <Icon className={cn("w-3 h-3", p.color)} />}
                     {p.label}
                   </button>
                 );
               })}
             </div>
 
-            <div className="w-px h-5 bg-border hidden sm:block" />
-
-            {/* Status filter */}
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex gap-1.5 flex-wrap ml-auto">
               {STATUSES.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => handleFilterChange(filterPlatform, s.id)}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition",
+                    "px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border",
                     filterStatus === s.id
-                      ? "bg-foreground text-background"
-                      : "border border-border text-muted-foreground hover:text-foreground"
+                      ? "border-[#C8843A] text-[#C8843A] bg-transparent"
+                      : "border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9]"
                   )}
                 >
                   {s.label}
                 </button>
               ))}
+              <span className="text-xs text-[#524D47] self-center ml-2">
+                {filtered.length} post{filtered.length !== 1 ? "s" : ""}
+              </span>
             </div>
-
-            <span className="ml-auto text-xs text-muted-foreground">
-              {filtered.length} post{filtered.length !== 1 ? "s" : ""}
-            </span>
           </div>
 
           {/* Content grid */}
           {paginatedContent.length === 0 ? (
-            <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
-              <Hash className="w-10 h-10 mx-auto mb-3 opacity-40" />
-              <p className="font-semibold text-foreground">No content found</p>
-              <p className="text-sm mt-1">
+            <div className="border border-[#2A2520] border-dashed rounded-sm p-16 text-center">
+              <p className="text-sm font-medium text-[#6E6860]">No content found</p>
+              <p className="text-xs text-[#524D47] mt-1">
                 {contentList.length === 0
                   ? "Generate your first piece of content above."
                   : "Try changing your filter."}

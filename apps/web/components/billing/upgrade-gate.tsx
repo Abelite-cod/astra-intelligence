@@ -62,22 +62,22 @@ export function UpgradeGate({
 
   const gate = (
     <div className={cn(
-      "rounded-2xl border border-astra-500/20 bg-gradient-to-br from-astra-500/5 to-purple-500/5 p-6 text-center",
+      "rounded-sm border border-[#2A2520] bg-[#161310] p-6 text-center",
       className
     )}>
-      <div className="w-12 h-12 rounded-2xl bg-astra-500/10 flex items-center justify-center mx-auto mb-4">
-        <Lock className="w-6 h-6 text-astra-500" />
+      <div className="w-10 h-10 rounded-sm bg-[#1F1B17] border border-[#2A2520] flex items-center justify-center mx-auto mb-4">
+        <Lock className="w-5 h-5 text-[#6E6860]" />
       </div>
-      <h3 className="font-bold text-foreground text-base mb-1">
+      <h3 className="font-semibold text-[#F5F2EE] text-base mb-1">
         {feature} requires {PLAN_LABELS[requiredPlan]}
       </h3>
-      <p className="text-sm text-muted-foreground mb-5">
+      <p className="text-sm text-[#6E6860] mb-5">
         Upgrade your plan to unlock {feature} and all {PLAN_LABELS[requiredPlan]} features.
       </p>
       <button
         onClick={handleUpgrade}
         disabled={checkout.isPending}
-        className="inline-flex items-center gap-2 bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-astra-500/20 disabled:opacity-50"
+        className="inline-flex items-center gap-2 bg-[#C8843A] hover:bg-[#DE913A] text-[#0D0B09] text-sm font-medium px-5 py-2.5 rounded-sm transition-colors disabled:opacity-50"
       >
         {checkout.isPending ? (
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -97,7 +97,7 @@ export function UpgradeGate({
   // Blur variant: show content underneath but blur it
   return (
     <div className="relative">
-      <div className="pointer-events-none select-none blur-sm opacity-40 overflow-hidden max-h-48">
+      <div className="pointer-events-none select-none blur-sm opacity-30 overflow-hidden max-h-48">
         {children}
       </div>
       <div className="absolute inset-0 flex items-center justify-center p-4">
@@ -130,15 +130,15 @@ export function UpgradeBanner({
   }
 
   return (
-    <div className="flex items-center gap-3 p-3.5 rounded-xl border border-astra-500/20 bg-astra-500/5">
-      <Lock className="w-4 h-4 text-astra-500 shrink-0" />
-      <p className="text-sm text-muted-foreground flex-1">
-        <span className="font-semibold text-foreground">{feature}</span> requires the {PLAN_LABELS[requiredPlan]} plan
+    <div className="flex items-center gap-3 p-3.5 rounded-sm border border-[#2A2520] bg-[#161310]">
+      <Lock className="w-4 h-4 text-[#524D47] shrink-0" />
+      <p className="text-sm text-[#6E6860] flex-1">
+        <span className="font-medium text-[#B8B2A9]">{feature}</span> requires the {PLAN_LABELS[requiredPlan]} plan
       </p>
       <button
         onClick={handleUpgrade}
         disabled={checkout.isPending}
-        className="flex items-center gap-1.5 text-xs font-semibold text-astra-500 hover:text-astra-600 border border-astra-500/30 hover:border-astra-500 px-3 py-1.5 rounded-lg transition disabled:opacity-50 shrink-0"
+        className="flex items-center gap-1.5 text-xs font-medium text-[#C8843A] hover:text-[#DE913A] border border-[#C8843A]/30 hover:border-[#C8843A] px-3 py-1.5 rounded-sm transition-colors disabled:opacity-50 shrink-0"
       >
         {checkout.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
         Upgrade

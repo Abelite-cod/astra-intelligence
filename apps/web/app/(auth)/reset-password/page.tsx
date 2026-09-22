@@ -52,59 +52,59 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#0D0B09] px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link href="/" className="flex items-center justify-center gap-2.5 mb-10">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-astra-500 to-purple-500 flex items-center justify-center shadow-lg shadow-astra-500/30">
+          <div className="w-9 h-9 rounded bg-[#C8843A] flex items-center justify-center">
             <Sparkles className="w-[1.125rem] h-[1.125rem] text-white" />
           </div>
-          <span className="font-black text-xl text-white">Astra Intelligence</span>
+          <span className="font-black text-xl text-[#F5F2EE]">Astra Intelligence</span>
         </Link>
 
         {done ? (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-5">
+          <div className="bg-[#161310] border border-[#2A2520] rounded p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5">
               <CheckCircle2 className="w-8 h-8 text-emerald-400" />
             </div>
-            <h2 className="text-2xl font-black text-white mb-2">Password updated!</h2>
-            <p className="text-white/55 text-sm">
+            <h2 className="text-2xl font-black text-[#F5F2EE] mb-2">Password updated!</h2>
+            <p className="text-[#6E6860] text-sm">
               Your password has been changed successfully.
               <br />
               Redirecting to your dashboard…
             </p>
           </div>
         ) : !hasSession ? (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-center">
-            <div className="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center mx-auto mb-4">
+          <div className="bg-[#161310] border border-[#2A2520] rounded p-8 text-center">
+            <div className="w-12 h-12 rounded bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
               <Lock className="w-6 h-6 text-red-400" />
             </div>
-            <h2 className="text-xl font-black text-white mb-2">Invalid or expired link</h2>
-            <p className="text-white/50 text-sm mb-5">
+            <h2 className="text-xl font-black text-[#F5F2EE] mb-2">Invalid or expired link</h2>
+            <p className="text-[#6E6860] text-sm mb-5">
               This password reset link has expired or already been used.
             </p>
             <Link
               href="/forgot-password"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-astra-500 to-purple-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-astra-500/20"
+              className="inline-flex items-center gap-2 bg-[#C8843A] hover:bg-[#A86830] text-white text-sm font-semibold px-5 py-2.5 rounded transition"
             >
               Request a new link
             </Link>
           </div>
         ) : (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
+          <div className="bg-[#161310] border border-[#2A2520] rounded p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-astra-500/15 flex items-center justify-center">
-                <Lock className="w-5 h-5 text-astra-400" />
+              <div className="w-10 h-10 rounded bg-[#C8843A]/10 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-[#C8843A]" />
               </div>
               <div>
-                <h2 className="text-xl font-black text-white">Choose a new password</h2>
-                <p className="text-white/45 text-sm">Must be at least 8 characters</p>
+                <h2 className="text-xl font-black text-[#F5F2EE]">Choose a new password</h2>
+                <p className="text-[#6E6860] text-sm">Must be at least 8 characters</p>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-white/70 mb-1.5">New password</label>
+                <label className="block text-xs font-semibold text-[#B8B2A9] mb-1.5">New password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -113,19 +113,19 @@ export default function ResetPasswordPage() {
                     required
                     minLength={8}
                     placeholder="Min. 8 characters"
-                    className="w-full px-4 py-2.5 pr-10 rounded-xl bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition"
+                    className="w-full px-4 py-2.5 pr-10 rounded border border-[#3A3530] bg-[#0D0B09] text-[#F5F2EE] placeholder-[#524D47] focus:outline-none focus:ring-1 focus:ring-[#C8843A] text-sm transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6E6860] hover:text-[#B8B2A9] transition"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-white/70 mb-1.5">Confirm new password</label>
+                <label className="block text-xs font-semibold text-[#B8B2A9] mb-1.5">Confirm new password</label>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={confirm}
@@ -133,8 +133,8 @@ export default function ResetPasswordPage() {
                   required
                   placeholder="Repeat password"
                   className={cn(
-                    "w-full px-4 py-2.5 rounded-xl bg-white border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-astra-500/50 text-sm transition",
-                    confirm && password !== confirm ? "border-red-400" : "border-gray-200"
+                    "w-full px-4 py-2.5 rounded border bg-[#0D0B09] text-[#F5F2EE] placeholder-[#524D47] focus:outline-none focus:ring-1 focus:ring-[#C8843A] text-sm transition",
+                    confirm && password !== confirm ? "border-red-400" : "border-[#3A3530]"
                   )}
                 />
                 {confirm && password !== confirm && (
@@ -143,7 +143,7 @@ export default function ResetPasswordPage() {
               </div>
 
               {error && (
-                <div className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 px-4 py-2.5 rounded-xl">
+                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 px-4 py-2.5 rounded">
                   {error}
                 </div>
               )}
@@ -152,10 +152,9 @@ export default function ResetPasswordPage() {
                 type="submit"
                 disabled={loading || !password || !confirm}
                 className={cn(
-                  "w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-white text-sm transition",
-                  "bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600",
-                  "disabled:opacity-50 disabled:cursor-not-allowed",
-                  "shadow-lg shadow-astra-500/20"
+                  "w-full flex items-center justify-center gap-2 py-3 rounded font-bold text-white text-sm transition",
+                  "bg-[#C8843A] hover:bg-[#A86830]",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
                 )}
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}

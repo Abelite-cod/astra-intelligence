@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
 import {
   Twitter, Linkedin, Send, CheckCircle2, XCircle,
-  Loader2, Link2, Unlink, ChevronDown, Clock, ExternalLink,
+  Link2, Unlink, ChevronDown, Clock, ExternalLink,
   Zap, Calendar, X, Trash2, Eye, Pencil, Save, ChevronLeft,
   ChevronRight, Hash, ImageIcon, Music2
 } from "lucide-react";
@@ -30,27 +30,18 @@ const PLATFORM_CONFIG = {
     icon: Twitter,
     label: "Twitter / X",
     color: "text-[#1DA1F2]",
-    bg: "bg-[#1DA1F2]/10",
-    border: "border-[#1DA1F2]/30",
-    buttonBg: "bg-[#1DA1F2] hover:bg-[#1a91da]",
     connectHref: (brandId: string) => `/api/auth/twitter?brand_id=${brandId}`,
   },
   linkedin: {
     icon: Linkedin,
     label: "LinkedIn",
     color: "text-[#0077B5]",
-    bg: "bg-[#0077B5]/10",
-    border: "border-[#0077B5]/30",
-    buttonBg: "bg-[#0077B5] hover:bg-[#006699]",
     connectHref: (brandId: string) => `/api/auth/linkedin?brand_id=${brandId}`,
   },
   tiktok: {
     icon: Music2,
     label: "TikTok",
     color: "text-[#EE1D52]",
-    bg: "bg-[#EE1D52]/10",
-    border: "border-[#EE1D52]/30",
-    buttonBg: "bg-gradient-to-r from-[#EE1D52] to-[#69C9D0] hover:from-[#d01947] hover:to-[#5bb8bf]",
     connectHref: (brandId: string) => `/api/auth/tiktok?brand_id=${brandId}`,
   },
 };
@@ -116,59 +107,54 @@ function ContentPreviewModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-2xl w-full max-w-xl shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+      <div className="bg-[#1F1B17] border border-[#2A2520] rounded-sm w-full max-w-xl shadow-lg max-h-[90vh] overflow-y-auto">
         {/* Modal header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card rounded-t-2xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#2A2520] sticky top-0 bg-[#1F1B17]">
           <div className="flex items-center gap-3">
-            {platformConfig && (
-              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", platformConfig.bg)}>
-                <Icon className={cn("w-4 h-4", platformConfig.color)} />
-              </div>
-            )}
+            <div className="w-7 h-7 rounded-sm bg-[#2A2520] flex items-center justify-center">
+              <Icon className={cn("w-4 h-4", platformConfig?.color ?? "text-[#6E6860]")} />
+            </div>
             <div>
-              <p className="font-semibold text-foreground capitalize">{item.platform}</p>
-              <p className="text-xs text-muted-foreground">{formatRelativeTime(item.created_at)}</p>
+              <p className="text-sm font-medium text-[#F5F2EE] capitalize">{item.platform}</p>
+              <p className="text-xs text-[#6E6860]">{formatRelativeTime(item.created_at)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {!editing && (
               <button
                 onClick={() => { setEditing(true); setEditBody(item.body ?? ""); }}
-                className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 rounded-lg transition"
+                className="flex items-center gap-1.5 text-xs font-medium text-[#6E6860] hover:text-[#F5F2EE] border border-[#3A3530] px-3 py-1.5 rounded-sm transition-colors"
               >
                 <Pencil className="w-3.5 h-3.5" /> Edit
               </button>
             )}
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition p-1.5 rounded-lg hover:bg-accent">
+            <button onClick={onClose} className="text-[#6E6860] hover:text-[#F5F2EE] transition-colors p-1.5">
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Social card preview */}
-        <div className="p-6">
-          <div className={cn("rounded-xl border p-5 space-y-4", platformConfig?.bg ?? "bg-muted/30", platformConfig?.border ?? "border-border")}>
+        {/* Content preview */}
+        <div className="p-5">
+          <div className="border border-[#2A2520] rounded-sm p-4 space-y-4 bg-[#161310]">
             {/* Profile row */}
             <div className="flex items-center gap-3">
-              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold", platformConfig?.buttonBg?.split(" ")[0] ?? "bg-muted")}>
-                <Icon className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 rounded-sm bg-[#2A2520] flex items-center justify-center">
+                <Icon className={cn("w-4 h-4", platformConfig?.color ?? "text-[#6E6860]")} />
               </div>
               <div>
-                <p className="text-sm font-bold text-foreground">Your Brand</p>
-                <p className={cn("text-xs font-medium", platformConfig?.color ?? "text-muted-foreground")}>
+                <p className="text-sm font-medium text-[#F5F2EE]">Your Brand</p>
+                <p className={cn("text-xs", platformConfig?.color ?? "text-[#6E6860]")}>
                   {item.platform === "twitter" ? "@yourbrand" : item.platform === "linkedin" ? "Your Company · Followers" : "@yourbrand"}
                 </p>
               </div>
-              <span className={cn("ml-auto text-xs px-2 py-0.5 rounded-full font-semibold", platformConfig?.color ?? "text-muted-foreground", platformConfig?.bg ?? "bg-muted")}>
-                {item.platform}
-              </span>
             </div>
 
             {/* Media images */}
             {selectedMedia.length > 0 && (
               <div className={cn(
-                "rounded-xl overflow-hidden",
+                "rounded-sm overflow-hidden",
                 selectedMedia.length === 1 ? "" : "grid grid-cols-2 gap-1"
               )}>
                 {selectedMedia.slice(0, 4).map((media, i) => (
@@ -182,20 +168,17 @@ function ContentPreviewModal({
                       src={media.public_url}
                       alt={media.alt_text ?? "Post image"}
                       className={cn(
-                        "w-full object-cover rounded-lg transition group-hover:brightness-90",
+                        "w-full object-cover transition group-hover:brightness-90",
                         selectedMedia.length === 1 ? "max-h-72" : "h-32"
                       )}
                     />
                     {selectedMedia.length > 4 && i === 3 && (
-                      <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-lg">
                         +{selectedMedia.length - 4}
                       </div>
                     )}
                     <div className="absolute top-1.5 left-1.5">
-                      <span className={cn(
-                        "text-[10px] font-bold px-1.5 py-0.5 rounded-full",
-                        media.type === "generated" ? "bg-astra-500 text-white" : "bg-black/60 text-white"
-                      )}>
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-sm bg-[#1F1B17] text-[#6E6860] border border-[#2A2520]">
                         {media.type === "generated" ? "AI" : "↑"}
                       </span>
                     </div>
@@ -204,7 +187,7 @@ function ContentPreviewModal({
               </div>
             )}
 
-            {/* Content */}
+            {/* Content body */}
             {editing ? (
               <div className="space-y-3">
                 <textarea
@@ -212,25 +195,25 @@ function ContentPreviewModal({
                   onChange={(e) => setEditBody(e.target.value)}
                   rows={7}
                   maxLength={charLimit}
-                  className="w-full px-4 py-3 rounded-xl border border-astra-500 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/30 resize-none leading-relaxed"
+                  className="w-full px-3 py-2 bg-[#0D0B09] border border-[#3A3530] rounded-sm text-sm text-[#F5F2EE] focus:border-[#C8843A] focus:outline-none resize-none leading-relaxed"
                   autoFocus
                 />
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-xs font-mono", editBody.length > charLimit ? "text-red-500" : "text-muted-foreground")}>
+                  <span className={cn("text-xs font-mono", editBody.length > charLimit ? "text-[#D97070]" : "text-[#6E6860]")}>
                     {editBody.length}/{charLimit}
                   </span>
                   <div className="flex gap-2">
                     <button
                       onClick={handleSave}
                       disabled={updateMutation.isPending}
-                      className="flex items-center gap-1.5 text-xs font-semibold bg-astra-500 hover:bg-astra-600 text-white px-4 py-2 rounded-lg transition disabled:opacity-50"
+                      className="flex items-center gap-1.5 text-xs font-medium bg-[#C8843A] text-[#0D0B09] px-3 py-1.5 rounded-sm hover:bg-[#DE913A] transition-colors disabled:opacity-50"
                     >
-                      {updateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                      {updateMutation.isPending ? <div className="w-3 h-3 border-2 border-[#0D0B09] border-t-transparent rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
                       Save
                     </button>
                     <button
                       onClick={() => setEditing(false)}
-                      className="text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg border border-border transition"
+                      className="text-xs font-medium text-[#6E6860] hover:text-[#F5F2EE] px-3 py-1.5 rounded-sm border border-[#3A3530] transition-colors"
                     >
                       Cancel
                     </button>
@@ -238,7 +221,7 @@ function ContentPreviewModal({
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+              <p className="text-sm text-[#B8B2A9] whitespace-pre-wrap leading-relaxed">
                 {saved ? editBody : (item.body ?? "")}
               </p>
             )}
@@ -247,23 +230,23 @@ function ContentPreviewModal({
             {item.hashtags && item.hashtags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {item.hashtags.map((tag) => (
-                  <span key={tag} className={cn("text-xs font-semibold", platformConfig?.color ?? "text-astra-500")}>
+                  <span key={tag} className={cn("text-xs font-medium", platformConfig?.color ?? "text-[#6E6860]")}>
                     #{tag.replace(/^#/, "")}
                   </span>
                 ))}
               </div>
             )}
 
-            {/* Media count hint if none selected */}
+            {/* Media count hint */}
             {selectedMedia.length === 0 && mediaList.length > 0 && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-1.5 text-xs text-[#6E6860] border border-[#2A2520] rounded-sm px-3 py-2">
                 <ImageIcon className="w-3.5 h-3.5" />
                 {mediaList.length} image{mediaList.length !== 1 ? "s" : ""} available — none selected for publishing
               </div>
             )}
 
             {/* Engagement mock */}
-            <div className="flex items-center gap-5 pt-2 border-t border-border/60 text-xs text-muted-foreground">
+            <div className="flex items-center gap-5 pt-2 border-t border-[#2A2520] text-xs text-[#524D47]">
               <span>👍 Like</span>
               <span>💬 Comment</span>
               <span>🔁 Share</span>
@@ -282,12 +265,12 @@ function ContentPreviewModal({
             <img
               src={lightboxUrl}
               alt="Preview"
-              className="max-w-full max-h-full rounded-xl object-contain"
+              className="max-w-full max-h-full object-contain"
               onClick={(e) => e.stopPropagation()}
             />
             <button
               onClick={() => setLightboxUrl(null)}
-              className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 rounded-full p-2 transition"
+              className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 rounded-sm p-2 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -295,24 +278,20 @@ function ContentPreviewModal({
         )}
 
         {/* CTA footer */}
-        <div className="px-6 pb-6 flex flex-col gap-3">
+        <div className="px-5 pb-5 flex flex-col gap-2">
           {isConnected ? (
             <div className="flex gap-2">
               <button
                 onClick={() => onPublish(item.id, item.platform)}
                 disabled={isPublishing}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition shadow-lg",
-                  platformConfig?.buttonBg ?? "bg-astra-500 hover:bg-astra-600",
-                  "disabled:opacity-50 disabled:cursor-not-allowed"
-                )}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-sm font-medium text-[#0D0B09] bg-[#C8843A] hover:bg-[#DE913A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {isPublishing ? <div className="w-4 h-4 border-2 border-[#0D0B09] border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
                 Publish now
               </button>
               <button
                 onClick={() => onSchedule(item)}
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-border bg-background hover:border-astra-500/50 hover:text-astra-600 text-sm font-semibold text-muted-foreground transition"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm border border-[#3A3530] text-sm font-medium text-[#B8B2A9] hover:border-[#524D47] hover:text-[#F5F2EE] bg-transparent transition-colors"
               >
                 <Calendar className="w-4 h-4" />
                 Schedule
@@ -321,7 +300,7 @@ function ContentPreviewModal({
           ) : (
             <a
               href={`/api/auth/${item.platform}?brand_id=${item.brand_id}`}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-border bg-background text-sm font-semibold text-muted-foreground hover:text-foreground transition"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-sm border border-[#3A3530] text-sm font-medium text-[#B8B2A9] hover:border-[#524D47] hover:text-[#F5F2EE] transition-colors"
             >
               <Link2 className="w-4 h-4" />
               Connect {platformConfig?.label ?? item.platform} to publish
@@ -338,20 +317,20 @@ function ContentPreviewModal({
 function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-center gap-2 mt-4">
-      <button onClick={() => onChange(page - 1)} disabled={page === 1} className="p-2 rounded-lg border border-border bg-card hover:bg-accent disabled:opacity-40 transition">
+    <div className="flex items-center justify-center gap-1.5 mt-4">
+      <button onClick={() => onChange(page - 1)} disabled={page === 1} className="p-2 rounded-sm border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9] disabled:opacity-40 transition-colors">
         <ChevronLeft className="w-4 h-4" />
       </button>
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
         <button
           key={p}
           onClick={() => onChange(p)}
-          className={cn("w-8 h-8 rounded-lg text-sm font-medium transition", p === page ? "bg-astra-500 text-white" : "border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground")}
+          className={cn("w-8 h-8 rounded-sm text-sm font-medium transition-colors", p === page ? "bg-[#C8843A] text-[#0D0B09]" : "border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9]")}
         >
           {p}
         </button>
       ))}
-      <button onClick={() => onChange(page + 1)} disabled={page === totalPages} className="p-2 rounded-lg border border-border bg-card hover:bg-accent disabled:opacity-40 transition">
+      <button onClick={() => onChange(page + 1)} disabled={page === totalPages} className="p-2 rounded-sm border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9] disabled:opacity-40 transition-colors">
         <ChevronRight className="w-4 h-4" />
       </button>
     </div>
@@ -442,7 +421,7 @@ function PublishPageInner() {
   const error = searchParams.get("error");
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-8 max-w-6xl">
       {/* Preview modal */}
       {previewItem && (
         <ContentPreviewModal
@@ -458,45 +437,45 @@ function PublishPageInner() {
 
       {/* Schedule picker modal */}
       {schedulePicker && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-[#1F1B17] border border-[#2A2520] rounded-sm p-6 w-full max-w-sm shadow-lg">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-astra-500" />
-                <h3 className="font-semibold text-foreground">Schedule post</h3>
+                <Calendar className="w-4 h-4 text-[#C8843A]" />
+                <h3 className="text-sm font-medium text-[#F5F2EE]">Schedule post</h3>
               </div>
-              <button onClick={() => setSchedulePicker(null)} className="text-muted-foreground hover:text-foreground transition">
+              <button onClick={() => setSchedulePicker(null)} className="text-[#6E6860] hover:text-[#F5F2EE] transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Platform</label>
-                <p className="text-sm font-semibold text-foreground capitalize">
+                <label className="block text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1.5">Platform</label>
+                <p className="text-sm font-medium text-[#F5F2EE] capitalize">
                   {schedulePicker.platform === "twitter" ? "Twitter / X" : "LinkedIn"}
                 </p>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Publish date & time</label>
+                <label className="block text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1.5">Publish date & time</label>
                 <input
                   type="datetime-local"
                   value={schedulePicker.scheduledAt}
                   min={getMinDateTime()}
                   onChange={(e) => setSchedulePicker((prev) => prev ? { ...prev, scheduledAt: e.target.value } : prev)}
-                  className="w-full px-3 py-2.5 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40"
+                  className="w-full h-9 px-3 bg-[#161310] border border-[#3A3530] rounded-sm text-sm text-[#F5F2EE] focus:border-[#C8843A] focus:outline-none"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Times are in your local timezone</p>
+                <p className="text-xs text-[#524D47] mt-1">Times are in your local timezone</p>
               </div>
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleSchedule}
                   disabled={scheduleMutation.isPending || !schedulePicker.scheduledAt}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-astra-500 hover:bg-astra-600 text-white text-sm font-semibold transition disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm bg-[#C8843A] hover:bg-[#DE913A] text-[#0D0B09] text-sm font-medium transition-colors disabled:opacity-50"
                 >
-                  {scheduleMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
+                  {scheduleMutation.isPending ? <div className="w-4 h-4 border-2 border-[#0D0B09] border-t-transparent rounded-full animate-spin" /> : <Calendar className="w-4 h-4" />}
                   Confirm schedule
                 </button>
-                <button onClick={() => setSchedulePicker(null)} className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition">
+                <button onClick={() => setSchedulePicker(null)} className="flex-1 py-2.5 rounded-sm border border-[#3A3530] text-sm font-medium text-[#B8B2A9] hover:border-[#524D47] hover:text-[#F5F2EE] transition-colors">
                   Cancel
                 </button>
               </div>
@@ -505,11 +484,11 @@ function PublishPageInner() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      {/* Page header */}
+      <div className="mb-8 pb-6 border-b border-[#2A2520] flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Publish</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h1 className="text-2xl font-semibold text-[#F5F2EE] tracking-tight">Publish</h1>
+          <p className="mt-1 text-sm text-[#928C83]">
             Publish now or schedule posts to go live at the perfect time.
           </p>
         </div>
@@ -518,118 +497,125 @@ function PublishPageInner() {
             <select
               value={activeBrandId}
               onChange={(e) => setSelectedBrandId(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="appearance-none h-9 pl-3 pr-8 bg-[#161310] border border-[#3A3530] rounded-sm text-sm text-[#F5F2EE] focus:border-[#C8843A] focus:outline-none"
             >
               {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6E6860] pointer-events-none" />
           </div>
         )}
       </div>
 
       {/* Banners */}
       {connected && (
-        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-3 mb-6 text-emerald-600 text-sm">
+        <div className="flex items-center gap-2 border border-[#1E4D30] bg-[#0E2A1A] rounded-sm px-4 py-3 mb-6 text-[#4D9A6A] text-sm">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           Successfully connected {connected === "twitter" ? "Twitter / X" : "LinkedIn"}!
         </div>
       )}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 mb-6 text-red-600 text-sm">
+        <div className="flex items-center gap-2 border border-[#5A2020] bg-[#2A0E0E] rounded-sm px-4 py-3 mb-6 text-[#D97070] text-sm">
           <XCircle className="w-4 h-4 shrink-0" />
           Connection failed: {error.replace(/_/g, " ")}
         </div>
       )}
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: "Connected", value: stats.connected, icon: Link2, color: "text-blue-600", bg: "bg-blue-500/10" },
-          { label: "Scheduled", value: stats.scheduled, icon: Clock, color: "text-amber-600", bg: "bg-amber-500/10" },
-          { label: "Published", value: stats.published, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10" },
-          { label: "Failed", value: stats.failed, icon: XCircle, color: "text-red-500", bg: "bg-red-500/10" },
-        ].map((s) => (
-          <div key={s.label} className="bg-card border border-border rounded-xl p-3.5 flex items-center gap-3">
-            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", s.bg)}>
-              <s.icon className={cn("w-4 h-4", s.color)} />
-            </div>
-            <div>
-              <p className={cn("text-xl font-bold", s.color)}>{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-            </div>
-          </div>
-        ))}
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[#2A2520] border border-[#2A2520] rounded-sm mb-8">
+        <div className="p-6">
+          <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Connected</p>
+          <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.connected}</p>
+        </div>
+        <div className="p-6">
+          <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Scheduled</p>
+          <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.scheduled}</p>
+          {stats.scheduled > 0 && <p className="text-xs text-[#C8843A] mt-1">upcoming</p>}
+        </div>
+        <div className="p-6">
+          <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Published</p>
+          <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.published}</p>
+          {stats.published > 0 && <p className="text-xs text-[#3D7A5A] mt-1">total</p>}
+        </div>
+        <div className="p-6">
+          <p className="text-xs font-medium text-[#6E6860] uppercase tracking-[0.06em] mb-1">Failed</p>
+          <p className="text-3xl font-semibold text-[#F5F2EE] tracking-tight">{stats.failed}</p>
+          {stats.failed > 0 && <p className="text-xs text-[#D97070] mt-1">need attention</p>}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: accounts + scheduled queue */}
-        <div className="lg:col-span-1 space-y-5">
-          <h2 className="text-sm font-bold text-foreground tracking-wide uppercase text-muted-foreground">Connected accounts</h2>
-
-          {Object.entries(PLATFORM_CONFIG).map(([platform, config]) => {
-            const account = getAccount(platform);
-            const Icon = config.icon;
-            return (
-              <div key={platform} className={cn("rounded-2xl border p-4 transition", account ? cn(config.bg, config.border) : "border-border bg-card")}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", account ? config.bg : "bg-muted")}>
-                    <Icon className={cn("w-5 h-5", account ? config.color : "text-muted-foreground")} />
+        <div className="lg:col-span-1 space-y-6">
+          <div>
+            <h2 className="text-base font-medium text-[#F5F2EE] mb-4">Connected accounts</h2>
+            <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
+              {Object.entries(PLATFORM_CONFIG).map(([platform, config]) => {
+                const account = getAccount(platform);
+                const Icon = config.icon;
+                return (
+                  <div key={platform} className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-7 h-7 rounded-sm bg-[#1F1B17] flex items-center justify-center shrink-0">
+                      <Icon className={cn("w-4 h-4", account ? config.color : "text-[#6E6860]")} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#F5F2EE]">{config.label}</p>
+                      {account ? (
+                        <p className={cn("text-xs", config.color)}>{account.account_name}</p>
+                      ) : (
+                        <p className="text-xs text-[#6E6860]">Not connected</p>
+                      )}
+                    </div>
+                    {account ? (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#3D7A5A] shrink-0" />
+                        <button
+                          onClick={() => toast.promise(disconnectMutation.mutateAsync(account.id), {
+                            loading: "Disconnecting…", success: `${config.label} disconnected`, error: "Failed",
+                          })}
+                          className="text-xs text-[#6E6860] hover:text-[#D97070] transition-colors flex items-center gap-1"
+                        >
+                          <Unlink className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <a
+                        href={activeBrandId ? config.connectHref(activeBrandId) : "#"}
+                        className="text-xs font-medium px-3 py-1.5 rounded-sm border border-[#3A3530] text-[#B8B2A9] hover:border-[#524D47] hover:text-[#F5F2EE] transition-colors"
+                      >
+                        Connect
+                      </a>
+                    )}
                   </div>
-                  <div>
-                    <p className="font-semibold text-sm text-foreground">{config.label}</p>
-                    {account && <p className={cn("text-xs font-semibold", config.color)}>{account.account_name}</p>}
-                  </div>
-                </div>
-                {account ? (
-                  <div className="flex items-center gap-2">
-                    <span className="flex-1 text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Connected
-                    </span>
-                    <button
-                      onClick={() => toast.promise(disconnectMutation.mutateAsync(account.id), {
-                        loading: "Disconnecting…", success: `${config.label} disconnected`, error: "Failed",
-                      })}
-                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition"
-                    >
-                      <Unlink className="w-3 h-3" /> Disconnect
-                    </button>
-                  </div>
-                ) : (
-                  <a
-                    href={activeBrandId ? config.connectHref(activeBrandId) : "#"}
-                    className={cn("flex items-center justify-center gap-2 w-full py-2 rounded-xl text-sm font-semibold transition border border-current", config.color, !activeBrandId && "opacity-50 pointer-events-none")}
-                  >
-                    <Link2 className="w-3.5 h-3.5" /> Connect {config.label}
-                  </a>
-                )}
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          </div>
 
           {/* Upcoming scheduled queue */}
           {upcomingPosts.length > 0 && (
             <div>
-              <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-wide mb-2 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-astra-500" /> Scheduled ({upcomingPosts.length})
-              </h3>
-              <div className="space-y-2">
+              <h2 className="text-base font-medium text-[#F5F2EE] mb-4">
+                Scheduled
+                <span className="ml-2 text-xs font-normal text-[#6E6860]">({upcomingPosts.length})</span>
+              </h2>
+              <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
                 {upcomingPosts.map((post) => {
                   const cfg = PLATFORM_CONFIG[post.platform as keyof typeof PLATFORM_CONFIG];
                   const Icon = cfg?.icon ?? Zap;
                   return (
-                    <div key={post.id} className="flex items-start gap-2.5 p-3 rounded-xl border border-astra-500/20 bg-astra-500/5 text-sm">
-                      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", cfg?.bg ?? "bg-muted")}>
-                        <Icon className={cn("w-3.5 h-3.5", cfg?.color ?? "text-muted-foreground")} />
+                    <div key={post.id} className="flex items-center gap-3 px-4 py-3">
+                      <div className="w-7 h-7 rounded-sm bg-[#1F1B17] flex items-center justify-center shrink-0">
+                        <Icon className={cn("w-3.5 h-3.5", cfg?.color ?? "text-[#6E6860]")} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-foreground text-xs capitalize">{post.platform}</p>
-                        <p className="text-xs text-muted-foreground">{formatScheduledAt(post.scheduled_at)}</p>
+                        <p className="text-xs font-medium text-[#F5F2EE] capitalize">{post.platform}</p>
+                        <p className="text-xs text-[#6E6860]">{formatScheduledAt(post.scheduled_at)}</p>
                       </div>
                       <button
                         onClick={() => toast.promise(cancelMutation.mutateAsync(post.id), {
                           loading: "Cancelling…", success: "Cancelled", error: "Failed",
                         })}
-                        className="text-muted-foreground hover:text-destructive transition"
+                        className="text-[#6E6860] hover:text-[#D97070] transition-colors"
                         title="Cancel"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -643,26 +629,23 @@ function PublishPageInner() {
         </div>
 
         {/* Right: approved content + history */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           {/* Ready to publish */}
           <div>
-            <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-              Ready to publish
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-medium text-[#F5F2EE]">Ready to publish</h2>
               {approvedContent.length > 0 && (
-                <span className="text-xs font-semibold text-astra-500 bg-astra-500/10 px-2 py-0.5 rounded-full">
-                  {approvedContent.length} approved
-                </span>
+                <span className="text-xs text-[#3D7A5A]">{approvedContent.length} approved</span>
               )}
-            </h2>
+            </div>
 
             {approvedContent.length === 0 ? (
-              <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl text-muted-foreground text-sm">
-                <Hash className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                <p className="font-semibold">No approved content yet.</p>
-                <p className="text-xs mt-1">Go to Content → approve posts → they appear here.</p>
+              <div className="border border-[#2A2520] border-dashed rounded-sm p-12 text-center">
+                <p className="text-sm font-medium text-[#6E6860]">No approved content yet</p>
+                <p className="text-xs text-[#524D47] mt-1">Go to Content → approve posts → they appear here.</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
                 {approvedContent.map((item) => {
                   const cfg = PLATFORM_CONFIG[item.platform as keyof typeof PLATFORM_CONFIG];
                   const account = getAccount(item.platform);
@@ -670,45 +653,41 @@ function PublishPageInner() {
                   const Icon = cfg?.icon ?? Zap;
 
                   return (
-                    <div key={item.id} className="group bg-card border border-border hover:border-astra-500/40 rounded-2xl p-4 transition hover:shadow-sm">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", cfg?.bg ?? "bg-muted")}>
-                          <Icon className={cn("w-4 h-4", cfg?.color ?? "text-muted-foreground")} />
+                    <div key={item.id} className="flex items-start justify-between px-4 py-4 hover:bg-[#161310] transition-colors">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="w-7 h-7 rounded-sm bg-[#1F1B17] flex items-center justify-center shrink-0 mt-0.5">
+                          <Icon className={cn("w-3.5 h-3.5", cfg?.color ?? "text-[#6E6860]")} />
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-bold text-foreground capitalize">{item.platform}</span>
-                            <span className="text-xs bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded-full font-semibold">approved</span>
+                            <span className="text-sm font-medium text-[#F5F2EE] capitalize">{item.platform}</span>
+                            <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.06em] bg-[#0E2A1A] text-[#4D9A6A] border border-[#1E4D30] rounded-sm">
+                              approved
+                            </span>
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{item.body}</p>
+                          <p className="text-xs text-[#6E6860] line-clamp-2 leading-relaxed">{item.body}</p>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-2 pt-2.5 border-t border-border">
-                        {/* Preview button */}
+                      <div className="flex items-center gap-1.5 shrink-0 ml-3">
                         <button
                           onClick={() => setPreviewItem(item)}
-                          className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground border border-border hover:border-astra-500/40 px-3 py-1.5 rounded-lg transition"
+                          className="text-xs font-medium text-[#6E6860] hover:text-[#B8B2A9] border border-[#2A2520] hover:border-[#3A3530] px-2.5 py-1.5 rounded-sm transition-colors flex items-center gap-1"
                         >
-                          <Eye className="w-3.5 h-3.5" /> Preview
+                          <Eye className="w-3 h-3" /> Preview
                         </button>
-
                         {isConnected ? (
                           <>
                             <button
                               onClick={() => handlePublish(item.id, item.platform)}
                               disabled={publishMutation.isPending}
-                              className={cn(
-                                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition disabled:opacity-50",
-                                cfg?.buttonBg ?? "bg-astra-500 hover:bg-astra-600"
-                              )}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-sm text-xs font-medium text-[#0D0B09] bg-[#C8843A] hover:bg-[#DE913A] transition-colors disabled:opacity-50"
                             >
-                              {publishMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                              Publish now
+                              {publishMutation.isPending ? <div className="w-3 h-3 border-2 border-[#0D0B09] border-t-transparent rounded-full animate-spin" /> : <Send className="w-3 h-3" />}
+                              Publish
                             </button>
                             <button
                               onClick={() => setSchedulePicker({ contentId: item.id, platform: item.platform, scheduledAt: getDefaultDateTime() })}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-background hover:border-astra-500/50 hover:text-astra-600 text-muted-foreground transition"
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-sm text-xs font-medium border border-[#2A2520] text-[#6E6860] hover:border-[#3A3530] hover:text-[#B8B2A9] transition-colors"
                             >
                               <Calendar className="w-3 h-3" /> Schedule
                             </button>
@@ -716,12 +695,11 @@ function PublishPageInner() {
                         ) : (
                           <a
                             href={activeBrandId ? cfg?.connectHref(activeBrandId) ?? "#" : "#"}
-                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition"
+                            className="flex items-center gap-1 text-xs text-[#6E6860] hover:text-[#B8B2A9] transition-colors"
                           >
-                            <Link2 className="w-3.5 h-3.5" /> Connect {cfg?.label ?? item.platform}
+                            <Link2 className="w-3 h-3" /> Connect
                           </a>
                         )}
-                        <span className="text-xs text-muted-foreground ml-auto">{formatRelativeTime(item.created_at)}</span>
                       </div>
                     </div>
                   );
@@ -733,44 +711,49 @@ function PublishPageInner() {
           {/* Publish history */}
           {historyPosts.length > 0 && (
             <div>
-              <h2 className="text-sm font-bold text-foreground mb-3">
-                Publish history
-                <span className="ml-2 text-xs font-normal text-muted-foreground">({historyPosts.length} total)</span>
-              </h2>
-              <div className="space-y-2">
-                {paginatedHistory.map((post) => (
-                  <div key={post.id} className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-card text-sm hover:border-border/80 transition">
-                    <div className={cn("w-2.5 h-2.5 rounded-full shrink-0",
-                      post.status === "published" ? "bg-emerald-500" :
-                      post.status === "failed" ? "bg-red-500" : "bg-amber-500"
-                    )} />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground capitalize">
-                        {post.platform}
-                        {post.error_message && (
-                          <span className="text-xs text-red-500 font-normal ml-2 truncate">— {post.error_message.slice(0, 60)}</span>
-                        )}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {post.status === "published"
-                          ? `Published ${formatRelativeTime(post.published_at ?? post.scheduled_at)}`
-                          : formatScheduledAt(post.scheduled_at)}
-                      </p>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-medium text-[#F5F2EE]">Publish history</h2>
+                <span className="text-xs text-[#6E6860]">{historyPosts.length} total</span>
+              </div>
+              <div className="border border-[#2A2520] rounded-sm divide-y divide-[#1F1B17]">
+                {paginatedHistory.map((post) => {
+                  const statusBadge =
+                    post.status === "published" ? "bg-[#0E2A1A] text-[#4D9A6A] border-[#1E4D30]" :
+                    post.status === "failed" ? "bg-[#2A0E0E] text-[#D97070] border-[#5A2020]" :
+                    "bg-[#2A1E08] text-[#C8943A] border-[#4D3810]";
+                  return (
+                    <div key={post.id} className="flex items-center gap-3 px-4 py-3">
+                      <div className={cn("w-1.5 h-1.5 rounded-full shrink-0",
+                        post.status === "published" ? "bg-[#3D7A5A]" :
+                        post.status === "failed" ? "bg-[#8A3030]" : "bg-[#C8843A]"
+                      )} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[#F5F2EE] capitalize">
+                          {post.platform}
+                          {post.error_message && (
+                            <span className="text-xs text-[#D97070] font-normal ml-2 truncate">— {post.error_message.slice(0, 60)}</span>
+                          )}
+                        </p>
+                        <p className="text-xs text-[#6E6860]">
+                          {post.status === "published"
+                            ? `Published ${formatRelativeTime(post.published_at ?? post.scheduled_at)}`
+                            : formatScheduledAt(post.scheduled_at)}
+                        </p>
+                      </div>
+                      {post.platform_post_id && post.platform === "twitter" && (
+                        <a href={`https://twitter.com/i/web/status/${post.platform_post_id}`} target="_blank" rel="noopener noreferrer" className="text-[#6E6860] hover:text-[#1DA1F2] transition-colors">
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                      <span className={cn(
+                        "inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.06em] rounded-sm border shrink-0",
+                        statusBadge
+                      )}>
+                        {post.status}
+                      </span>
                     </div>
-                    {post.platform_post_id && post.platform === "twitter" && (
-                      <a href={`https://twitter.com/i/web/status/${post.platform_post_id}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-[#1DA1F2] transition">
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    <span className={cn("text-xs px-2 py-0.5 rounded-full font-semibold shrink-0",
-                      post.status === "published" ? "bg-emerald-500/10 text-emerald-600" :
-                      post.status === "failed" ? "bg-red-500/10 text-red-500" :
-                      "bg-amber-500/10 text-amber-600"
-                    )}>
-                      {post.status}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <Pagination page={historyPage} totalPages={historyTotalPages} onChange={setHistoryPage} />
             </div>
@@ -783,7 +766,7 @@ function PublishPageInner() {
 
 export default function PublishPage() {
   return (
-    <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-6 h-6 border-2 border-astra-500 border-t-transparent rounded-full" /></div>}>
+    <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-5 h-5 border-2 border-[#C8843A] border-t-transparent rounded-full" /></div>}>
       <PublishPageInner />
     </Suspense>
   );

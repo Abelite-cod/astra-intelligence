@@ -144,8 +144,8 @@ export function TikTokMediaPanel({
   return (
     <div className="space-y-3">
       {/* Note */}
-      <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-xl px-3 py-2">
-        <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#EE1D52]" />
+      <div className="flex items-start gap-2 text-xs text-[#6E6860] bg-[#1F1B17] border border-[#2A2520] rounded-sm px-3 py-2">
+        <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#524D47]" />
         <span>{cfg.note}</span>
       </div>
 
@@ -154,7 +154,7 @@ export function TikTokMediaPanel({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadMutation.isPending || (mode === "video" && videoMedia.length >= 1)}
-          className="flex items-center gap-1.5 text-xs font-semibold border border-[#EE1D52]/30 hover:border-[#EE1D52] text-[#EE1D52] hover:bg-[#EE1D52]/5 px-3 py-2 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 text-xs font-medium border border-[#3A3530] text-[#B8B2A9] hover:border-[#524D47] hover:text-[#F5F2EE] px-3 py-2 rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-transparent"
         >
           {uploadMutation.isPending ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -168,7 +168,7 @@ export function TikTokMediaPanel({
         <button
           onClick={() => setShowGenerateForm((v) => !v)}
           disabled={generateMutation.isPending}
-          className="flex items-center gap-1.5 text-xs font-semibold bg-astra-500 hover:bg-astra-600 text-white px-3 py-2 rounded-xl transition disabled:opacity-50"
+          className="flex items-center gap-1.5 text-xs font-medium bg-[#C8843A] hover:bg-[#DE913A] text-[#0D0B09] px-3 py-2 rounded-sm transition-colors disabled:opacity-50"
         >
           {generateMutation.isPending ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -177,14 +177,14 @@ export function TikTokMediaPanel({
           )}
           {mode === "video" ? "Generate thumbnail" : "Generate image"}
         </button>
-        <span className="text-xs text-muted-foreground">{cfg.hint}</span>
+        <span className="text-xs text-[#524D47]">{cfg.hint}</span>
       </div>
 
       {/* AI generate form — always available */}
       {showGenerateForm && (
-        <div className="bg-astra-500/5 border border-astra-500/20 rounded-xl p-3 space-y-2.5">
-          <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-astra-500" />
+        <div className="bg-[#1F1B17] border border-[#2A2520] rounded-sm p-3 space-y-2.5">
+          <p className="text-xs font-medium text-[#F5F2EE] flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#C8843A]" />
             ASTRA Image — writes brief, Pollinations renders
           </p>
           <textarea
@@ -192,20 +192,20 @@ export function TikTokMediaPanel({
             onChange={(e) => setGeneratePrompt(e.target.value)}
             rows={2}
             placeholder="Optional: describe the image. Leave blank to generate from content context."
-            className="w-full px-3 py-2 text-xs rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+            className="w-full px-3 py-2 text-xs rounded-sm border border-[#3A3530] bg-[#161310] text-[#F5F2EE] placeholder:text-[#524D47] focus:border-[#C8843A] focus:outline-none transition-colors resize-none"
           />
           <div className="flex gap-2">
             <button
               onClick={handleGenerate}
               disabled={generateMutation.isPending}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-astra-500 hover:bg-astra-600 text-white transition disabled:opacity-50"
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-sm bg-[#C8843A] hover:bg-[#DE913A] text-[#0D0B09] transition-colors disabled:opacity-50"
             >
               {generateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
               {generateMutation.isPending ? "Generating…" : "Generate"}
             </button>
             <button
               onClick={() => { setShowGenerateForm(false); setGeneratePrompt(""); }}
-              className="text-xs text-muted-foreground hover:text-foreground transition"
+              className="text-xs text-[#6E6860] hover:text-[#B8B2A9] transition-colors"
             >
               Cancel
             </button>
@@ -225,15 +225,15 @@ export function TikTokMediaPanel({
       {/* Media grid */}
       {isLoading ? (
         <div className="flex items-center justify-center h-16">
-          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+          <Loader2 className="w-4 h-4 animate-spin text-[#524D47]" />
         </div>
       ) : relevantMedia.length === 0 ? (
         <div
-          className="border-2 border-dashed border-[#EE1D52]/20 rounded-xl p-6 text-center cursor-pointer hover:border-[#EE1D52]/40 transition"
+          className="border border-dashed border-[#3A3530] rounded-sm p-6 text-center cursor-pointer hover:border-[#524D47] transition-colors"
           onClick={() => fileInputRef.current?.click()}
         >
-          <Icon className="w-8 h-8 mx-auto mb-2 text-[#EE1D52] opacity-40" />
-          <p className="text-xs text-muted-foreground">
+          <Icon className="w-8 h-8 mx-auto mb-2 text-[#524D47]" />
+          <p className="text-xs text-[#6E6860]">
             {mode === "video" ? "Click to upload your TikTok video" : "Click to upload images"}
           </p>
         </div>
@@ -242,17 +242,19 @@ export function TikTokMediaPanel({
         <div className="space-y-2">
           {videoMedia.map((media) => (
             <div key={media.id} className={cn(
-              "flex items-center gap-3 p-3 rounded-xl border transition",
-              media.selected ? "border-[#EE1D52]/30 bg-[#EE1D52]/5" : "border-border bg-card"
+              "flex items-center gap-3 p-3 rounded-sm border transition-colors",
+              media.selected
+                ? "border-[#C8843A] bg-[#1F1B17]"
+                : "border-[#2A2520] bg-[#161310]"
             )}>
-              <div className="w-12 h-12 rounded-lg bg-black flex items-center justify-center shrink-0 overflow-hidden">
-                <Film className="w-5 h-5 text-white/60" />
+              <div className="w-12 h-12 rounded-sm bg-[#0D0B09] border border-[#2A2520] flex items-center justify-center shrink-0 overflow-hidden">
+                <Film className="w-5 h-5 text-[#524D47]" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-foreground truncate">
+                <p className="text-xs font-medium text-[#F5F2EE] truncate">
                   {media.storage_path?.split("/").pop() ?? "video"}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[#6E6860]">
                   {media.selected ? "✓ Selected for TikTok" : "Not selected"}
                 </p>
               </div>
@@ -260,10 +262,10 @@ export function TikTokMediaPanel({
                 <button
                   onClick={() => toggleSelect(media)}
                   className={cn(
-                    "text-xs font-semibold px-2.5 py-1 rounded-lg transition",
+                    "text-xs font-medium px-2.5 py-1 rounded-sm transition-colors border",
                     media.selected
-                      ? "bg-[#EE1D52]/10 text-[#EE1D52]"
-                      : "border border-border text-muted-foreground hover:text-foreground"
+                      ? "bg-[#C8843A] text-[#0D0B09] border-[#C8843A]"
+                      : "border-[#3A3530] text-[#B8B2A9] hover:border-[#524D47] hover:text-[#F5F2EE]"
                   )}
                 >
                   {media.selected ? "✓ Selected" : "Select"}
@@ -272,7 +274,7 @@ export function TikTokMediaPanel({
                   onClick={() => toast.promise(deleteMutation.mutateAsync(media.id), {
                     loading: "Deleting…", success: "Deleted", error: "Failed"
                   })}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                  className="p-1.5 rounded-sm text-[#524D47] hover:text-red-400 hover:bg-red-900/20 border border-transparent hover:border-red-900/30 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -280,34 +282,34 @@ export function TikTokMediaPanel({
             </div>
           ))}
           {videoMedia.filter(m => m.selected).length === 0 && videoMedia.length > 0 && (
-            <p className="text-xs text-amber-600 flex items-center gap-1">
+            <p className="text-xs text-[#C8843A] flex items-center gap-1">
               <AlertCircle className="w-3 h-3" /> Select a video to enable TikTok publishing
             </p>
           )}
           {/* Thumbnails / cover images (generated or uploaded images in video mode) */}
           {imageMedia.length > 0 && (
-            <div className="space-y-1.5 pt-2 border-t border-border">
-              <p className="text-xs font-semibold text-muted-foreground">Thumbnails / Cover images ({imageMedia.length})</p>
+            <div className="space-y-1.5 pt-2 border-t border-[#2A2520]">
+              <p className="text-xs font-medium text-[#6E6860]">Thumbnails / Cover images ({imageMedia.length})</p>
               <div className="grid grid-cols-4 gap-2">
                 {imageMedia.map((media) => (
                   <div
                     key={media.id}
                     className={cn(
-                      "relative rounded-lg overflow-hidden border-2 aspect-square bg-muted group cursor-pointer transition",
-                      media.selected ? "border-[#EE1D52]" : "border-transparent"
+                      "relative rounded-sm overflow-hidden border-2 aspect-square bg-[#1F1B17] group cursor-pointer transition-colors",
+                      media.selected ? "border-[#C8843A]" : "border-transparent"
                     )}
                     onClick={() => toggleSelect(media)}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={media.public_url} alt="Thumbnail" className="w-full h-full object-cover" />
                     <div className="absolute top-0.5 left-0.5">
-                      <span className="text-[9px] font-bold px-1 py-0.5 rounded-full bg-astra-500 text-white">
+                      <span className="text-[9px] font-bold px-1 py-0.5 rounded-sm bg-[#C8843A] text-[#0D0B09]">
                         {media.type === "generated" ? "AI" : "↑"}
                       </span>
                     </div>
                     {media.selected && (
                       <div className="absolute top-0.5 right-0.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#EE1D52] bg-white rounded-full" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#C8843A] bg-[#0D0B09] rounded-full" />
                       </div>
                     )}
                     <button
@@ -335,8 +337,8 @@ export function TikTokMediaPanel({
               <div
                 key={media.id}
                 className={cn(
-                  "relative rounded-xl overflow-hidden border-2 aspect-[9/16] bg-muted group cursor-pointer transition",
-                  media.selected ? "border-[#EE1D52]" : "border-transparent"
+                  "relative rounded-sm overflow-hidden border-2 aspect-[9/16] bg-[#1F1B17] group cursor-pointer transition-colors",
+                  media.selected ? "border-[#C8843A]" : "border-transparent"
                 )}
                 onClick={() => toggleSelect(media)}
               >
@@ -348,7 +350,7 @@ export function TikTokMediaPanel({
                 />
                 {media.selected && (
                   <div className="absolute top-1 right-1">
-                    <CheckCircle2 className="w-4 h-4 text-[#EE1D52] bg-white rounded-full" />
+                    <CheckCircle2 className="w-4 h-4 text-[#C8843A] bg-[#0D0B09] rounded-full" />
                   </div>
                 )}
                 <button
@@ -358,7 +360,7 @@ export function TikTokMediaPanel({
                       loading: "Deleting…", success: "Deleted", error: "Failed"
                     });
                   }}
-                  className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition w-5 h-5 rounded-full bg-black/50 flex items-center justify-center"
+                  className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition w-5 h-5 rounded-sm bg-black/50 flex items-center justify-center"
                 >
                   <X className="w-3 h-3 text-white" />
                 </button>
@@ -366,7 +368,7 @@ export function TikTokMediaPanel({
             ))}
           </div>
           {mode === "carousel" && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-[#6E6860]">
               {imageMedia.length} image{imageMedia.length !== 1 ? "s" : ""} · {selectedMedia.length} selected
               {imageMedia.length < 2 && " · carousel requires at least 2 images"}
             </p>
@@ -381,7 +383,7 @@ export function TikTokMediaPanel({
           onClick={() => setPreviewUrl(null)}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={previewUrl} alt="Preview" className="max-w-full max-h-full rounded-xl object-contain" />
+          <img src={previewUrl} alt="Preview" className="max-w-full max-h-full rounded-sm object-contain" />
         </div>
       )}
     </div>

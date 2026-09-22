@@ -53,7 +53,7 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
               i < currentStep
                 ? "bg-emerald-500 text-white"
                 : i === currentStep
-                ? "bg-astra-500 text-white ring-4 ring-astra-500/20"
+                ? "bg-[#C8843A] text-white"
                 : "bg-muted text-muted-foreground"
             )}>
               {i < currentStep ? (
@@ -156,17 +156,16 @@ export default function OnboardingPage() {
     return (
       <OnboardingShell step={0} totalSteps={STEPS.length}>
         <div className="text-center max-w-lg mx-auto">
-          {/* Animated logo */}
+          {/* Logo */}
           <div className="relative w-24 h-24 mx-auto mb-8">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-astra-500 to-purple-500 animate-pulse opacity-20" />
-            <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-astra-500 to-purple-500 flex items-center justify-center shadow-2xl shadow-astra-500/30">
+            <div className="relative w-24 h-24 rounded bg-[#C8843A] flex items-center justify-center">
               <Sparkles className="w-12 h-12 text-white" />
             </div>
           </div>
 
           <h1 className="text-4xl font-black text-foreground mb-4 tracking-tight">
             Welcome to<br />
-            <span className="bg-gradient-to-r from-astra-500 to-purple-500 bg-clip-text text-transparent">
+            <span className="text-[#C8843A]">
               Astra Intelligence
             </span>
           </h1>
@@ -181,9 +180,9 @@ export default function OnboardingPage() {
               { icon: Sparkles, label: "Claude AI", desc: "Writes on-brand content instantly" },
               { icon: Rocket, label: "Auto-publish", desc: "Scheduled across all platforms" },
             ].map((f) => (
-              <div key={f.label} className="bg-card border border-border rounded-2xl p-4 text-left">
-                <div className="w-8 h-8 rounded-lg bg-astra-500/10 flex items-center justify-center mb-2">
-                  <f.icon className="w-4 h-4 text-astra-500" />
+              <div key={f.label} className="bg-card border border-border rounded p-4 text-left">
+                <div className="w-8 h-8 rounded bg-[#C8843A]/10 flex items-center justify-center mb-2">
+                  <f.icon className="w-4 h-4 text-[#C8843A]" />
                 </div>
                 <p className="text-xs font-bold text-foreground">{f.label}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{f.desc}</p>
@@ -193,14 +192,14 @@ export default function OnboardingPage() {
 
           <button
             onClick={() => setStep(1)}
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white text-lg font-bold transition shadow-2xl shadow-astra-500/30"
+            className="w-full flex items-center justify-center gap-3 py-4 rounded bg-[#C8843A] hover:bg-[#A86830] text-white text-lg font-bold transition"
           >
             Let&apos;s get started <ArrowRight className="w-5 h-5" />
           </button>
 
           <p className="text-xs text-muted-foreground mt-4">
             Already set up?{" "}
-            <button onClick={() => router.push("/brand")} className="text-astra-500 hover:text-astra-600 font-medium transition">
+            <button onClick={() => router.push("/brand")} className="text-[#C8843A] hover:text-[#DE913A] font-medium transition">
               Go to dashboard →
             </button>
           </p>
@@ -216,8 +215,8 @@ export default function OnboardingPage() {
       <OnboardingShell step={1} totalSteps={STEPS.length} onBack={() => setStep(0)}>
         <form onSubmit={handleBrandSubmit} className="max-w-lg mx-auto space-y-6">
           <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-astra-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4">
-              <Building2 className="w-7 h-7 text-astra-500" />
+            <div className="w-14 h-14 rounded bg-[#C8843A]/10 flex items-center justify-center mx-auto mb-4">
+              <Building2 className="w-7 h-7 text-[#C8843A]" />
             </div>
             <h2 className="text-2xl font-black text-foreground">Tell Claude about your brand</h2>
             <p className="text-muted-foreground mt-2">This becomes your AI&apos;s permanent memory. The more detail, the better.</p>
@@ -231,7 +230,7 @@ export default function OnboardingPage() {
                 onChange={(e) => setBrandName(e.target.value)}
                 required
                 placeholder="e.g. Astra Intelligence"
-                className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40 transition"
+                className="w-full px-4 py-3 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40 transition"
               />
             </div>
 
@@ -242,7 +241,7 @@ export default function OnboardingPage() {
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   placeholder="https://yoursite.com"
-                  className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40 transition"
+                  className="w-full px-4 py-3 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40 transition"
                 />
               </div>
               <div>
@@ -250,7 +249,7 @@ export default function OnboardingPage() {
                 <select
                   value={industry}
                   onChange={(e) => setIndustry(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40 transition"
+                  className="w-full px-4 py-3 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40 transition"
                 >
                   <option value="">Select industry…</option>
                   {INDUSTRIES.map((i) => <option key={i} value={i}>{i}</option>)}
@@ -266,7 +265,7 @@ export default function OnboardingPage() {
                 required
                 rows={3}
                 placeholder="We help B2B SaaS companies automate their marketing with AI. Our platform generates on-brand content, schedules posts, and analyzes performance automatically."
-                className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40 resize-none transition"
+                className="w-full px-4 py-3 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40 resize-none transition"
               />
             </div>
 
@@ -276,7 +275,7 @@ export default function OnboardingPage() {
                 value={mission}
                 onChange={(e) => setMission(e.target.value)}
                 placeholder="To make world-class marketing accessible to every company…"
-                className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40 transition"
+                className="w-full px-4 py-3 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40 transition"
               />
             </div>
           </div>
@@ -284,7 +283,7 @@ export default function OnboardingPage() {
           <button
             type="submit"
             disabled={createBrand.isPending || !brandName.trim() || !description.trim()}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white font-bold transition disabled:opacity-50 shadow-lg shadow-astra-500/20"
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded bg-[#C8843A] hover:bg-[#A86830] text-white font-bold transition disabled:opacity-50"
           >
             {createBrand.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Continue <ArrowRight className="w-5 h-5" /></>}
           </button>
@@ -300,8 +299,8 @@ export default function OnboardingPage() {
       <OnboardingShell step={2} totalSteps={STEPS.length} onBack={() => setStep(1)}>
         <form onSubmit={handleVoiceSubmit} className="max-w-xl mx-auto space-y-6">
           <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-astra-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4">
-              <Mic2 className="w-7 h-7 text-astra-500" />
+            <div className="w-14 h-14 rounded bg-[#C8843A]/10 flex items-center justify-center mx-auto mb-4">
+              <Mic2 className="w-7 h-7 text-[#C8843A]" />
             </div>
             <h2 className="text-2xl font-black text-foreground">How does your brand sound?</h2>
             <p className="text-muted-foreground mt-2">Claude will match this tone in every piece of content.</p>
@@ -317,14 +316,14 @@ export default function OnboardingPage() {
                   type="button"
                   onClick={() => setTone(t.value)}
                   className={cn(
-                    "flex flex-col items-start gap-1 p-4 rounded-xl border text-left transition",
+                    "flex flex-col items-start gap-1 p-4 rounded border text-left transition",
                     tone === t.value
-                      ? "border-astra-500 bg-astra-500/5 shadow-sm shadow-astra-500/10"
-                      : "border-border hover:border-astra-500/40 hover:bg-accent/50"
+                        ? "border-[#C8843A] bg-[#C8843A]/5"
+                      : "border-border hover:border-[#C8843A]/40 hover:bg-accent/50"
                   )}
                 >
                   <span className="text-xl">{t.emoji}</span>
-                  <p className={cn("text-sm font-bold", tone === t.value ? "text-astra-600" : "text-foreground")}>{t.label}</p>
+                  <p className={cn("text-sm font-bold", tone === t.value ? "text-[#C8843A]" : "text-foreground")}>{t.label}</p>
                   <p className="text-xs text-muted-foreground leading-tight">{t.desc}</p>
                 </button>
               ))}
@@ -341,7 +340,7 @@ export default function OnboardingPage() {
               onChange={(e) => setAudience(e.target.value)}
               rows={3}
               placeholder="B2B SaaS founders and marketing managers at companies with 10–200 employees who struggle with content creation consistency and want to scale their marketing without hiring more staff…"
-              className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40 resize-none transition"
+              className="w-full px-4 py-3 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40 resize-none transition"
             />
           </div>
 
@@ -354,14 +353,14 @@ export default function OnboardingPage() {
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
               placeholder="AI marketing, automation, content generation, B2B growth"
-              className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-astra-500/40 transition"
+              className="w-full px-4 py-3 rounded border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-[#C8843A]/40 transition"
             />
           </div>
 
           <button
             type="submit"
             disabled={updateBrand.isPending}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white font-bold transition disabled:opacity-50 shadow-lg shadow-astra-500/20"
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded bg-[#C8843A] hover:bg-[#A86830] text-white font-bold transition disabled:opacity-50"
           >
             {updateBrand.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Continue <ArrowRight className="w-5 h-5" /></>}
           </button>
@@ -377,14 +376,14 @@ export default function OnboardingPage() {
       <OnboardingShell step={3} totalSteps={STEPS.length} onBack={() => setStep(2)}>
         <div className="max-w-lg mx-auto space-y-6">
           <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-astra-500/20 flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 rounded bg-[#1F1B17] flex items-center justify-center mx-auto mb-4">
               <BookOpen className="w-7 h-7 text-blue-600" />
             </div>
             <h2 className="text-2xl font-black text-foreground">Feed your Brand Brain</h2>
             <p className="text-muted-foreground mt-2">Upload PDFs, brand guides, or case studies. Claude reads everything and uses it when writing content.</p>
           </div>
 
-          <div className="border-2 border-dashed border-border rounded-2xl p-10 text-center">
+          <div className="border-2 border-dashed border-border rounded p-10 text-center">
             <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-40" />
             <p className="text-sm font-semibold text-foreground mb-1">Upload documents later</p>
             <p className="text-xs text-muted-foreground">
@@ -393,8 +392,8 @@ export default function OnboardingPage() {
           </div>
 
           {/* What to upload suggestions */}
-          <div className="bg-astra-500/5 border border-astra-500/20 rounded-2xl p-5">
-            <p className="text-sm font-bold text-astra-600 mb-3 flex items-center gap-2">
+          <div className="bg-[#1F1B17] border border-[#2A2520] rounded p-5">
+            <p className="text-sm font-bold text-[#C8843A] mb-3 flex items-center gap-2">
               <Star className="w-4 h-4" /> What to upload for best results
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -407,7 +406,7 @@ export default function OnboardingPage() {
                 "Press releases",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-astra-500 shrink-0" /> {item}
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#C8843A] shrink-0" /> {item}
                 </div>
               ))}
             </div>
@@ -420,13 +419,13 @@ export default function OnboardingPage() {
                   router.push(`/brand/${brandId}`);
                 }
               }}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white font-bold transition shadow-lg shadow-astra-500/20"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded bg-[#C8843A] hover:bg-[#A86830] text-white font-bold transition"
             >
               <Upload className="w-5 h-5" /> Upload documents now
             </button>
             <button
               onClick={handleSkipKnowledge}
-              className="w-full py-3 rounded-2xl border border-border text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition"
+              className="w-full py-3 rounded border border-border text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition"
             >
               Skip for now — I&apos;ll add later
             </button>
@@ -443,8 +442,8 @@ export default function OnboardingPage() {
       <OnboardingShell step={4} totalSteps={STEPS.length} onBack={() => setStep(3)}>
         <div className="max-w-lg mx-auto space-y-6">
           <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-4">
-              <Link2 className="w-7 h-7 text-purple-600" />
+            <div className="w-14 h-14 rounded bg-[#1F1B17] flex items-center justify-center mx-auto mb-4">
+              <Link2 className="w-7 h-7 text-[#B8B2A9]" />
             </div>
             <h2 className="text-2xl font-black text-foreground">Connect your social accounts</h2>
             <p className="text-muted-foreground mt-2">Connect LinkedIn and Twitter so Astra can publish directly from the app.</p>
@@ -453,7 +452,7 @@ export default function OnboardingPage() {
           <div className="space-y-3">
             {/* LinkedIn */}
             <div className={cn(
-              "flex items-center gap-4 p-5 rounded-2xl border transition",
+              "flex items-center gap-4 p-5 rounded border transition",
               linkedinConnected ? "border-emerald-500/30 bg-emerald-500/5" : "border-border bg-card"
             )}>
               <div className="w-12 h-12 rounded-xl bg-[#0077B5]/10 flex items-center justify-center shrink-0">
@@ -470,7 +469,7 @@ export default function OnboardingPage() {
               ) : (
                 <a
                   href={brandId ? `/api/auth/linkedin?brand_id=${brandId}` : "#"}
-                  className="flex items-center gap-1.5 text-sm font-semibold text-[#0077B5] border border-[#0077B5]/30 hover:border-[#0077B5] hover:bg-[#0077B5]/5 px-4 py-2 rounded-xl transition"
+                  className="flex items-center gap-1.5 text-sm font-semibold text-[#0077B5] border border-[#0077B5]/30 hover:border-[#0077B5] hover:bg-[#0077B5]/5 px-4 py-2 rounded transition"
                 >
                   <Link2 className="w-3.5 h-3.5" /> Connect
                 </a>
@@ -479,7 +478,7 @@ export default function OnboardingPage() {
 
             {/* Twitter */}
             <div className={cn(
-              "flex items-center gap-4 p-5 rounded-2xl border transition",
+              "flex items-center gap-4 p-5 rounded border transition",
               twitterConnected ? "border-emerald-500/30 bg-emerald-500/5" : "border-border bg-card"
             )}>
               <div className="w-12 h-12 rounded-xl bg-[#1DA1F2]/10 flex items-center justify-center shrink-0">
@@ -496,7 +495,7 @@ export default function OnboardingPage() {
               ) : (
                 <a
                   href={brandId ? `/api/auth/twitter?brand_id=${brandId}` : "#"}
-                  className="flex items-center gap-1.5 text-sm font-semibold text-[#1DA1F2] border border-[#1DA1F2]/30 hover:border-[#1DA1F2] hover:bg-[#1DA1F2]/5 px-4 py-2 rounded-xl transition"
+                  className="flex items-center gap-1.5 text-sm font-semibold text-[#1DA1F2] border border-[#1DA1F2]/30 hover:border-[#1DA1F2] hover:bg-[#1DA1F2]/5 px-4 py-2 rounded transition"
                 >
                   <Link2 className="w-3.5 h-3.5" /> Connect
                 </a>
@@ -504,8 +503,8 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <div className="bg-muted/50 border border-border rounded-2xl p-4 flex gap-3">
-            <Zap className="w-4 h-4 text-astra-500 shrink-0 mt-0.5" />
+          <div className="bg-muted/50 border border-border rounded p-4 flex gap-3">
+            <Zap className="w-4 h-4 text-[#C8843A] shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
               You can connect accounts anytime from the <strong>Publish</strong> page. Connecting now lets you immediately publish content after generating it.
             </p>
@@ -514,13 +513,13 @@ export default function OnboardingPage() {
           <div className="flex flex-col gap-3">
             <button
               onClick={handleSkipConnect}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white font-bold transition shadow-lg shadow-astra-500/20"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded bg-[#C8843A] hover:bg-[#A86830] text-white font-bold transition"
             >
               Continue <ArrowRight className="w-5 h-5" />
             </button>
             <button
               onClick={handleSkipConnect}
-              className="w-full py-3 rounded-2xl border border-border text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition"
+              className="w-full py-3 rounded border border-border text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition"
             >
               Skip — I&apos;ll connect later
             </button>
@@ -537,8 +536,7 @@ export default function OnboardingPage() {
       <div className="max-w-lg mx-auto text-center">
         {/* Celebration */}
         <div className="relative w-28 h-28 mx-auto mb-8">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400 to-astra-500 animate-pulse opacity-20" />
-          <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-emerald-400 to-astra-500 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
+          <div className="relative w-28 h-28 rounded-full bg-emerald-600 flex items-center justify-center">
             <Rocket className="w-14 h-14 text-white" />
           </div>
         </div>
@@ -553,30 +551,30 @@ export default function OnboardingPage() {
         {/* Next steps */}
         <div className="space-y-3 mb-10 text-left">
           {[
-            { icon: Sparkles, label: "Generate content", desc: "Create LinkedIn, Twitter & Instagram posts in one click", href: "/content", color: "text-astra-500", bg: "bg-astra-500/10" },
-            { icon: Zap, label: "Run AI Agents", desc: "Let 4 specialized agents build a complete campaign", href: "/agents", color: "text-purple-600", bg: "bg-purple-500/10" },
+            { icon: Sparkles, label: "Generate content", desc: "Create LinkedIn, Twitter & Instagram posts in one click", href: "/content", color: "text-[#C8843A]", bg: "bg-[#C8843A]/10" },
+            { icon: Zap, label: "Run AI Agents", desc: "Let 4 specialized agents build a complete campaign", href: "/agents", color: "text-[#B8B2A9]", bg: "bg-[#1F1B17]" },
             { icon: BookOpen, label: "Upload documents", desc: "Add brand guides and docs to sharpen the AI's knowledge", href: brandId ? `/brand/${brandId}` : "/brand", color: "text-blue-600", bg: "bg-blue-500/10" },
           ].map((item) => (
             <a
               key={item.label}
               href={item.href}
-              className="flex items-center gap-4 p-4 bg-card border border-border rounded-2xl hover:border-astra-500/40 hover:shadow-sm transition group"
+              className="flex items-center gap-4 p-4 bg-card border border-border rounded hover:border-[#C8843A]/40 transition group"
             >
-              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", item.bg)}>
+              <div className={cn("w-10 h-10 rounded flex items-center justify-center shrink-0", item.bg)}>
                 <item.icon className={cn("w-5 h-5", item.color)} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold text-foreground group-hover:text-astra-600 transition">{item.label}</p>
+                <p className="text-sm font-bold text-foreground group-hover:text-[#C8843A] transition">{item.label}</p>
                 <p className="text-xs text-muted-foreground">{item.desc}</p>
               </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-astra-500 transition" />
+              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-[#C8843A] transition" />
             </a>
           ))}
         </div>
 
         <button
           onClick={handleLaunch}
-          className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-gradient-to-r from-astra-500 to-purple-500 hover:from-astra-600 hover:to-purple-600 text-white text-lg font-black transition shadow-2xl shadow-astra-500/30"
+          className="w-full flex items-center justify-center gap-3 py-4 rounded bg-[#C8843A] hover:bg-[#A86830] text-white text-lg font-black transition"
         >
           <Rocket className="w-5 h-5" /> Enter Astra Intelligence
         </button>
@@ -605,7 +603,7 @@ function OnboardingShell({
       {/* Top bar */}
       <div className="flex items-center justify-between px-8 py-5 border-b border-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-astra-500 to-purple-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded bg-[#C8843A] flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <span className="font-black text-foreground text-lg">Astra</span>

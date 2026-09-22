@@ -22,10 +22,10 @@ export default async function DashboardLayout({
   if (!user) redirect("/login");
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[#0D0D0D]">
       <Sidebar user={user} />
       {/* pt-14 on mobile offsets the fixed top bar; md:pt-0 removes it on desktop */}
-      <main className="flex-1 overflow-auto pt-14 md:pt-0" suppressHydrationWarning>
+      <main className="flex-1 overflow-y-auto pt-14 md:pt-0" suppressHydrationWarning>
         <AuthGuard>{children}</AuthGuard>
       </main>
     </div>

@@ -34,7 +34,7 @@ const STATUS_CAMPAIGN: Record<string, { label: string; color: string; bg: string
   draft: { label: "Draft", color: "text-amber-600", bg: "bg-amber-500/10 border border-amber-500/20" },
   active: { label: "Active", color: "text-emerald-600", bg: "bg-emerald-500/10 border border-emerald-500/20" },
   paused: { label: "Paused", color: "text-blue-600", bg: "bg-blue-500/10 border border-blue-500/20" },
-  completed: { label: "Completed", color: "text-purple-600", bg: "bg-purple-500/10 border border-purple-500/20" },
+  completed: { label: "Completed", color: "text-[#B8B2A9]", bg: "bg-[#1F1B17] border border-[#2A2520]" },
 };
 
 const PAGE_SIZE = 10;
@@ -72,7 +72,7 @@ function ContentCard({
 
   return (
     <div className={cn(
-      "bg-card border rounded-2xl p-4 space-y-3 transition hover:shadow-sm",
+      "bg-card border rounded p-4 space-y-3 transition hover:shadow-sm",
       item.status === "approved" ? "border-emerald-500/30" :
       item.status === "published" ? "border-blue-500/30" :
       "border-border"
@@ -274,10 +274,10 @@ export default function CampaignDetailPage({ params }: { params: { campaignId: s
       </Link>
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-astra-500/8 via-background to-purple-500/5 border border-border rounded-3xl p-7">
+      <div className="bg-card border border-border rounded p-7">
         <div className="flex items-start justify-between gap-6">
           <div className="flex items-start gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-astra-500/20 to-purple-500/20 flex items-center justify-center shrink-0">
+            <div className="w-14 h-14 rounded bg-[#1F1B17] flex items-center justify-center shrink-0">
               <Calendar className="w-7 h-7 text-astra-500" />
             </div>
             <div>
@@ -312,7 +312,7 @@ export default function CampaignDetailPage({ params }: { params: { campaignId: s
           </div>
           <Link
             href="/content"
-            className="flex items-center gap-2 text-sm font-semibold bg-astra-500 hover:bg-astra-600 text-white px-4 py-2.5 rounded-xl transition shadow-lg shadow-astra-500/20 shrink-0"
+            className="flex items-center gap-2 text-sm font-semibold bg-[#C8843A] hover:bg-[#A86830] text-white px-4 py-2.5 rounded transition shrink-0"
           >
             <Zap className="w-4 h-4" /> Generate content
           </Link>
@@ -387,7 +387,7 @@ export default function CampaignDetailPage({ params }: { params: { campaignId: s
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       ) : paginated.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
+        <div className="text-center py-16 border-2 border-dashed border-border rounded text-muted-foreground">
           <Hash className="w-8 h-8 mx-auto mb-2 opacity-40" />
           <p className="font-semibold text-foreground">No content found</p>
           <p className="text-sm mt-1">
