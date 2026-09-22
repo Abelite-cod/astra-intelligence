@@ -130,7 +130,7 @@ export function BrandSetupWizard() {
         <form onSubmit={handleBasics} className="space-y-5">
           <div>
             <h2 className="text-xl font-bold text-foreground mb-1">Tell us about your brand</h2>
-            <p className="text-muted-foreground text-sm">This becomes your AI&apos;s permanent memory.</p>
+            <p className="text-muted-foreground text-sm">This becomes ASTRA&apos;s permanent memory.</p>
           </div>
 
           <div>
@@ -205,7 +205,7 @@ export function BrandSetupWizard() {
         <form onSubmit={handleAudience} className="space-y-5">
           <div>
             <h2 className="text-xl font-bold text-foreground mb-1">Who are your customers?</h2>
-            <p className="text-muted-foreground text-sm">Your AI will target every message to the right person.</p>
+            <p className="text-muted-foreground text-sm">ASTRA will target every message to the right person.</p>
           </div>
 
           <div>
@@ -244,7 +244,7 @@ export function BrandSetupWizard() {
         <form onSubmit={handleVoice} className="space-y-5">
           <div>
             <h2 className="text-xl font-bold text-foreground mb-1">How does your brand sound?</h2>
-            <p className="text-muted-foreground text-sm">Your AI will match this tone in every piece of content.</p>
+            <p className="text-muted-foreground text-sm">ASTRA will match this tone in every piece of content.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-3">

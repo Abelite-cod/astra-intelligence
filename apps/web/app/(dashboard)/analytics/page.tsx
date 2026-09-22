@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Performance overview for your brand's AI-generated content.
+            Performance overview for your brand's ASTRA-generated content.
           </p>
         </div>
         {brands.length > 1 && (

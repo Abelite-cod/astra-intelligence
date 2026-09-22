@@ -51,7 +51,7 @@ function LoginForm() {
     <div className="w-full max-w-md">
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
         <h2 className="text-2xl font-black text-white mb-1">Welcome back</h2>
-        <p className="text-white/50 text-sm mb-7">Sign in to your AI marketing command center</p>
+        <p className="text-white/50 text-sm mb-7">Sign in to your ASTRA marketing command center</p>
 
         {/* Google */}
         <button

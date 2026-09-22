@@ -11,12 +11,12 @@ const HOW_IT_WORKS = [
   {
     num: "01",
     title: "Train your Brand Brain",
-    desc: "Upload your brand guide, website, and docs. Claude learns your voice, audience, and products — permanently.",
+    desc: "Upload your brand guide, website, and docs. ASTRA learns your voice, audience, and products — permanently.",
     icon: Brain,
   },
   {
     num: "02",
-    title: "AI Agents go to work",
+    title: "ASTRA Agents go to work",
     desc: "Research, Trend, Writer, and Reviewer agents collaborate. In 60 seconds: researched, written, and reviewed content.",
     icon: Bot,
   },
@@ -35,7 +35,7 @@ const HOW_IT_WORKS = [
 ];
 
 const FEATURES = [
-  { icon: Brain, title: "Brand Brain", desc: "Permanent AI memory of your brand, audience, and products" },
+  { icon: Brain, title: "Brand Brain", desc: "Permanent ASTRA memory of your brand, audience, and products" },
   { icon: Bot, title: "4-Agent Pipeline", desc: "Research → Trend → Writer → Reviewer in under 60 seconds" },
   { icon: Calendar, title: "Campaign Builder", desc: "Full 30-day content calendar from one goal" },
   { icon: Music2, title: "TikTok Studio", desc: "Native TikTok scripts, memory patterns, inbox upload" },
@@ -48,7 +48,7 @@ const PRICING = [
     name: "Starter",
     price: "$39",
     desc: "For solo founders",
-    features: ["1 brand workspace", "100K AI tokens/mo", "LinkedIn + Twitter", "Brand Brain", "Email support"],
+    features: ["1 brand workspace", "100K ASTRA tokens/mo", "LinkedIn + Twitter", "Brand Brain", "Email support"],
     cta: "Start free trial",
     highlight: false,
   },
@@ -56,7 +56,7 @@ const PRICING = [
     name: "Pro",
     price: "$149",
     desc: "For growing teams",
-    features: ["3 brands", "5 seats", "500K AI tokens/mo", "All platforms + TikTok", "Campaigns & calendar", "Analytics"],
+    features: ["3 brands", "5 seats", "500K ASTRA tokens/mo", "All platforms + TikTok", "Campaigns & calendar", "Analytics"],
     cta: "Start free trial",
     highlight: true,
     badge: "Most Popular",
@@ -65,7 +65,7 @@ const PRICING = [
     name: "Business",
     price: "$499",
     desc: "For agencies",
-    features: ["10 brands", "20 seats", "2M AI tokens/mo", "Multi-agent workflows", "White-label", "Dedicated support"],
+    features: ["10 brands", "20 seats", "2M ASTRA tokens/mo", "Multi-agent workflows", "White-label", "Dedicated support"],
     cta: "Start free trial",
     highlight: false,
   },
@@ -124,12 +124,12 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm text-white/60 mb-8"
             style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Powered by Claude 3.5 on Amazon Bedrock
+            Powered by ASTRA on Amazon Bedrock
           </div>
 
           {/* Headline */}
           <h1 className="text-6xl sm:text-7xl md:text-8xl font-black leading-[0.95] tracking-tighter mb-6">
-            <span className="block text-white">Your AI</span>
+            <span className="block text-white">Your ASTRA</span>
             <span className="block" style={{
               background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 30%, #ec4899 60%, #f97316 100%)",
               WebkitBackgroundClip: "text",
@@ -141,7 +141,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg sm:text-xl text-white/45 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Upload your brand once. Claude learns everything, plans campaigns, generates on-brand content, and publishes to LinkedIn, Twitter, and TikTok — automatically.
+            Upload your brand once. ASTRA learns everything, plans campaigns, generates on-brand content, and publishes to LinkedIn, Twitter, and TikTok — automatically.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
@@ -178,7 +178,7 @@ export default function LandingPage() {
             <div className="p-6 grid grid-cols-12 gap-4 min-h-[280px]">
               {/* Sidebar */}
               <div className="col-span-2 space-y-2">
-                {["Intelligence Hub", "Brand Brain", "Campaigns", "Content", "Publish", "TikTok Studio", "Analytics", "AI Agents"].map((item, i) => (
+                {["Intelligence Hub", "Brand Brain", "Campaigns", "Content", "Publish", "TikTok Studio", "Analytics", "ASTRA Agents"].map((item, i) => (
                   <div key={item} className="h-5 rounded-md text-[10px] flex items-center px-2"
                     style={{
                       background: i === 0 ? "rgba(99,102,241,0.2)" : "transparent",
@@ -353,7 +353,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
             ["60s", "From goal to reviewed content"],
-            ["4", "AI agents working simultaneously"],
+            ["4", "ASTRA agents working simultaneously"],
             ["3+", "Social platforms auto-published"],
             ["∞", "Brand memory retained forever"],
           ].map(([val, label]) => (
@@ -441,7 +441,7 @@ export default function LandingPage() {
         </div>
         <div className="relative max-w-3xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-5">
-            <span className="text-white">Your AI marketing team</span>
+            <span className="text-white">Your ASTRA marketing team</span>
             <br />
             <span style={{
               background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 40%, #ec4899 70%, #f97316 100%)",
@@ -451,7 +451,7 @@ export default function LandingPage() {
             </span>
           </h2>
           <p className="text-white/40 text-lg mb-10 leading-relaxed">
-            Setup takes 15 minutes. First campaign in under an hour. Claude handles the rest.
+            Setup takes 15 minutes. First campaign in under an hour. ASTRA handles the rest.
           </p>
           <Link href="/register"
             className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-black text-lg text-white transition"

@@ -20,7 +20,7 @@ interface BrandPageProps {
 const SECTION_TABS = [
   { id: "overview", label: "Overview", icon: Brain },
   { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
-  { id: "chat", label: "Ask AI", icon: MessageSquare },
+  { id: "chat", label: "Ask ASTRA", icon: MessageSquare },
 ];
 
 export default function BrandDetailPage({ params }: BrandPageProps) {
@@ -349,7 +349,7 @@ export default function BrandDetailPage({ params }: BrandPageProps) {
               </div>
             </div>
             <div>
-              <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">AI Readiness</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">ASTRA Readiness</p>
               <div className="space-y-2.5">
                 {[
                   { label: "Brand profile", done: !!brand.description },
@@ -386,7 +386,7 @@ export default function BrandDetailPage({ params }: BrandPageProps) {
               <h2 className="text-base font-bold text-foreground">Knowledge Base</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-5">
-              Upload documents, PDFs, and websites. Claude reads everything you add and uses it when generating content.
+              Upload documents, PDFs, and websites. ASTRA reads everything you add and uses it when generating content.
             </p>
             <KnowledgeUploader brandId={brandId} />
           </div>
@@ -401,7 +401,7 @@ export default function BrandDetailPage({ params }: BrandPageProps) {
               <h2 className="text-base font-bold text-foreground">Ask your documents</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-5">
-              Ask Claude anything about your uploaded documents. Answers are grounded strictly in your knowledge base.
+              Ask ASTRA anything about your uploaded documents. Answers are grounded strictly in your knowledge base.
             </p>
             {indexedDocs.length === 0 ? (
               <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl text-muted-foreground">

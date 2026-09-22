@@ -105,9 +105,9 @@ export default function AgentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">AI Agents</h1>
+          <h1 className="text-2xl font-bold text-foreground">ASTRA Agents</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            A team of specialized AI agents that coordinate to create high-quality campaigns.
+            A team of specialized ASTRA agents that coordinate to create high-quality campaigns.
           </p>
         </div>
         {brands.length > 1 && (

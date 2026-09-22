@@ -408,7 +408,7 @@ export default function ContentPage() {
         return res;
       }),
       {
-        loading: "Claude is writing on-brand content…",
+        loading: "ASTRA is writing on-brand content…",
         success: (res) => `Generated ${Object.keys(res.generated).length} platform versions ✓`,
         error: (e) => safeErr(e),
       }
@@ -546,7 +546,7 @@ export default function ContentPage() {
                 {generateMutation.isPending ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Writing content…</>
                 ) : (
-                  <><Sparkles className="w-4 h-4" /> Generate with Claude AI</>
+                  <><Sparkles className="w-4 h-4" /> Generate with ASTRA</>
                 )}
               </button>
             </form>
@@ -561,7 +561,7 @@ export default function ContentPage() {
                 </div>
                 <div className="text-center">
                   <p className="font-semibold text-foreground">Your platform previews will appear here</p>
-                  <p className="text-xs mt-1">Claude reads your brand brief and generates platform-optimised posts</p>
+                  <p className="text-xs mt-1">ASTRA reads your brand brief and generates platform-optimised posts</p>
                 </div>
               </div>
             )}
@@ -569,7 +569,7 @@ export default function ContentPage() {
               <div className="h-72 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-astra-500/30 rounded-2xl bg-astra-500/5">
                 <Loader2 className="w-10 h-10 text-astra-500 animate-spin" />
                 <div className="text-center">
-                  <p className="text-sm font-semibold text-foreground">Claude is reading your brand context…</p>
+                  <p className="text-sm font-semibold text-foreground">ASTRA is reading your brand context…</p>
                   <p className="text-xs text-muted-foreground mt-1">Writing optimised posts for {selectedPlatforms.join(", ")}</p>
                 </div>
               </div>

@@ -168,8 +168,8 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
         return res;
       }),
       {
-        loading: "Generating AI image…",
-        success: "AI image generated ✓",
+        loading: "Generating ASTRA image…",
+        success: "ASTRA image generated ✓",
         error: (err) => err.message,
       }
     );
@@ -261,9 +261,9 @@ export function MediaPanel({ contentId, contentBody, contentHook, platform }: Me
         <div className="bg-astra-500/5 border border-astra-500/20 rounded-xl p-4 space-y-3">
           <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-astra-500" />
-            AI Image Generation
+            ASTRA Image Generation
             <span className="font-normal text-muted-foreground ml-1">
-              — Claude writes visual brief, Pollinations renders
+              — ASTRA writes visual brief, Pollinations renders
             </span>
           </p>
           <textarea

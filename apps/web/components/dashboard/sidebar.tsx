@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { href: "/content", icon: FileText, label: "Content" },
   { href: "/publish", icon: Send, label: "Publish" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/agents", icon: Bot, label: "AI Agents" },
+  { href: "/agents", icon: Bot, label: "ASTRA Agents" },
   { href: "/tiktok", icon: Music2, label: "TikTok Studio", highlight: true },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];

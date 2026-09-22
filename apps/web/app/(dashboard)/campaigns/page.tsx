@@ -124,7 +124,7 @@ export default function CampaignsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Campaigns</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            AI-generated 30-day content strategies. Click any campaign to view its content.
+            ASTRA-generated 30-day content strategies. Click any campaign to view its content.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ export default function CampaignsPage() {
           </div>
           <p className="font-bold text-foreground text-lg mb-1">No campaigns yet</p>
           <p className="text-sm text-muted-foreground mb-6">
-            Create your first AI-generated 30-day content campaign.
+            Create your first ASTRA-generated 30-day content campaign.
           </p>
           <Link
             href="/campaigns/new"

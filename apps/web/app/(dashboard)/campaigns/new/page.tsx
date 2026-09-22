@@ -103,7 +103,7 @@ export default function CampaignsNewPage() {
           return res;
         }),
       {
-        loading: `Claude is planning your ${duration}-day campaign…`,
+        loading: `ASTRA is planning your ${duration}-day campaign…`,
         success: (res) => `${res.total_posts} posts planned across ${res.platforms.length} platforms`,
         error: (e) => e.message,
       }
@@ -185,7 +185,7 @@ export default function CampaignsNewPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Campaign Builder</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Enter one goal. AI generates your full 30-day content strategy.
+            Enter one goal. ASTRA generates your full 30-day content strategy.
           </p>
         </div>
         {brands.length > 1 && (

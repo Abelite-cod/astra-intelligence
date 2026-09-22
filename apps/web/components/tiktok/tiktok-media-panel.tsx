@@ -93,8 +93,8 @@ export function TikTokMediaPanel({
         return res;
       }),
       {
-        loading: "Generating AI image…",
-        success: "AI image generated ✓",
+        loading: "Generating ASTRA image…",
+        success: "ASTRA image generated ✓",
         error: (err) => err.message,
       }
     );
@@ -185,7 +185,7 @@ export function TikTokMediaPanel({
         <div className="bg-astra-500/5 border border-astra-500/20 rounded-xl p-3 space-y-2.5">
           <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-astra-500" />
-            AI Image — Claude writes brief, Pollinations renders
+            ASTRA Image — writes brief, Pollinations renders
           </p>
           <textarea
             value={generatePrompt}

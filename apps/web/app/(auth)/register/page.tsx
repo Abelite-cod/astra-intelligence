@@ -105,7 +105,7 @@ export default function RegisterPage() {
             Your autonomous
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-astra-400 to-purple-400">
-              AI marketing team
+              ASTRA marketing team
             </span>
           </h1>
           <p className="text-white/55 text-lg mb-10 leading-relaxed">

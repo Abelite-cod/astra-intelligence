@@ -226,8 +226,8 @@ export default function DashboardPage() {
           </h1>
           <p className="text-muted-foreground mt-1.5">
             {brands.length === 0
-              ? "Let's get your AI marketing system set up."
-              : `${brands[0]?.name ?? "Your brand"} · AI is ready to work.`}
+              ? "Let's get your ASTRA marketing system set up."
+              : `${brands[0]?.name ?? "Your brand"} · ASTRA is ready to work.`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                 </div>
                 <h2 className="text-2xl font-black mb-2">Activate your Brand Brain</h2>
                 <p className="text-white/80 max-w-lg leading-relaxed">
-                  Train Claude on your company, products, and audience. Once set up, every piece of content will be perfectly on-brand — automatically.
+                  Train ASTRA on your company, products, and audience. Once set up, every piece of content will be perfectly on-brand — automatically.
                 </p>
                 <div className="flex items-center gap-5 mt-4 text-sm text-white/70">
                   <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-white/60" /> On-brand content</span>
@@ -336,7 +336,7 @@ export default function DashboardPage() {
                 href="/content"
                 icon={Sparkles}
                 title="Generate content"
-                desc="AI writes platform-optimised posts in seconds"
+                desc="ASTRA writes platform-optimised posts in seconds"
                 color="text-astra-500"
                 bg="bg-astra-500/10"
                 badge={stats.draftContent > 0 ? `${stats.draftContent} drafts` : undefined}
@@ -344,7 +344,7 @@ export default function DashboardPage() {
               <QuickAction
                 href="/agents"
                 icon={Bot}
-                title="Run AI Agents"
+                title="Run ASTRA Agents"
                 desc="4 agents build a complete campaign strategy"
                 color="text-purple-600"
                 bg="bg-purple-500/10"
